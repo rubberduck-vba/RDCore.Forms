@@ -6,8 +6,8 @@ namespace RDCore.Forms.Tests.Import.VB6;
 
 // Intrinsics.frm, UserScale.frm and Misplaced.frm, with Intrinsics.frx, are hand-written; VB6 compiled them and a program it built
 // wrote what it read from each into vb6-read.txt. An expectation is a value of that file, except where a test says it is the
-// designer file's. Where the import reads a value other than the one VB6 read, the test says so, and for the Timer's offset and the
-// user-scale Line's ends an ignored test holds VB6's.
+// designer file's. Where the import reads a value other than the one VB6 read, the test says so, and for the Timer's offset an
+// ignored test holds VB6's.
 [TestClass]
 public sealed class VB6FixtureTests
 {
@@ -244,23 +244,13 @@ public sealed class VB6FixtureTests
 
         Assert.AreEqual((ScaleMode.User, -10d, -10d, 200d, 100d), (form.Root.Get(VBProperties.ScaleMode), form.Root.Get(VBProperties.ScaleLeft),
             form.Root.Get(VBProperties.ScaleTop), form.Root.Get(VBProperties.ScaleWidth), form.Root.Get(VBProperties.ScaleHeight)));
-        // the designer file's ends: VB6 read them back through twips, as -0.0124842 0 100.0125 50.
+        // the designer file's ends, which the model keeps as written: VB6 read -0.0124842 0 100.0125 50.
         Assert.AreEqual((0d, 0d, 100d, 50d), (line.Get(VBProperties.X1), line.Get(VBProperties.Y1), line.Get(VBProperties.X2), line.Get(VBProperties.Y2)));
         Assert.AreEqual((4000d, 3000d), (form.Root.Get(VBProperties.Width), form.Root.Get(VBProperties.Height)));
     }
 
     [TestMethod]
-    [Ignore("A user-scale position is held as written; VB6 holds it in twips and converts it back, so it reads it rounded to a twip.")]
-    public void AUserScaleLinesEnds_AreReadAsVB6ReadsThem_RoundedToATwip()
-    {
-        var line = Read("UserScale.frm").Form!.Find("linAcross")!;
-
-        Assert.AreEqual(-0.0124842, line.Get(VBProperties.X1), 1e-7);
-        Assert.AreEqual(100.0125, line.Get(VBProperties.X2), 1e-7);
-    }
-
-    [TestMethod]
-    [Ignore("A control inside a Timer is placed in the form at its written position; VB6 also offsets it by the Timer's own Left and Top.")]
+    [Ignore("Not implemented: a control written inside a Timer is not offset by the Timer's Left and Top, as VB6 offsets it.")]
     public void AControlInsideATimer_IsPlacedInTheForm_OffsetByTheTimersPosition()
     {
         var label = Read("Misplaced.frm").Form!.Find("lblInTimer")!;
