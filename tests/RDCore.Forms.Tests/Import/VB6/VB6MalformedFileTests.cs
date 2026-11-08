@@ -115,6 +115,7 @@ public sealed class VB6MalformedFileTests
 
     [TestMethod]
     [DataRow("Left = NaN", DisplayName = "not a number")]
+    [DataRow("Enabled = NaN", DisplayName = "not a number for a Boolean")]
     [DataRow("Left = Infinity", DisplayName = "an infinity")]
     [DataRow("Left = 1E400", DisplayName = "past a Double's range")]
     [DataRow("Left = 1E39", DisplayName = "past a Single's range")]
