@@ -35,7 +35,7 @@
   </PropertyGroup>
 
   <!-- every project, its tests included, builds with no warning: a warning is an error. A missing xmldoc (CS1591) and an advisory published against
-       a package are warnings still, which a build reports without failing: the first is what the API reference still lacks, the second news of the
+       a package are warnings still, which a build reports without failing: the first marks a member the API reference has no text for, the second is news of the
        package, not of the code built. -->
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
