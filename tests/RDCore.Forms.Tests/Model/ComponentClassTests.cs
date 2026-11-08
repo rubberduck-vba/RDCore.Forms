@@ -61,6 +61,14 @@ public sealed class ComponentClassTests
     }
 
     [TestMethod]
+    public void TheCatalog_GivesAComboBoxLocked_AndAListBoxNone()
+    {
+        // VB6.OLB's ListBox has no Locked property: its file's Locked line is kept as an unmodelled property.
+        Assert.IsTrue(VBClasses.ComboBox.Has(VBProperties.Locked));
+        Assert.IsNull(VBClasses.ListBox.Property("Locked"));
+    }
+
+    [TestMethod]
     public void TheCatalog_DefaultsAPictureBoxToABorder_AndALabelToAnOpaqueBackground()
     {
         Assert.AreEqual(BorderStyle.FixedSingle, VBClasses.PictureBox.DefaultOf(VBProperties.BorderStyle));

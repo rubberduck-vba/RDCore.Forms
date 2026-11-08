@@ -15,7 +15,7 @@ namespace RDCore.Forms.Model.VB;
 /// </para>
 /// <para>
 /// A number has the range of its VB type: a <see cref="short"/> is an Integer and an <see cref="int"/> a Long. A
-/// <see cref="double"/> property, such as <see cref="Left"/>, is a Single, and holds a value in a Single's range.
+/// <see cref="double"/> property, such as <see cref="Left"/>, is a Single: the VB6 import refuses a value outside a Single's range.
 /// </para>
 /// </remarks>
 public static class VBProperties
@@ -56,19 +56,20 @@ public static class VBProperties
     public static readonly PropertyDefinition<double> ScaleTop = new("ScaleTop", PropertyCategory.Position);
 
     /// <summary>
-    /// The inside width of a form or a PictureBox, in its own scale. A designer file writes it for every form; in a scale other than
-    /// <see cref="Model.ScaleMode.User"/> it follows from the component's size.
+    /// The inside width of a form or a PictureBox, in its own scale. A designer file writes it for every Form, UserControl and
+    /// PropertyPage; in a scale other than <see cref="Model.ScaleMode.User"/> it follows from the component's size.
     /// </summary>
     public static readonly PropertyDefinition<double> ScaleWidth = new("ScaleWidth", PropertyCategory.Position);
 
     /// <summary>
-    /// The inside height of a form or a PictureBox, in its own scale. A designer file writes it for every form; in a scale other than
-    /// <see cref="Model.ScaleMode.User"/> it follows from the component's size.
+    /// The inside height of a form or a PictureBox, in its own scale. A designer file writes it for every Form, UserControl and
+    /// PropertyPage; in a scale other than <see cref="Model.ScaleMode.User"/> it follows from the component's size.
     /// </summary>
     public static readonly PropertyDefinition<double> ScaleHeight = new("ScaleHeight", PropertyCategory.Position);
 
     /// <summary>
-    /// The text of a form's title bar, of a button, or beside a check box.
+    /// The text of a form's title bar, a property page's tab, a button's face, a label, a frame's title or a menu item, or the text
+    /// beside a check box or an option button.
     /// </summary>
     public static readonly PropertyDefinition<string> Caption = new("Caption", PropertyCategory.Appearance, "");
 
@@ -158,7 +159,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> UseMnemonic = new("UseMnemonic", PropertyCategory.Misc, true);
 
     /// <summary>
-    /// Whether a Label wraps its caption onto more lines, and grows to show them when <see cref="AutoSize"/> is set.
+    /// Whether a Label whose <see cref="AutoSize"/> is set grows down, wrapping its caption at its width, or across, keeping its caption
+    /// on one line. It has no effect when <see cref="AutoSize"/> is not set.
     /// </summary>
     public static readonly PropertyDefinition<bool> WordWrap = new("WordWrap", PropertyCategory.Misc);
 
@@ -237,7 +239,7 @@ public static class VBProperties
     /// <summary>
     /// The width of a Shape's border or of a Line, in pixels.
     /// </summary>
-    public static readonly PropertyDefinition<short> BorderWidth =new("BorderWidth", PropertyCategory.Appearance, 1);
+    public static readonly PropertyDefinition<short> BorderWidth = new("BorderWidth", PropertyCategory.Appearance, 1);
 
     /// <summary>
     /// The colour a figure is filled with.
@@ -278,32 +280,32 @@ public static class VBProperties
     /// How a Line's colour combines with what is drawn under it: a raster operation from 1 to 16. 13, the default, draws the colour
     /// as it is.
     /// </summary>
-    public static readonly PropertyDefinition<short> DrawMode =new("DrawMode", PropertyCategory.Appearance, 13);
+    public static readonly PropertyDefinition<short> DrawMode = new("DrawMode", PropertyCategory.Appearance, 13);
 
     /// <summary>
     /// How much a scroll bar's value changes when the user clicks its track.
     /// </summary>
-    public static readonly PropertyDefinition<short> LargeChange =new("LargeChange", PropertyCategory.Behavior, 1);
+    public static readonly PropertyDefinition<short> LargeChange = new("LargeChange", PropertyCategory.Behavior, 1);
 
     /// <summary>
     /// How much a scroll bar's value changes when the user clicks one of its arrows.
     /// </summary>
-    public static readonly PropertyDefinition<short> SmallChange =new("SmallChange", PropertyCategory.Behavior, 1);
+    public static readonly PropertyDefinition<short> SmallChange = new("SmallChange", PropertyCategory.Behavior, 1);
 
     /// <summary>
     /// A scroll bar's value at its left or top end.
     /// </summary>
-    public static readonly PropertyDefinition<short> Min =new("Min", PropertyCategory.Behavior);
+    public static readonly PropertyDefinition<short> Min = new("Min", PropertyCategory.Behavior);
 
     /// <summary>
     /// A scroll bar's value at its right or bottom end.
     /// </summary>
-    public static readonly PropertyDefinition<short> Max =new("Max", PropertyCategory.Behavior, 32767);
+    public static readonly PropertyDefinition<short> Max = new("Max", PropertyCategory.Behavior, 32767);
 
     /// <summary>
     /// A scroll bar's value, from <see cref="Min"/> to <see cref="Max"/>.
     /// </summary>
-    public static readonly PropertyDefinition<short> ScrollBarValue =new("Value", PropertyCategory.Misc);
+    public static readonly PropertyDefinition<short> ScrollBarValue = new("Value", PropertyCategory.Misc);
 
     /// <summary>
     /// A CheckBox's state, an Integer to a program.
@@ -316,7 +318,7 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> OptionButtonValue = new("Value", PropertyCategory.Misc);
 
     /// <summary>
-    /// Whether the user can change a TextBox's text or a list's selection.
+    /// Whether the user is prevented from changing a TextBox's or a ComboBox's text.
     /// </summary>
     public static readonly PropertyDefinition<bool> Locked = new("Locked", PropertyCategory.Behavior);
 
@@ -343,7 +345,7 @@ public static class VBProperties
     /// <summary>
     /// The control's position in its form's tab order.
     /// </summary>
-    public static readonly PropertyDefinition<short> TabIndex =new("TabIndex", PropertyCategory.Behavior);
+    public static readonly PropertyDefinition<short> TabIndex = new("TabIndex", PropertyCategory.Behavior);
 
     /// <summary>
     /// Whether the Tab key moves the focus to the control.

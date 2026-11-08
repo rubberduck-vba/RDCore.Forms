@@ -15,7 +15,8 @@ public static class VBEvents
     private static readonly EventParameter Y = new("Y", "Single");
 
     /// <summary>
-    /// The user clicked the component, or chose it with the keyboard.
+    /// The user clicked the component or chose it with the keyboard, or a program set a CheckBox's or an OptionButton's
+    /// <c>Value</c> or a list's <c>ListIndex</c>.
     /// </summary>
     public static readonly EventDefinition Click = new("Click");
 

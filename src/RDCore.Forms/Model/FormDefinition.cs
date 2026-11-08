@@ -7,9 +7,9 @@ namespace RDCore.Forms.Model;
 /// A form's designer: its root component, with every control and menu item placed in it, and what the form declares about itself.
 /// </summary>
 /// <remarks>
-/// The form's code is not part of its definition. A control's position and size, and a VB Line's ends, are in its container's scale,
-/// as the form's designer file holds them: twips, unless the form or the PictureBox holding it has a <c>ScaleMode</c> of its own. The
-/// root's own position and size are its client area's, in twips.
+/// The form's code is not part of its definition. A control's position and size, and a VB Line's ends, are in its container's scale:
+/// twips, unless the form or the PictureBox holding it has a <c>ScaleMode</c> of its own. The root's own position and size are its
+/// client area's, in twips.
 /// </remarks>
 public sealed class FormDefinition
 {
@@ -60,7 +60,7 @@ public sealed class FormDefinition
 /// <summary>
 /// A control library a form declares, such as <c>MSCOMCTL.OCX</c>.
 /// </summary>
-/// <param name="Id">The library's identifier.</param>
+/// <param name="Id">The GUID of the library's type library.</param>
 /// <param name="Version">The library's version, such as <c>2.0</c>.</param>
 /// <param name="FileName">The library's file name, as the form's file names it.</param>
 public sealed record ControlLibraryReference(Guid Id, string Version, string FileName);

@@ -68,7 +68,7 @@ public enum CheckBoxValue
 }
 
 /// <summary>
-/// How a VB control aligns its text, or a CheckBox or an OptionButton its caption: its <c>Alignment</c>.
+/// How a VB control aligns its text: its <c>Alignment</c>.
 /// </summary>
 public enum TextAlignment
 {

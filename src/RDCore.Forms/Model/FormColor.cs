@@ -11,7 +11,7 @@ namespace RDCore.Forms.Model;
 /// </summary>
 /// <remarks>
 /// As a Long, an RGB colour is <c>&amp;H00BBGGRR</c>, and a system colour is <c>&amp;H800000nn</c>, where <c>nn</c> is its
-/// <see cref="Model.SystemColor"/> index. No other Long is a colour: VB answers error 380 to a program that assigns one.
+/// <see cref="Model.SystemColor"/> index. The model accepts no other Long as a colour.
 /// </remarks>
 public readonly record struct FormColor
 {
@@ -202,7 +202,7 @@ public enum SystemColor
     /// </summary>
     ThreeDDarkShadow = 21,
     /// <summary>
-    /// The lightest edge of three-dimensional elements, after <see cref="ButtonHighlight"/>.
+    /// The second-lightest edge of three-dimensional elements; <see cref="ButtonHighlight"/> is the lightest.
     /// </summary>
     ThreeDLight = 22,
     /// <summary>

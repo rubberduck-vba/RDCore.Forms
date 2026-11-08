@@ -48,7 +48,7 @@ public enum ScaleMode
 public static class ScaleModeExtensions
 {
     /// <summary>
-    /// The twips a pixel is at 96 dots per inch, the resolution VB's designer files are measured at.
+    /// The twips in a pixel at 96 dots per inch, the value the model converts pixels with.
     /// </summary>
     public const double TwipsPerPixel = 15;
 
@@ -61,8 +61,8 @@ public static class ScaleModeExtensions
     /// across and 240 down. A pixel is <see cref="TwipsPerPixel"/>.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// <paramref name="mode"/> is <see cref="ScaleMode.User"/>, whose unit is the container's size over its scale, not a constant, or is
-    /// not a scale mode.
+    /// <paramref name="mode"/> is <see cref="ScaleMode.User"/>, which has no fixed unit (its unit is the container's size over its
+    /// scale), or is not a scale mode.
     /// </exception>
     public static (double Across, double Down) TwipsPerUnit(this ScaleMode mode) => mode switch
     {
