@@ -3,7 +3,7 @@
 
 ![VIVAT CUCUMIS](./assets/vivat-cucumis-stonecore.png)
 
-RDCore.Forms is RDForms, the form toolkit of the [RDCore](https://github.com/rubberduck-vba/RDCore) platform. It describes forms, their controls and their events, renders them with [Avalonia](https://avaloniaui.net) on Windows, Linux and macOS, and imports the forms of Visual Basic 6.0 projects (`.frm` and `.frx` files).
+RDCore.Forms is RDForms, the form toolkit of the [RDCore](https://github.com/rubberduck-vba/RDCore) platform. It describes forms, their controls and their events, and imports the forms of Visual Basic 6.0 projects (`.frm` and `.frx` files). Its renderer shows those forms with [Avalonia](https://avaloniaui.net) on Windows, Linux and macOS.
 
 The RDCore runtime runs the code behind a form. RDCore.Forms shows the form and raises its controls' events to that code.
 
@@ -13,6 +13,9 @@ This repository holds two libraries:
 |---|---|
 | **RDCore.Forms** | The form model, with no UI dependency: component classes, their properties and events, the instances of a form, and the readers that import a form into the model. The language server reads and analyses a form with it, without loading Avalonia. |
 | **RDCore.Forms.Avalonia** | The controls and the renderer: the controls of a form, and the window built from the model. |
+
+> [!NOTE]
+> **Not implemented.** RDCore.Forms.Avalonia holds no controls and no renderer: no form is shown on screen.
 
 ## Project status
 
@@ -29,7 +32,7 @@ dotnet build RDCore.Forms.slnx
 dotnet test RDCore.Forms.slnx
 ```
 
-The control tests run on Avalonia's headless platform, so they need no display.
+The tests run in a headless Avalonia session, so they need no display.
 
 ## Licence
 
