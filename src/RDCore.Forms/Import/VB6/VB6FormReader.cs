@@ -19,20 +19,23 @@ namespace RDCore.Forms.Import.VB6;
 /// Positions and sizes are read as written: in twips for a root, and in the container's scale for a control.
 /// </para>
 /// <para>
-/// A read does not throw on what a file holds, and drops nothing it reads. A property the model does not have, or whose value it
-/// cannot hold, is kept as an <see cref="UnmodelledProperty"/>; a component of a class the model does not have, such as an ActiveX
-/// control, or with no name, or nested deeper than <see cref="MaxNestingDepth"/>, is kept as an <see cref="UnmodelledComponent"/>;
-/// a header line that names no control library is kept in <see cref="VB6FormImport.UnmodelledHeader"/>, and a root block that is
-/// not a form's in <see cref="VB6FormImport.UnmodelledRoot"/>. Each of these, and each line that cannot be read, is reported in
-/// <see cref="VB6FormImport.Diagnostics"/>.
+/// A read does not throw on what a file holds. A property the model does not have, or whose value it cannot hold, is kept as an
+/// <see cref="UnmodelledProperty"/>, and so is a property bag other than a Font its class has; a component of a class the model does
+/// not have as a control or a menu, such as an ActiveX control, or with no name, or nested deeper than <see cref="MaxNestingDepth"/>,
+/// is kept as an <see cref="UnmodelledComponent"/>; a header line that names no control library is kept in
+/// <see cref="VB6FormImport.UnmodelledHeader"/>, and a root block that is not a form's in <see cref="VB6FormImport.UnmodelledRoot"/>.
+/// Each of these is reported in <see cref="VB6FormImport.Diagnostics"/>, except a property or a property bag the model does not have.
+/// A line that cannot be read and an <c>EndProperty</c> that closes nothing are reported and left out. The <c>VERSION</c> line is
+/// left out, and so are the header lines of a file that holds no form. A property a block sets twice has the value of its last line.
 /// </para>
 /// <para>
-/// A control on a Form that writes no <c>Font</c> takes a copy of the form's font, as VB6 gives it. A component placed inside one
-/// that cannot hold it, such as a control inside a ListBox, is placed in the nearest enclosing component that can, at its position
-/// as written. A companion record is read in the shape its property's type has: a string cited as <c>$"Form1.frx":0000</c> has a
-/// 4-byte length, and one cited as <c>"Form1.frx":0000</c> a 1-byte length and ends at its first NUL; a picture is the signature
-/// <c>lt\0\0</c> and the image file's length before its bytes; a List is a 2-byte count, then, for a list that is not empty, a
-/// 2-byte word, then each item's 2-byte length and bytes; an ItemData is a List of the decimal text of each Long.
+/// A control that writes no <c>Font</c>, on a <c>VB.Form</c> that writes one, takes a copy of that form's font. A component placed
+/// inside one that cannot hold it, such as a control inside a ListBox, is placed in the nearest enclosing component that can, at its
+/// position as written. A companion record is read in the shape its property's type has: a string cited as
+/// <c>$"Form1.frx":0000</c> has a 4-byte length, and one cited as <c>"Form1.frx":0000</c> a 1-byte length and ends at its first NUL;
+/// a picture is a 4-byte length of the rest, the signature <c>lt\0\0</c>, then the image file's 4-byte length and its bytes, an image
+/// of no bytes being no picture; a List is a 2-byte count, then, for a list that is not empty, a 2-byte word, then each item's 2-byte
+/// length and bytes; an ItemData is a List of the decimal text of each Long.
 /// </para>
 /// </remarks>
 public static partial class VB6FormReader
@@ -53,6 +56,7 @@ public static partial class VB6FormReader
     /// </param>
     /// <param name="options">How strings in the companion are decoded; <see langword="null"/> for <see cref="VB6ImportOptions.Default"/>.</param>
     /// <returns>The form, the module text, and what the import reports.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="designerFile"/> is <see langword="null"/>.</exception>
     public static VB6FormImport Read(string designerFile, byte[]? companion = null, VB6ImportOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(designerFile);
@@ -64,14 +68,21 @@ public static partial class VB6FormReader
 
     /// <summary>
     /// Reads a designer file, and the companion binary files its properties cite, such as <c>Form1.frx</c>: each one by the name the
-    /// designer file cites, from the designer file's folder, its name compared without regard to case.
+    /// designer file cites, from the designer file's folder, its name compared without regard to case. A cited name that is a rooted
+    /// path, such as a network path, is not read, and neither is one that holds a NUL: the property is reported as citing a missing
+    /// companion.
     /// </summary>
     /// <param name="path">The designer file's path.</param>
     /// <param name="options">
     /// How the designer file and the strings in its companions are decoded; <see langword="null"/> for <see cref="VB6ImportOptions.Default"/>.
     /// </param>
     /// <returns>The form, the module text, and what the import reports.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="path"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="path"/> is empty, or holds a NUL.</exception>
     /// <exception cref="IOException">The designer file, or a companion file that was found, cannot be read.</exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// The designer file, or a companion file that was found, or the designer file's folder, cannot be accessed.
+    /// </exception>
     public static VB6FormImport ReadFile(string path, VB6ImportOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(path);
@@ -85,8 +96,7 @@ public static partial class VB6FormReader
         {
             if (!companions.TryGetValue(cited, out var found))
             {
-                var lookedFor = Path.GetFullPath(Path.Combine(folder, cited));
-                var file = FindIgnoringCase(lookedFor);
+                var (lookedFor, file) = FindCompanion(folder, cited);
                 found = (file is null ? null : new Companion(File.ReadAllBytes(file), options.Encoding), lookedFor);
                 companions[cited] = found;
             }
@@ -102,6 +112,19 @@ public static partial class VB6FormReader
         var importer = new Importer(diagnostics, companions);
         var form = file.Root is null ? null : importer.Import(file, file.Root);
         return new VB6FormImport(form, importer.UnmodelledRoot, importer.UnmodelledHeader, file.ModuleText, file.ModuleLine, diagnostics.Items);
+    }
+
+    // The path a cited companion is looked for at, and the file found there. A rooted name, a network path among them, is not in the
+    // designer file's folder, and a name with a NUL is no file's: neither is looked for.
+    private static (string LookedFor, string? File) FindCompanion(string folder, string cited)
+    {
+        if (cited.Contains('\0') || Path.IsPathRooted(cited))
+        {
+            return (cited, null);
+        }
+
+        var path = Path.GetFullPath(Path.Combine(folder, cited));
+        return (path, FindIgnoringCase(path));
     }
 
     // The file at the path, or else the one of its folder whose name differs from it only in case.
@@ -558,13 +581,14 @@ public sealed class VB6FormImport
     public UnmodelledComponent? UnmodelledRoot { get; }
 
     /// <summary>
-    /// The header lines before the root block that do not name a control library the form's
-    /// <see cref="FormDefinition.ControlLibraries"/> lists, kept as they were read.
+    /// The <c>Name = Value</c> header lines before the root block that do not name a control library the form's
+    /// <see cref="FormDefinition.ControlLibraries"/> lists, kept as they were read. Empty when the file holds no form.
     /// </summary>
     public IReadOnlyList<UnmodelledProperty> UnmodelledHeader { get; }
 
     /// <summary>
-    /// The part of the file after the designer half: its <c>Attribute</c> lines and its code, with the file's own line endings.
+    /// The part of the file after the designer half: its <c>Attribute</c> lines and its code, with the file's own line endings. Empty
+    /// when the file has no root block, or its root block has no <c>End</c>.
     /// </summary>
     public string ModuleText { get; }
 
@@ -574,7 +598,7 @@ public sealed class VB6FormImport
     public int ModuleLine { get; }
 
     /// <summary>
-    /// What the import reports, in the order of the lines it is about.
+    /// What the import reports, in the order of the lines it is about; what it reports about one line, in the order it found it.
     /// </summary>
     public IReadOnlyList<VB6ImportDiagnostic> Diagnostics { get; }
 }

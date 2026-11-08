@@ -60,6 +60,31 @@ public sealed class VB6CompanionFileTests
     }
 
     [TestMethod]
+    public void ARootedCitation_IsNotRead_EvenWhenTheFileExists()
+    {
+        var rooted = Path.Combine(folder, "Rooted.frx");
+        var form = WriteForm(rooted);
+        WriteCompanion("Rooted.frx");
+
+        var import = VB6FormReader.ReadFile(form);
+
+        var diagnostic = import.Diagnostics.Single();
+        Assert.AreEqual(VB6ImportDiagnosticKind.MissingCompanion, diagnostic.Kind);
+        Assert.Contains(rooted, diagnostic.Message);
+        Assert.AreEqual("", import.Form!.Find("Label1")!.Get(VBProperties.Caption));
+    }
+
+    [TestMethod]
+    public void ACitationWithANul_IsAMissingCompanion_AndDoesNotThrow()
+    {
+        var form = WriteForm("Form1\0.frx");
+
+        var import = VB6FormReader.ReadFile(form);
+
+        Assert.AreEqual(VB6ImportDiagnosticKind.MissingCompanion, import.Diagnostics.Single().Kind);
+    }
+
+    [TestMethod]
     public void AMissingCompanion_IsReportedWithThePathLookedFor()
     {
         var form = WriteForm("Missing.frx");

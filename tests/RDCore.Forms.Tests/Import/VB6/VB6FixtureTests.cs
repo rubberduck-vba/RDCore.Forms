@@ -6,7 +6,8 @@ namespace RDCore.Forms.Tests.Import.VB6;
 
 // Intrinsics.frm, UserScale.frm and Misplaced.frm, with Intrinsics.frx, are hand-written; VB6 compiled them and a program it built
 // wrote what it read from each into vb6-read.txt. An expectation is a value of that file, except where a test says it is the
-// designer file's; where the import reads a value other than the one VB6 read, an ignored test holds VB6's.
+// designer file's. Where the import reads a value other than the one VB6 read, the test says so, and for the Timer's offset and the
+// user-scale Line's ends an ignored test holds VB6's.
 [TestClass]
 public sealed class VB6FixtureTests
 {

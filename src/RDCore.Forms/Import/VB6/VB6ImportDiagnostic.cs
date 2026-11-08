@@ -24,8 +24,8 @@ public enum VB6ImportDiagnosticKind
     MalformedLine,
 
     /// <summary>
-    /// A Begin or BeginProperty has no matching End or EndProperty, so it ends at the End that closes its container, or at the end of
-    /// the file.
+    /// A Begin or BeginProperty has no matching End or EndProperty. A BeginProperty left open ends at the End of its block, and a
+    /// Begin left open ends with the file.
     /// </summary>
     UnbalancedBlock,
 
@@ -57,7 +57,7 @@ public enum VB6ImportDiagnosticKind
     UnmodelledHeaderLine,
 
     /// <summary>
-    /// A component's class is not one the model has, so the component is kept as text.
+    /// A component's class is not one the model has as a control or a menu, so the component is kept as text.
     /// </summary>
     UnmodelledClass,
 
@@ -69,12 +69,14 @@ public enum VB6ImportDiagnosticKind
 
     /// <summary>
     /// A property's value is not one the property can hold, or the property cites a companion record and is of a type that has none,
-    /// so the property is kept as text.
+    /// so the property is kept as an <see cref="Model.UnmodelledProperty"/>. An <c>Index</c> that is not a number from 0 to 32767 is
+    /// kept the same way, and the component is in no control array.
     /// </summary>
     InvalidValue,
 
     /// <summary>
-    /// A property cites a companion binary file that was not found, so the property is kept as text.
+    /// A property cites a companion binary file that was not found, or by a name that is not looked for (a rooted path, or a name
+    /// that holds a NUL), so the property is kept as text.
     /// </summary>
     MissingCompanion,
 
@@ -96,7 +98,7 @@ public enum VB6ImportSeverity
     Information,
 
     /// <summary>
-    /// The import left out or kept as text something the file meant to set.
+    /// The import left out, kept as text, or placed elsewhere than written something the file sets, or could not read a line.
     /// </summary>
     Warning,
 
