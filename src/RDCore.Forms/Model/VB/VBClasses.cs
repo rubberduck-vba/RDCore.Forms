@@ -56,12 +56,14 @@ public static class VBClasses
         [Click, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
-    /// <c>VB.TextBox</c>. Its colours default to the window's, where most controls default to the button face's.
+    /// <c>VB.TextBox</c>. Its colours default to the window's, where most controls default to the button face's, and it has a
+    /// single-line border by default.
     /// </summary>
     public static readonly ComponentClass TextBox = Control("VB.TextBox", "Text",
-        [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText],
+        [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText, P.Locked, P.Alignment,
+         P.Appearance, P.BorderStyle],
         [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
-        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
 
     /// <summary>
     /// <c>VB.Label</c>, windowless. Its background is opaque by default.
@@ -118,7 +120,7 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass PictureBox = Control("VB.PictureBox", "Picture",
         [P.Align, P.Appearance, P.AutoRedraw, P.AutoSize, P.BackColor, P.BorderStyle, P.CausesValidation, P.Enabled, P.FillColor, P.FillStyle,
-         P.Font, P.ForeColor, P.MousePointer, P.TabIndex, P.TabStop, P.ToolTipText, P.Picture],
+         P.Font, P.ForeColor, P.MousePointer, P.TabIndex, P.TabStop, P.ToolTipText, P.Picture, .. ScaleProperties],
         [Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
         Defaults((P.BorderStyle, BorderStyle.FixedSingle)), isContainer: true);
 
@@ -188,8 +190,11 @@ public static class VBClasses
 
     private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, LostFocus];
 
+    private static PropertyDefinition[] ScaleProperties => [P.ScaleMode, P.ScaleLeft, P.ScaleTop, P.ScaleWidth, P.ScaleHeight];
+
     private static ComponentClass Root(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events) =>
-        new(typeName, defaultName, ComponentKind.Root, [.. properties, P.Left, P.Top, P.Width, P.Height, P.Tag], events, isContainer: true);
+        new(typeName, defaultName, ComponentKind.Root, [.. properties, P.Left, P.Top, P.Width, P.Height, .. ScaleProperties, P.Tag], events,
+            isContainer: true);
 
     private static ComponentClass Control(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events,
         IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false) =>

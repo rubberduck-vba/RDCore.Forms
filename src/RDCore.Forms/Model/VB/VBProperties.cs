@@ -10,29 +10,56 @@ namespace RDCore.Forms.Model.VB;
 /// A component's name and its control-array index are not properties here: they are <see cref="ComponentInstance.Name"/> and
 /// <see cref="ComponentInstance.Index"/>. Where two classes have a property of the same name with different types, there is one
 /// definition per type, such as <see cref="CheckBoxValue"/> and <see cref="OptionButtonValue"/>. A picture is held as the bytes of
-/// its record in the form's binary file.
+/// its image file.
 /// </remarks>
 public static class VBProperties
 {
     /// <summary>
-    /// The distance from the inside left edge of the container to the component's left edge, in twips.
+    /// A control's left edge, in its container's scale; a form's client area's left edge on the screen, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Left = new("Left", PropertyCategory.Position);
 
     /// <summary>
-    /// The distance from the inside top edge of the container to the component's top edge, in twips.
+    /// A control's top edge, in its container's scale; a form's client area's top edge on the screen, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Top = new("Top", PropertyCategory.Position);
 
     /// <summary>
-    /// The component's width, in twips.
+    /// A control's width, in its container's scale; a form's client area's width, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Width = new("Width", PropertyCategory.Position);
 
     /// <summary>
-    /// The component's height, in twips.
+    /// A control's height, in its container's scale; a form's client area's height, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Height = new("Height", PropertyCategory.Position);
+
+    /// <summary>
+    /// The unit of a form's or a PictureBox's scale, which its contents' positions and sizes are in.
+    /// </summary>
+    public static readonly PropertyDefinition<ScaleMode> ScaleMode = new("ScaleMode", PropertyCategory.Position, Model.ScaleMode.Twip);
+
+    /// <summary>
+    /// The horizontal coordinate of a form's or a PictureBox's inside left edge, in its own scale.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScaleLeft = new("ScaleLeft", PropertyCategory.Position);
+
+    /// <summary>
+    /// The vertical coordinate of a form's or a PictureBox's inside top edge, in its own scale.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScaleTop = new("ScaleTop", PropertyCategory.Position);
+
+    /// <summary>
+    /// The inside width of a form or a PictureBox, in its own scale. A designer file writes it for every form; in a scale other than
+    /// <see cref="Model.ScaleMode.User"/> it follows from the component's size.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScaleWidth = new("ScaleWidth", PropertyCategory.Position);
+
+    /// <summary>
+    /// The inside height of a form or a PictureBox, in its own scale. A designer file writes it for every form; in a scale other than
+    /// <see cref="Model.ScaleMode.User"/> it follows from the component's size.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScaleHeight = new("ScaleHeight", PropertyCategory.Position);
 
     /// <summary>
     /// The text of a form's title bar, of a button, or beside a check box.
@@ -40,9 +67,9 @@ public static class VBProperties
     public static readonly PropertyDefinition<string> Caption = new("Caption", PropertyCategory.Appearance, "");
 
     /// <summary>
-    /// A value of the program's own, attached to the component.
+    /// A string of the program's own, attached to the component.
     /// </summary>
-    public static readonly PropertyDefinition<object?> Tag = new("Tag", PropertyCategory.Misc, null);
+    public static readonly PropertyDefinition<string> Tag = new("Tag", PropertyCategory.Misc, "");
 
     /// <summary>
     /// Whether the component is shown while the program runs.
@@ -140,23 +167,24 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> AutoRedraw = new("AutoRedraw", PropertyCategory.Behavior);
 
     /// <summary>
-    /// The picture the component shows, as its record in the form's binary file holds it.
+    /// The picture the component shows, as the bytes of its image file (a bitmap, icon, cursor, GIF, JPEG or metafile), or
+    /// <see langword="null"/> for none.
     /// </summary>
     public static readonly PropertyDefinition<byte[]?> Picture = new("Picture", PropertyCategory.Appearance, null);
 
     /// <summary>
-    /// The icon a form shows in its title bar, as its record in the form's binary file holds it.
+    /// The icon a form shows in its title bar, as the bytes of its icon file, or <see langword="null"/> for none.
     /// </summary>
     public static readonly PropertyDefinition<byte[]?> Icon = new("Icon", PropertyCategory.Appearance, null);
 
     /// <summary>
-    /// The pointer shown when <see cref="MousePointer"/> is <see cref="VB.MousePointer.Custom"/>, as its record in the form's binary
-    /// file holds it.
+    /// The pointer shown when <see cref="MousePointer"/> is <see cref="VB.MousePointer.Custom"/>, as the bytes of its icon or cursor
+    /// file, or <see langword="null"/> for none.
     /// </summary>
     public static readonly PropertyDefinition<byte[]?> MouseIcon = new("MouseIcon", PropertyCategory.Behavior, null);
 
     /// <summary>
-    /// The image shown while the control is dragged, as its record in the form's binary file holds it.
+    /// The image shown while the control is dragged, as the bytes of its icon file, or <see langword="null"/> for none.
     /// </summary>
     public static readonly PropertyDefinition<byte[]?> DragIcon = new("DragIcon", PropertyCategory.Behavior, null);
 
@@ -166,14 +194,14 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> Stretch = new("Stretch", PropertyCategory.Appearance);
 
     /// <summary>
-    /// A ListBox's or ComboBox's items, as their record in the form's binary file holds them.
+    /// A ListBox's or ComboBox's items, in order.
     /// </summary>
-    public static readonly PropertyDefinition<byte[]?> List = new("List", PropertyCategory.List, null);
+    public static readonly PropertyDefinition<IReadOnlyList<string>> List = new("List", PropertyCategory.List, []);
 
     /// <summary>
-    /// The Long value attached to each item of a ListBox or ComboBox, as their record in the form's binary file holds them.
+    /// The Long value attached to each item of a ListBox or ComboBox, in the order of <see cref="List"/>.
     /// </summary>
-    public static readonly PropertyDefinition<byte[]?> ItemData = new("ItemData", PropertyCategory.Misc, null);
+    public static readonly PropertyDefinition<IReadOnlyList<int>> ItemData = new("ItemData", PropertyCategory.Misc, []);
 
     /// <summary>
     /// The milliseconds between a Timer's events. 0 stops the Timer.

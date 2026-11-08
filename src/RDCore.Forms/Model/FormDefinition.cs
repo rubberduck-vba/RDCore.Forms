@@ -7,9 +7,9 @@ namespace RDCore.Forms.Model;
 /// A form's designer: its root component, with every control and menu item placed in it, and what the form declares about itself.
 /// </summary>
 /// <remarks>
-/// The form's code is not part of its definition. Positions and sizes (<c>Left</c>, <c>Top</c>, <c>Width</c>, <c>Height</c>) are in
-/// twips, whatever the form's <see cref="Scale"/>; a VB Line's endpoints are the exception, in its container's scale, as its designer
-/// file holds them.
+/// The form's code is not part of its definition. A control's position and size, and a VB Line's ends, are in its container's scale,
+/// as the form's designer file holds them: twips, unless the form or the PictureBox holding it has a <c>ScaleMode</c> of its own. The
+/// root's own position and size are its client area's, in twips.
 /// </remarks>
 public sealed class FormDefinition
 {
@@ -38,11 +38,6 @@ public sealed class FormDefinition
     public string Name => Root.Name;
 
     /// <summary>
-    /// The coordinate scale the form's file declares for its contents, or <see langword="null"/> when it declares none, which is twips.
-    /// </summary>
-    public FormScale? Scale { get; set; }
-
-    /// <summary>
     /// The control libraries the form's file declares, in its order: the ActiveX controls its components may be instances of.
     /// </summary>
     public List<ControlLibraryReference> ControlLibraries { get; } = [];
@@ -61,22 +56,6 @@ public sealed class FormDefinition
     public ComponentInstance? Find(string name, int? index = null) =>
         Components.FirstOrDefault(c => c.Index == index && string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
 }
-
-/// <summary>
-/// A form's coordinate scale, as its file declares it.
-/// </summary>
-/// <param name="Mode">The scale's unit.</param>
-/// <param name="Left">The horizontal coordinate of the form's inside left edge.</param>
-/// <param name="Top">The vertical coordinate of the form's inside top edge.</param>
-/// <param name="Width">
-/// The form's inside width in the scale's units, or <see langword="null"/> when the file declares none, in which case it follows from the
-/// form's width.
-/// </param>
-/// <param name="Height">
-/// The form's inside height in the scale's units, or <see langword="null"/> when the file declares none, in which case it follows from the
-/// form's height.
-/// </param>
-public sealed record FormScale(ScaleMode Mode, double Left = 0, double Top = 0, double? Width = null, double? Height = null);
 
 /// <summary>
 /// A control library a form declares, such as <c>MSCOMCTL.OCX</c>.
