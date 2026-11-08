@@ -117,6 +117,41 @@ public sealed class ComponentInstanceTests
     }
 
     [TestMethod]
+    public void Descendants_AreDepthFirstInFileOrder()
+    {
+        var form = new ComponentInstance(VBClasses.Form, "Form1");
+        var frame = new ComponentInstance(VBClasses.Frame, "Frame1");
+        var inner = new ComponentInstance(VBClasses.CommandButton, "Command1");
+        var after = new ComponentInstance(VBClasses.Label, "Label1");
+        frame.SetContainer(form);
+        inner.SetContainer(frame);
+        after.SetContainer(form);
+
+        CollectionAssert.AreEqual(new[] { frame, inner, after }, form.Descendants().ToArray());
+    }
+
+    [TestMethod]
+    public void Descendants_OfTenThousandNestedFrames_AreReadOnTheDefaultStack()
+    {
+        const int depth = 10_000;
+        var form = new ComponentInstance(VBClasses.Form, "Form1");
+        var container = form;
+        for (var level = 0; level < depth; level++)
+        {
+            var frame = new ComponentInstance(VBClasses.Frame, "Frame1", level);
+            frame.SetContainer(container);
+            container = frame;
+        }
+
+        var count = 0;
+        var thread = new Thread(() => count = form.Descendants().Count());
+        thread.Start();
+        thread.Join();
+
+        Assert.AreEqual(depth, count);
+    }
+
+    [TestMethod]
     public void ToString_NamesTheControlArrayElement()
     {
         var option = new ComponentInstance(VBClasses.OptionButton, "Option1", index: 2);
