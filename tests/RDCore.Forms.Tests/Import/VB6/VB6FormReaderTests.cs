@@ -253,8 +253,8 @@ public sealed class VB6FormReaderTests
             CultureInfo.CurrentUICulture = new CultureInfo("en-CA");
             var english = VB6FormReader.Read(Form(Label("Alignment = 7"))).Diagnostics.Single().Message;
 
-            Assert.AreEqual("La propriété Alignment de Label1 avait une valeur invalide; elle est donc conservée sous forme de texte.", french);
-            Assert.AreEqual("Property Alignment in Label1 had an invalid value, so it is kept as text.", english);
+            Assert.AreEqual("La propriété Alignment de Label1 a une valeur non valide; elle est donc conservée sous forme de texte.", french);
+            Assert.AreEqual("Property Alignment in Label1 has an invalid value, so it is kept as text.", english);
         }
         finally
         {

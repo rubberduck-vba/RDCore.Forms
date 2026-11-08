@@ -43,15 +43,15 @@
     <value>La classe {0} du contrôle {1} n'est pas modélisée; le contrôle est donc conservé sous forme de texte.</value>
   </data>
   <data name="MisplacedComponent" xml:space="preserve">
-    <value>{0} ne peut pas contenir {1}; {1} est donc placé dans {2}, où sa position est lue telle qu'écrite.</value>
+    <value>{0} ne peut pas contenir {1}; {1} est donc placé dans {2}, où sa position est lue telle qu'elle est écrite.</value>
   </data>
   <data name="InvalidValue" xml:space="preserve">
-    <value>La propriété {0} de {1} avait une valeur invalide; elle est donc conservée sous forme de texte.</value>
+    <value>La propriété {0} de {1} a une valeur non valide; elle est donc conservée sous forme de texte.</value>
   </data>
   <data name="MissingCompanion" xml:space="preserve">
-    <value>La propriété {0} de {1} cite {2}, qui est introuvable; elle est donc conservée sous forme de texte.</value>
+    <value>La propriété {0} de {1} renvoie à {2}, qui est introuvable; elle est donc conservée sous forme de texte.</value>
   </data>
   <data name="MissingRecord" xml:space="preserve">
-    <value>La propriété {0} de {1} cite la position {2} de {3}, qui ne contient aucun enregistrement que la propriété peut lire; elle est donc conservée sous forme de texte.</value>
+    <value>La propriété {0} de {1} renvoie au décalage {2} de {3}, qui ne contient aucun enregistrement que la propriété puisse lire; elle est donc conservée sous forme de texte.</value>
   </data>
 </root>
