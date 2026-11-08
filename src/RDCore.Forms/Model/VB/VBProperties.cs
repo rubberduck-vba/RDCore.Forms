@@ -7,10 +7,16 @@ namespace RDCore.Forms.Model.VB;
 /// The properties of VB's intrinsic forms and controls that a designer file sets, with their VB6 defaults.
 /// </summary>
 /// <remarks>
+/// <para>
 /// A component's name and its control-array index are not properties here: they are <see cref="ComponentInstance.Name"/> and
 /// <see cref="ComponentInstance.Index"/>. Where two classes have a property of the same name with different types, there is one
 /// definition per type, such as <see cref="CheckBoxValue"/> and <see cref="OptionButtonValue"/>. A picture is held as the bytes of
 /// its image file.
+/// </para>
+/// <para>
+/// A number has the range of its VB type: a <see cref="short"/> is an Integer and an <see cref="int"/> a Long. A
+/// <see cref="double"/> property, such as <see cref="Left"/>, is a Single, and holds a value in a Single's range.
+/// </para>
 /// </remarks>
 public static class VBProperties
 {
@@ -231,7 +237,7 @@ public static class VBProperties
     /// <summary>
     /// The width of a Shape's border or of a Line, in pixels.
     /// </summary>
-    public static readonly PropertyDefinition<int> BorderWidth = new("BorderWidth", PropertyCategory.Appearance, 1);
+    public static readonly PropertyDefinition<short> BorderWidth =new("BorderWidth", PropertyCategory.Appearance, 1);
 
     /// <summary>
     /// The colour a figure is filled with.
@@ -272,32 +278,32 @@ public static class VBProperties
     /// How a Line's colour combines with what is drawn under it: a raster operation from 1 to 16. 13, the default, draws the colour
     /// as it is.
     /// </summary>
-    public static readonly PropertyDefinition<int> DrawMode = new("DrawMode", PropertyCategory.Appearance, 13);
+    public static readonly PropertyDefinition<short> DrawMode =new("DrawMode", PropertyCategory.Appearance, 13);
 
     /// <summary>
     /// How much a scroll bar's value changes when the user clicks its track.
     /// </summary>
-    public static readonly PropertyDefinition<int> LargeChange = new("LargeChange", PropertyCategory.Behavior, 1);
+    public static readonly PropertyDefinition<short> LargeChange =new("LargeChange", PropertyCategory.Behavior, 1);
 
     /// <summary>
     /// How much a scroll bar's value changes when the user clicks one of its arrows.
     /// </summary>
-    public static readonly PropertyDefinition<int> SmallChange = new("SmallChange", PropertyCategory.Behavior, 1);
+    public static readonly PropertyDefinition<short> SmallChange =new("SmallChange", PropertyCategory.Behavior, 1);
 
     /// <summary>
     /// A scroll bar's value at its left or top end.
     /// </summary>
-    public static readonly PropertyDefinition<int> Min = new("Min", PropertyCategory.Behavior);
+    public static readonly PropertyDefinition<short> Min =new("Min", PropertyCategory.Behavior);
 
     /// <summary>
     /// A scroll bar's value at its right or bottom end.
     /// </summary>
-    public static readonly PropertyDefinition<int> Max = new("Max", PropertyCategory.Behavior, 32767);
+    public static readonly PropertyDefinition<short> Max =new("Max", PropertyCategory.Behavior, 32767);
 
     /// <summary>
     /// A scroll bar's value, from <see cref="Min"/> to <see cref="Max"/>.
     /// </summary>
-    public static readonly PropertyDefinition<int> ScrollBarValue = new("Value", PropertyCategory.Misc);
+    public static readonly PropertyDefinition<short> ScrollBarValue =new("Value", PropertyCategory.Misc);
 
     /// <summary>
     /// A CheckBox's state, an Integer to a program.
@@ -337,7 +343,7 @@ public static class VBProperties
     /// <summary>
     /// The control's position in its form's tab order.
     /// </summary>
-    public static readonly PropertyDefinition<int> TabIndex = new("TabIndex", PropertyCategory.Behavior);
+    public static readonly PropertyDefinition<short> TabIndex =new("TabIndex", PropertyCategory.Behavior);
 
     /// <summary>
     /// Whether the Tab key moves the focus to the control.

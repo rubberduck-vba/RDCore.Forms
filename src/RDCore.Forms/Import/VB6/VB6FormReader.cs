@@ -19,28 +19,37 @@ namespace RDCore.Forms.Import.VB6;
 /// Positions and sizes are read as written: in twips for a root, and in the container's scale for a control.
 /// </para>
 /// <para>
-/// Nothing is dropped. A property the model does not have, or whose value it cannot hold, is kept as an
-/// <see cref="UnmodelledProperty"/>; a component of a class the model does not have, such as an ActiveX control, is kept as an
-/// <see cref="UnmodelledComponent"/>. Each of these, and each line that cannot be read, is reported in
+/// A read does not throw on what a file holds, and drops nothing it reads. A property the model does not have, or whose value it
+/// cannot hold, is kept as an <see cref="UnmodelledProperty"/>; a component of a class the model does not have, such as an ActiveX
+/// control, or with no name, or nested deeper than <see cref="MaxNestingDepth"/>, is kept as an <see cref="UnmodelledComponent"/>;
+/// a header line that names no control library is kept in <see cref="VB6FormImport.UnmodelledHeader"/>, and a root block that is
+/// not a form's in <see cref="VB6FormImport.UnmodelledRoot"/>. Each of these, and each line that cannot be read, is reported in
 /// <see cref="VB6FormImport.Diagnostics"/>.
 /// </para>
 /// <para>
-/// The import reads a file as VB6 loads it. A control on a form that writes no <c>Font</c> takes a copy of the form's font. A
-/// component placed inside one that cannot hold it, such as a control inside a ListBox, is placed in the nearest enclosing
-/// component that can. A companion record is read in the shape its property's type has: a string cited as <c>$"Form1.frx":0000</c>
-/// has a 4-byte length, and one cited as <c>"Form1.frx":0000</c> a 1-byte length and ends at its first NUL; a picture is the
-/// signature <c>lt\0\0</c> and the image file's length before its bytes; a List is a 2-byte count, then, for a list that is not
-/// empty, a 2-byte word, then each item's 2-byte length and bytes; an ItemData is a List of the decimal text of each Long.
+/// A control on a Form that writes no <c>Font</c> takes a copy of the form's font, as VB6 gives it. A component placed inside one
+/// that cannot hold it, such as a control inside a ListBox, is placed in the nearest enclosing component that can, at its position
+/// as written. A companion record is read in the shape its property's type has: a string cited as <c>$"Form1.frx":0000</c> has a
+/// 4-byte length, and one cited as <c>"Form1.frx":0000</c> a 1-byte length and ends at its first NUL; a picture is the signature
+/// <c>lt\0\0</c> and the image file's length before its bytes; a List is a 2-byte count, then, for a list that is not empty, a
+/// 2-byte word, then each item's 2-byte length and bytes; an ItemData is a List of the decimal text of each Long.
 /// </para>
 /// </remarks>
 public static partial class VB6FormReader
 {
     /// <summary>
+    /// How deep the blocks of a designer file are read, the root's included: 2,500. A block nested deeper is kept as text, its own
+    /// contents included.
+    /// </summary>
+    public const int MaxNestingDepth = 2_500;
+
+    /// <summary>
     /// Reads a designer file's text and its companion binary file.
     /// </summary>
     /// <param name="designerFile">The designer file's text.</param>
     /// <param name="companion">
-    /// The companion binary file's bytes, or <see langword="null"/> when there is none. A property citing it is then kept as text.
+    /// The companion binary file's bytes, read for every property that cites a companion record, or <see langword="null"/> when there
+    /// is none. A property citing one is then kept as text.
     /// </param>
     /// <param name="options">How strings in the companion are decoded; <see langword="null"/> for <see cref="VB6ImportOptions.Default"/>.</param>
     /// <returns>The form, the module text, and what the import reports.</returns>
@@ -49,43 +58,71 @@ public static partial class VB6FormReader
         ArgumentNullException.ThrowIfNull(designerFile);
         options ??= VB6ImportOptions.Default;
 
-        var diagnostics = new DiagnosticBag();
-        var file = DesignerFile.Parse(designerFile, diagnostics);
-        var form = file.Root is null
-            ? null
-            : new Importer(diagnostics, companion is null ? null : new Companion(companion, options.Encoding)).Import(file, file.Root);
-        return new VB6FormImport(form, file.ModuleText, file.ModuleLine, diagnostics.Items);
+        var read = companion is null ? null : new Companion(companion, options.Encoding);
+        return Read(designerFile, cited => (read, cited));
     }
 
     /// <summary>
-    /// Reads a designer file and the companion binary file beside it: <c>.frx</c> for a <c>.frm</c>, <c>.ctx</c> for a <c>.ctl</c>,
-    /// and <c>.pgx</c> for a <c>.pag</c>.
+    /// Reads a designer file, and the companion binary files its properties cite, such as <c>Form1.frx</c>: each one by the name the
+    /// designer file cites, from the designer file's folder, its name compared without regard to case.
     /// </summary>
     /// <param name="path">The designer file's path.</param>
     /// <param name="options">
-    /// How the designer file and the strings in its companion are decoded; <see langword="null"/> for <see cref="VB6ImportOptions.Default"/>.
+    /// How the designer file and the strings in its companions are decoded; <see langword="null"/> for <see cref="VB6ImportOptions.Default"/>.
     /// </param>
     /// <returns>The form, the module text, and what the import reports.</returns>
-    /// <exception cref="IOException">The designer file cannot be read.</exception>
+    /// <exception cref="IOException">The designer file, or a companion file that was found, cannot be read.</exception>
     public static VB6FormImport ReadFile(string path, VB6ImportOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(path);
         options ??= VB6ImportOptions.Default;
 
-        var text = options.Encoding.GetString(File.ReadAllBytes(path));
-        var companionPath = Path.ChangeExtension(path, Path.GetExtension(path).ToLowerInvariant() switch
+        var fullPath = Path.GetFullPath(path);
+        var folder = Path.GetDirectoryName(fullPath) ?? "";
+        var text = options.Encoding.GetString(File.ReadAllBytes(fullPath));
+        var companions = new Dictionary<string, (Companion?, string)>(StringComparer.OrdinalIgnoreCase);
+        return Read(text, cited =>
         {
-            ".ctl" => ".ctx",
-            ".pag" => ".pgx",
-            _ => ".frx",
+            if (!companions.TryGetValue(cited, out var found))
+            {
+                var lookedFor = Path.GetFullPath(Path.Combine(folder, cited));
+                var file = FindIgnoringCase(lookedFor);
+                found = (file is null ? null : new Companion(File.ReadAllBytes(file), options.Encoding), lookedFor);
+                companions[cited] = found;
+            }
+
+            return found;
         });
-        return Read(text, File.Exists(companionPath) ? File.ReadAllBytes(companionPath) : null, options);
+    }
+
+    private static VB6FormImport Read(string designerFile, Func<string, (Companion? Companion, string LookedFor)> companions)
+    {
+        var diagnostics = new DiagnosticBag();
+        var file = DesignerFile.Parse(designerFile, diagnostics);
+        var importer = new Importer(diagnostics, companions);
+        var form = file.Root is null ? null : importer.Import(file, file.Root);
+        return new VB6FormImport(form, importer.UnmodelledRoot, importer.UnmodelledHeader, file.ModuleText, file.ModuleLine, diagnostics.Items);
+    }
+
+    // The file at the path, or else the one of its folder whose name differs from it only in case.
+    private static string? FindIgnoringCase(string path)
+    {
+        if (File.Exists(path))
+        {
+            return path;
+        }
+
+        var folder = Path.GetDirectoryName(path);
+        var name = Path.GetFileName(path);
+        return folder is not null && Directory.Exists(folder)
+            ? Directory.EnumerateFiles(folder).FirstOrDefault(f => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase))
+            : null;
     }
 
     [GeneratedRegex("""^"\{(?<id>[0-9A-Fa-f-]{36})\}#(?<version>[^#"]*)#[^"]*"\s*;\s*"(?<file>[^"]*)"$""")]
     private static partial Regex LibraryReference();
 
-    private sealed class Importer(DiagnosticBag diagnostics, Companion? companion)
+    private sealed class Importer(DiagnosticBag diagnostics, Func<string, (Companion? Companion, string LookedFor)> companions)
     {
         private static readonly Dictionary<string, PropertyDefinition> ClientRectangle = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -95,16 +132,29 @@ public static partial class VB6FormReader
             ["ClientHeight"] = VBProperties.Height,
         };
 
+        public UnmodelledComponent? UnmodelledRoot { get; private set; }
+
+        public List<UnmodelledProperty> UnmodelledHeader { get; } = [];
+
         public FormDefinition? Import(DesignerFile file, DesignerBlock root)
         {
+            if (root.Name.Length == 0)
+            {
+                diagnostics.Add(VB6ImportDiagnosticKind.NamelessComponent, VB6ImportSeverity.Error, root.Line, root.TypeName);
+                UnmodelledRoot = new UnmodelledComponent(root.TypeName, root.Name, 0, root.Text);
+                return null;
+            }
+
             var rootClass = VBClasses.ByTypeName(root.TypeName);
             if (rootClass is not { Kind: ComponentKind.Root })
             {
                 diagnostics.Add(VB6ImportDiagnosticKind.NotAFormRoot, root.Line, root.TypeName);
+                UnmodelledRoot = new UnmodelledComponent(root.TypeName, root.Name, 0, root.Text);
                 return null;
             }
 
-            var rootInstance = new ComponentInstance(rootClass, root.Name, ReadIndex(root));
+            var (index, invalidIndex) = ReadIndex(root);
+            var rootInstance = new ComponentInstance(rootClass, root.Name, index);
             foreach (var property in root.Properties)
             {
                 if (ClientRectangle.TryGetValue(property.Name, out var axis))
@@ -117,26 +167,44 @@ public static partial class VB6FormReader
                 {
                     SetFromText(rootInstance, definition, property, root.Name);
                 }
-                else if (!property.Name.Equals("Index", StringComparison.OrdinalIgnoreCase))
+                else if (!property.Name.Equals("Index", StringComparison.OrdinalIgnoreCase) || property == invalidIndex)
                 {
-                    // The window's outer rectangle among them: the model holds the client rectangle.
+                    // the window's outer rectangle among them: the model holds the client rectangle.
                     rootInstance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
                 }
             }
 
             ReadBags(rootInstance, root);
             var form = new FormDefinition(rootInstance);
-            ReadLibraries(file, form);
+            ReadHeader(file, form);
 
             var ambientFont = rootClass == VBClasses.Form && rootInstance.IsSet(VBProperties.Font) ? rootInstance.Get(VBProperties.Font) : (FormFont?)null;
             ReadContents(rootInstance, root, ambientFont);
             return form;
         }
 
-        private void ReadContents(ComponentInstance container, DesignerBlock block, FormFont? ambientFont)
+        // Depth first in the file's order, with a stack of its own rather than the call stack, so a deep file costs no recursion.
+        private void ReadContents(ComponentInstance root, DesignerBlock rootBlock, FormFont? ambientFont)
         {
-            foreach (var child in block.Children)
+            var pending = new Stack<(ComponentInstance Container, DesignerBlock Block, int Depth)>();
+            Push(pending, root, rootBlock, 1);
+            while (pending.TryPop(out var next))
             {
+                var (container, child, depth) = next;
+                if (depth > MaxNestingDepth)
+                {
+                    diagnostics.Add(VB6ImportDiagnosticKind.NestingTooDeep, child.Line, child.Name, MaxNestingDepth);
+                    KeepAsText(container, child);
+                    continue;
+                }
+
+                if (child.Name.Length == 0)
+                {
+                    diagnostics.Add(VB6ImportDiagnosticKind.NamelessComponent, child.Line, child.TypeName);
+                    KeepAsText(container, child);
+                    continue;
+                }
+
                 var componentClass = VBClasses.ByTypeName(child.TypeName);
                 if (componentClass is null or { Kind: ComponentKind.Root })
                 {
@@ -145,7 +213,8 @@ public static partial class VB6FormReader
                     continue;
                 }
 
-                var instance = new ComponentInstance(componentClass, child.Name, ReadIndex(child));
+                var (index, invalidIndex) = ReadIndex(child);
+                var instance = new ComponentInstance(componentClass, child.Name, index);
                 Place(instance, container, child.Line);
 
                 foreach (var property in child.Properties)
@@ -154,19 +223,29 @@ public static partial class VB6FormReader
                     {
                         SetFromText(instance, definition, property, instance.ToString());
                     }
-                    else if (!property.Name.Equals("Index", StringComparison.OrdinalIgnoreCase))
+                    else if (!property.Name.Equals("Index", StringComparison.OrdinalIgnoreCase) || property == invalidIndex)
                     {
                         instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
                     }
                 }
 
-                ReadBags(instance, child);
-                if (ambientFont is { } font && componentClass.Has(VBProperties.Font) && !instance.IsSet(VBProperties.Font))
+                // a control whose Font bag could not be read keeps that bag as text, and does not take the form's font as well.
+                var hasFontBag = ReadBags(instance, child);
+                if (ambientFont is { } font && componentClass.Has(VBProperties.Font) && !hasFontBag)
                 {
                     instance.Set(VBProperties.Font, font);
                 }
 
-                ReadContents(instance, child, ambientFont);
+                Push(pending, instance, child, depth);
+            }
+        }
+
+        // A block's children, one level deeper than the block, pushed last first so the first is read first.
+        private static void Push(Stack<(ComponentInstance, DesignerBlock, int)> pending, ComponentInstance container, DesignerBlock block, int depth)
+        {
+            for (var at = block.Children.Count - 1; at >= 0; at--)
+            {
+                pending.Push((container, block.Children[at], depth + 1));
             }
         }
 
@@ -196,32 +275,34 @@ public static partial class VB6FormReader
         };
 
         private static void KeepAsText(ComponentInstance container, DesignerBlock block) =>
-            container.UnmodelledContents.Add(new UnmodelledComponent(block.TypeName, block.Name, container.Contents.Count, block.Text ?? ""));
+            container.UnmodelledContents.Add(new UnmodelledComponent(block.TypeName, block.Name, container.Contents.Count, block.Text));
 
-        private int? ReadIndex(DesignerBlock block)
+        // The block's Index, and the Index line kept as text when its value is not one.
+        private (int? Index, DesignerProperty? Invalid) ReadIndex(DesignerBlock block)
         {
             var index = block.Properties.LastOrDefault(p => p.Name.Equals("Index", StringComparison.OrdinalIgnoreCase));
             if (index is null)
             {
-                return null;
+                return (null, null);
             }
 
             if (ValueLiteral.Parse(index.Value) is ValueLiteral.Number { IsIntegral: true, Value: >= 0 and <= short.MaxValue } number)
             {
-                return (int)number.Value;
+                return ((int)number.Value, null);
             }
 
             diagnostics.Add(VB6ImportDiagnosticKind.InvalidValue, index.Line, index.Name, block.Name);
-            return null;
+            return (null, index);
         }
 
-        private void ReadLibraries(DesignerFile file, FormDefinition form)
+        private void ReadHeader(DesignerFile file, FormDefinition form)
         {
             foreach (var line in file.Header)
             {
                 if (!line.Name.Equals("Object", StringComparison.OrdinalIgnoreCase))
                 {
-                    diagnostics.Add(VB6ImportDiagnosticKind.MalformedLine, line.Line, $"{line.Name} = {line.Value}");
+                    diagnostics.Add(VB6ImportDiagnosticKind.UnmodelledHeaderLine, line.Line, line.Name);
+                    UnmodelledHeader.Add(new UnmodelledProperty(line.Name, line.Value));
                     continue;
                 }
 
@@ -233,27 +314,34 @@ public static partial class VB6FormReader
                 else
                 {
                     diagnostics.Add(VB6ImportDiagnosticKind.UnreadLibraryReference, line.Line, line.Value);
+                    UnmodelledHeader.Add(new UnmodelledProperty(line.Name, line.Value));
                 }
             }
         }
 
-        private void ReadBags(ComponentInstance instance, DesignerBlock block)
+        // Whether the block has a Font bag the instance's class could take, read or kept as text.
+        private bool ReadBags(ComponentInstance instance, DesignerBlock block)
         {
+            var hasFontBag = false;
             foreach (var bag in block.Bags)
             {
-                if (bag.Name.Equals("Font", StringComparison.OrdinalIgnoreCase) && instance.Class.Has(VBProperties.Font) && ReadFont(bag) is { } font)
+                var isFont = bag.Name.Equals("Font", StringComparison.OrdinalIgnoreCase) && instance.Class.Has(VBProperties.Font);
+                hasFontBag |= isFont;
+                if (isFont && ReadFont(bag) is { } font)
                 {
                     instance.Set(VBProperties.Font, font);
                     continue;
                 }
 
-                if (bag.Name.Equals("Font", StringComparison.OrdinalIgnoreCase) && instance.Class.Has(VBProperties.Font))
+                if (isFont)
                 {
                     diagnostics.Add(VB6ImportDiagnosticKind.InvalidValue, bag.Line, bag.Name, instance.ToString());
                 }
 
                 instance.UnmodelledProperties.Add(new UnmodelledProperty(bag.Name, bag.Text));
             }
+
+            return hasFontBag;
         }
 
         // A Font bag's fields, in any case and any order; a field the bag leaves out keeps the default font's.
@@ -268,7 +356,7 @@ public static partial class VB6FormReader
                     case ("name", ValueLiteral.Text text):
                         font = font with { Name = text.Value };
                         break;
-                    case ("size", ValueLiteral.Number { Value: > 0 } size):
+                    case ("size", ValueLiteral.Number { Value: > 0 and <= float.MaxValue } size):
                         font = font with { Size = size.Value };
                         break;
                     case ("charset", ValueLiteral.Number { IsIntegral: true, Value: >= 0 and <= 255 } charset):
@@ -299,22 +387,7 @@ public static partial class VB6FormReader
             var literal = ValueLiteral.Parse(property.Value);
             if (literal is ValueLiteral.Citation citation)
             {
-                if (companion is null)
-                {
-                    diagnostics.Add(VB6ImportDiagnosticKind.MissingCompanion, property.Line, property.Name, component, citation.FileName);
-                    instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
-                    return;
-                }
-
-                if (!TryReadRecord(definition, citation, out var record))
-                {
-                    diagnostics.Add(VB6ImportDiagnosticKind.MissingRecord, property.Line, property.Name, component,
-                        citation.Offset.ToString("X4", System.Globalization.CultureInfo.InvariantCulture), citation.FileName);
-                    instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
-                    return;
-                }
-
-                instance.TrySet(definition, record);
+                SetFromCompanion(instance, definition, property, component, citation);
                 return;
             }
 
@@ -323,52 +396,81 @@ public static partial class VB6FormReader
                 return;
             }
 
+            KeepInvalid(instance, property, component);
+        }
+
+        private void SetFromCompanion(ComponentInstance instance, PropertyDefinition definition, DesignerProperty property, string component,
+            ValueLiteral.Citation citation)
+        {
+            if (!HasRecordShape(definition.ValueType, citation))
+            {
+                KeepInvalid(instance, property, component);
+                return;
+            }
+
+            var (companion, lookedFor) = companions(citation.FileName);
+            if (companion is null)
+            {
+                diagnostics.Add(VB6ImportDiagnosticKind.MissingCompanion, property.Line, property.Name, component, lookedFor);
+                instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
+                return;
+            }
+
+            if (!TryReadRecord(companion, definition.ValueType, citation, out var record))
+            {
+                diagnostics.Add(VB6ImportDiagnosticKind.MissingRecord, property.Line, property.Name, component,
+                    citation.Offset.ToString("X4", System.Globalization.CultureInfo.InvariantCulture), citation.FileName);
+                instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
+                return;
+            }
+
+            if (!instance.TrySet(definition, record))
+            {
+                KeepInvalid(instance, property, component);
+            }
+        }
+
+        private void KeepInvalid(ComponentInstance instance, DesignerProperty property, string component)
+        {
             diagnostics.Add(VB6ImportDiagnosticKind.InvalidValue, property.Line, property.Name, component);
             instance.UnmodelledProperties.Add(new UnmodelledProperty(property.Name, property.Value));
         }
 
-        private bool TryReadRecord(PropertyDefinition definition, ValueLiteral.Citation citation, out object? record)
+        // Whether a property of the type can be cited this way: a string by either citation, a picture or a list by the plain one.
+        private static bool HasRecordShape(Type type, ValueLiteral.Citation citation) =>
+            type == typeof(string)
+            || !citation.IsDollar && (type == typeof(byte[]) || type == typeof(IReadOnlyList<string>) || type == typeof(IReadOnlyList<int>));
+
+        private static bool TryReadRecord(Companion companion, Type type, ValueLiteral.Citation citation, out object? record)
         {
-            record = null;
-            var type = definition.ValueType;
+            bool read;
             if (type == typeof(string))
             {
-                var read = citation.IsDollar
-                    ? companion!.TryReadLongString(citation.Offset, out var text)
-                    : companion!.TryReadShortString(citation.Offset, out text);
+                read = citation.IsDollar
+                    ? companion.TryReadLongString(citation.Offset, out var text)
+                    : companion.TryReadShortString(citation.Offset, out text);
                 record = text;
-                return read;
             }
-
-            if (citation.IsDollar)
+            else if (type == typeof(byte[]))
             {
-                return false;
-            }
-
-            if (type == typeof(byte[]))
-            {
-                var read = companion!.TryReadPicture(citation.Offset, out var image);
+                read = companion.TryReadPicture(citation.Offset, out var image);
                 record = image;
-                return read;
             }
-
-            if (type == typeof(IReadOnlyList<string>))
+            else if (type == typeof(IReadOnlyList<string>))
             {
-                var read = companion!.TryReadList(citation.Offset, out var items);
+                read = companion.TryReadList(citation.Offset, out var items);
                 record = items;
-                return read;
             }
-
-            if (type == typeof(IReadOnlyList<int>))
+            else
             {
-                var read = companion!.TryReadItemData(citation.Offset, out var values);
+                read = companion.TryReadItemData(citation.Offset, out var values);
                 record = values;
-                return read;
             }
 
-            return false;
+            return read;
         }
 
+        // A number in the range of the property's VB type: a short is an Integer, an int a Long, a double a Single.
         private static bool TryConvert(Type type, ValueLiteral literal, out object? value)
         {
             value = null;
@@ -378,12 +480,15 @@ public static partial class VB6FormReader
                     value = text.Value;
                     return true;
 
-                case ValueLiteral.Number number when type == typeof(double):
+                case ValueLiteral.Number { Value: >= -float.MaxValue and <= float.MaxValue } number when type == typeof(double):
                     value = number.Value;
                     return true;
 
-                case ValueLiteral.Number { IsIntegral: true } number when type == typeof(int)
-                    && number.Value is >= int.MinValue and <= int.MaxValue:
+                case ValueLiteral.Number { IsIntegral: true, Value: >= short.MinValue and <= short.MaxValue } number when type == typeof(short):
+                    value = (short)number.Value;
+                    return true;
+
+                case ValueLiteral.Number { IsIntegral: true, Value: >= int.MinValue and <= int.MaxValue } number when type == typeof(int):
                     value = (int)number.Value;
                     return true;
 
@@ -391,14 +496,12 @@ public static partial class VB6FormReader
                     value = number.Value != 0;
                     return true;
 
-                case ValueLiteral.Number { IsIntegral: true } number when type.IsEnum
-                    && number.Value is >= int.MinValue and <= int.MaxValue:
+                case ValueLiteral.Number { IsIntegral: true, Value: >= int.MinValue and <= int.MaxValue } number when type.IsEnum:
                     var member = Enum.ToObject(type, (int)number.Value);
                     value = member;
                     return Enum.IsDefined(type, member);
 
-                case ValueLiteral.Number { IsIntegral: true } number when type == typeof(FormColor)
-                    && number.Value is >= int.MinValue and <= int.MaxValue
+                case ValueLiteral.Number { IsIntegral: true, Value: >= int.MinValue and <= int.MaxValue } number when type == typeof(FormColor)
                     && FormColor.TryFromOle((int)number.Value, out var color):
                     value = color;
                     return true;
@@ -432,9 +535,12 @@ public sealed class VB6ImportOptions
 /// </summary>
 public sealed class VB6FormImport
 {
-    internal VB6FormImport(FormDefinition? form, string moduleText, int moduleLine, IReadOnlyList<VB6ImportDiagnostic> diagnostics)
+    internal VB6FormImport(FormDefinition? form, UnmodelledComponent? unmodelledRoot, IReadOnlyList<UnmodelledProperty> unmodelledHeader,
+        string moduleText, int moduleLine, IReadOnlyList<VB6ImportDiagnostic> diagnostics)
     {
         Form = form;
+        UnmodelledRoot = unmodelledRoot;
+        UnmodelledHeader = unmodelledHeader;
         ModuleText = moduleText;
         ModuleLine = moduleLine;
         Diagnostics = diagnostics;
@@ -444,6 +550,18 @@ public sealed class VB6FormImport
     /// The form, or <see langword="null"/> when the file holds none; <see cref="Diagnostics"/> then says why.
     /// </summary>
     public FormDefinition? Form { get; }
+
+    /// <summary>
+    /// The file's root block kept as text, when its class is not one of the roots of <see cref="VBClasses"/>, or it has no name;
+    /// otherwise <see langword="null"/>. <see cref="Form"/> is then <see langword="null"/>.
+    /// </summary>
+    public UnmodelledComponent? UnmodelledRoot { get; }
+
+    /// <summary>
+    /// The header lines before the root block that do not name a control library the form's
+    /// <see cref="FormDefinition.ControlLibraries"/> lists, kept as they were read.
+    /// </summary>
+    public IReadOnlyList<UnmodelledProperty> UnmodelledHeader { get; }
 
     /// <summary>
     /// The part of the file after the designer half: its <c>Attribute</c> lines and its code, with the file's own line endings.

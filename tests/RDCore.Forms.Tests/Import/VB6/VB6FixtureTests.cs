@@ -5,7 +5,8 @@ using RDCore.Forms.Model.VB;
 namespace RDCore.Forms.Tests.Import.VB6;
 
 // Intrinsics.frm, UserScale.frm and Misplaced.frm, with Intrinsics.frx, are hand-written; VB6 compiled them and a program it built
-// wrote what it read from each into vb6-read.txt. Each expectation here is a line of that file.
+// wrote what it read from each into vb6-read.txt. An expectation is a value of that file, except where a test says it is the
+// designer file's; where the import reads a value other than the one VB6 read, an ignored test holds VB6's.
 [TestClass]
 public sealed class VB6FixtureTests
 {
@@ -54,6 +55,7 @@ public sealed class VB6FixtureTests
     [TestMethod]
     public void TheFormsClientRectangle_IsItsPositionAndSize_AndItsOuterOneIsNotRead()
     {
+        // the designer file's values: VB6 read a ScaleWidth of 7995, its window's client width at run time.
         Assert.AreEqual((60d, 345d, 8000d, 6000d), Bounds(Intrinsics.Root));
         Assert.AreEqual(ScaleMode.Twip, Intrinsics.Root.Get(VBProperties.ScaleMode));
         Assert.AreEqual(8000d, Intrinsics.Root.Get(VBProperties.ScaleWidth));
@@ -241,8 +243,28 @@ public sealed class VB6FixtureTests
 
         Assert.AreEqual((ScaleMode.User, -10d, -10d, 200d, 100d), (form.Root.Get(VBProperties.ScaleMode), form.Root.Get(VBProperties.ScaleLeft),
             form.Root.Get(VBProperties.ScaleTop), form.Root.Get(VBProperties.ScaleWidth), form.Root.Get(VBProperties.ScaleHeight)));
-        Assert.AreEqual((100d, 50d), (line.Get(VBProperties.X2), line.Get(VBProperties.Y2)));
+        // the designer file's ends: VB6 read them back through twips, as -0.0124842 0 100.0125 50.
+        Assert.AreEqual((0d, 0d, 100d, 50d), (line.Get(VBProperties.X1), line.Get(VBProperties.Y1), line.Get(VBProperties.X2), line.Get(VBProperties.Y2)));
         Assert.AreEqual((4000d, 3000d), (form.Root.Get(VBProperties.Width), form.Root.Get(VBProperties.Height)));
+    }
+
+    [TestMethod]
+    [Ignore("A user-scale position is held as written; VB6 holds it in twips and converts it back, so it reads it rounded to a twip.")]
+    public void AUserScaleLinesEnds_AreReadAsVB6ReadsThem_RoundedToATwip()
+    {
+        var line = Read("UserScale.frm").Form!.Find("linAcross")!;
+
+        Assert.AreEqual(-0.0124842, line.Get(VBProperties.X1), 1e-7);
+        Assert.AreEqual(100.0125, line.Get(VBProperties.X2), 1e-7);
+    }
+
+    [TestMethod]
+    [Ignore("A control inside a Timer is placed in the form at its written position; VB6 also offsets it by the Timer's own Left and Top.")]
+    public void AControlInsideATimer_IsPlacedInTheForm_OffsetByTheTimersPosition()
+    {
+        var label = Read("Misplaced.frm").Form!.Find("lblInTimer")!;
+
+        Assert.AreEqual((720d, 4800d, 1215d, 255d), Bounds(label));
     }
 
     [TestMethod]
@@ -256,6 +278,8 @@ public sealed class VB6FixtureTests
         Assert.AreSame(form.Find("fraHost"), form.Find("cmdDeep")!.Container);
         Assert.AreEqual((60d, 60d, 900d, 375d), Bounds(form.Find("cmdDeep")!));
         Assert.AreSame(form.Root, form.Find("lblInTimer")!.Container);
+        // the designer file's position: VB6 read 720 4800, the Timer's offset added.
+        Assert.AreEqual((600d, 2400d, 1215d, 255d), Bounds(form.Find("lblInTimer")!));
         Assert.HasCount(3, import.Diagnostics);
         Assert.IsTrue(import.Diagnostics.All(d => d is { Kind: VB6ImportDiagnosticKind.MisplacedComponent, Severity: VB6ImportSeverity.Warning }));
         Assert.AreEqual(17, import.Diagnostics[0].Line);

@@ -42,6 +42,7 @@ public sealed class VB6FormReaderTests
         Assert.IsNull(import.Form);
         Assert.AreEqual(VB6ImportDiagnosticKind.NotAFormRoot, import.Diagnostics.Single().Kind);
         Assert.AreEqual(2, import.Diagnostics.Single().Line);
+        Assert.AreEqual(new UnmodelledComponent("VB.CommandButton", "Command1", 0, "Begin VB.CommandButton Command1 \r\nEnd"), import.UnmodelledRoot);
     }
 
     [TestMethod]
@@ -113,12 +114,13 @@ public sealed class VB6FormReaderTests
     }
 
     [TestMethod]
-    public void AListCitedAsALongString_IsNoRecordTheListCanRead()
+    public void AListCitedAsALongString_IsAValueTheListCannotHold()
     {
         var import = VB6FormReader.Read(Form("   Begin VB.ListBox List1 ", "      List            =   $\"Form1.frx\":0000", "   End"),
             Bytes(0x00, 0x00));
 
-        Assert.AreEqual(VB6ImportDiagnosticKind.MissingRecord, import.Diagnostics.Single().Kind);
+        Assert.AreEqual(VB6ImportDiagnosticKind.InvalidValue, import.Diagnostics.Single().Kind);
+        Assert.Contains(new UnmodelledProperty("List", "$\"Form1.frx\":0000"), import.Form!.Find("List1")!.UnmodelledProperties);
     }
 
     [TestMethod]
@@ -149,14 +151,16 @@ public sealed class VB6FormReaderTests
     }
 
     [TestMethod]
-    public void AFontBagWithAFieldItCannotRead_IsKeptAsText()
+    public void AFontBagWithAFieldItCannotRead_IsKeptAsText_AndTheFormsFontIsNotTakenAsWell()
     {
-        var import = VB6FormReader.Read(Form(Label("BeginProperty Font ", "   Weight = Bold", "EndProperty")));
+        var import = VB6FormReader.Read(Form(["   BeginProperty Font ", "      name = \"Arial\"", "   EndProperty",
+            .. Label("BeginProperty Font ", "   Weight = Bold", "EndProperty")]));
         var label = import.Form!.Find("Label1")!;
 
+        Assert.AreEqual("Arial", import.Form.Root.Get(VBProperties.Font).Name);
         Assert.AreEqual(VB6ImportDiagnosticKind.InvalidValue, import.Diagnostics.Single().Kind);
         Assert.AreEqual("Font", label.UnmodelledProperties.Single().Name);
-        Assert.AreEqual(FormFont.Default, label.Get(VBProperties.Font));
+        Assert.IsFalse(label.IsSet(VBProperties.Font));
     }
 
     [TestMethod]
@@ -176,16 +180,17 @@ public sealed class VB6FormReaderTests
 
         Assert.AreEqual("x", import.Form!.Root.Get(VBProperties.Caption));
         Assert.IsNotNull(import.Form.Find("Label1"));
-        Assert.AreEqual(VB6ImportDiagnosticKind.UnbalancedBlock, import.Diagnostics.Single().Kind);
+        CollectionAssert.AreEqual(new[] { (VB6ImportDiagnosticKind.UnbalancedBlock, 2), (VB6ImportDiagnosticKind.UnbalancedBlock, 4) },
+            import.Diagnostics.Select(d => (d.Kind, d.Line)).ToArray());
         Assert.AreEqual("", import.ModuleText);
     }
 
     [TestMethod]
-    public void AnEndPropertyWithNoBeginProperty_IsReported()
+    public void AnEndPropertyWithNoBeginProperty_IsReportedAsClosingNothing()
     {
         var import = VB6FormReader.Read(Form("   EndProperty"));
 
-        Assert.AreEqual((VB6ImportDiagnosticKind.UnbalancedBlock, 6), (import.Diagnostics.Single().Kind, import.Diagnostics.Single().Line));
+        Assert.AreEqual((VB6ImportDiagnosticKind.UnmatchedEnd, 6), (import.Diagnostics.Single().Kind, import.Diagnostics.Single().Line));
     }
 
     [TestMethod]
@@ -227,11 +232,13 @@ public sealed class VB6FormReaderTests
     }
 
     [TestMethod]
-    public void AnIndexThatIsNoNumber_IsReported_AndTheComponentIsNoArrayElement()
+    public void AnIndexThatIsNoNumber_IsReported_KeptAsText_AndTheComponentIsNoArrayElement()
     {
         var import = VB6FormReader.Read(Form(Label("Index           =   \"a\"")));
+        var label = import.Form!.Find("Label1")!;
 
-        Assert.IsNull(import.Form!.Find("Label1")!.Index);
+        Assert.IsNull(label.Index);
+        Assert.Contains(new UnmodelledProperty("Index", "\"a\""), label.UnmodelledProperties);
         Assert.AreEqual(VB6ImportDiagnosticKind.InvalidValue, import.Diagnostics.Single().Kind);
     }
 

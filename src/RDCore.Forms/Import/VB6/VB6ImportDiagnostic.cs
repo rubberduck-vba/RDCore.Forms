@@ -14,7 +14,7 @@ public enum VB6ImportDiagnosticKind
     NoDesignerBlock,
 
     /// <summary>
-    /// The file's root block is not a Form, a UserControl or a PropertyPage.
+    /// The file's root block is not a Form, an MDIForm, a UserControl or a PropertyPage, so the block is kept as text.
     /// </summary>
     NotAFormRoot,
 
@@ -24,14 +24,37 @@ public enum VB6ImportDiagnosticKind
     MalformedLine,
 
     /// <summary>
-    /// A Begin or BeginProperty has no matching End or EndProperty, or the reverse.
+    /// A Begin or BeginProperty has no matching End or EndProperty, so it ends at the End that closes its container, or at the end of
+    /// the file.
     /// </summary>
     UnbalancedBlock,
 
     /// <summary>
-    /// A header line names a control library by something other than its type library's id, such as a project of the same group.
+    /// An EndProperty closes no open BeginProperty, so the line is skipped.
+    /// </summary>
+    UnmatchedEnd,
+
+    /// <summary>
+    /// A Begin line names no component, so the block is kept as text. A root with no name leaves the file with no form.
+    /// </summary>
+    NamelessComponent,
+
+    /// <summary>
+    /// A block is nested deeper than <see cref="VB6FormReader.MaxNestingDepth"/> blocks, so it is kept as text, its own contents
+    /// included.
+    /// </summary>
+    NestingTooDeep,
+
+    /// <summary>
+    /// A header line names a control library by something other than its type library's id, such as a project of the same group, so
+    /// it is kept as text.
     /// </summary>
     UnreadLibraryReference,
+
+    /// <summary>
+    /// A header line is not a control library's, so it is kept as text.
+    /// </summary>
+    UnmodelledHeaderLine,
 
     /// <summary>
     /// A component's class is not one the model has, so the component is kept as text.
@@ -40,22 +63,24 @@ public enum VB6ImportDiagnosticKind
 
     /// <summary>
     /// A component is inside a component that cannot hold it, such as a control inside a ListBox, so it is placed in the nearest
-    /// enclosing component that can, as VB6 places it, with its position as written.
+    /// enclosing component that can, with its position as written.
     /// </summary>
     MisplacedComponent,
 
     /// <summary>
-    /// A property's value is not one the property can hold, so the property is kept as text.
+    /// A property's value is not one the property can hold, or the property cites a companion record and is of a type that has none,
+    /// so the property is kept as text.
     /// </summary>
     InvalidValue,
 
     /// <summary>
-    /// A property cites the companion binary file, and there is none.
+    /// A property cites a companion binary file that was not found, so the property is kept as text.
     /// </summary>
     MissingCompanion,
 
     /// <summary>
-    /// A property cites a record the companion binary file does not hold, or holds in a shape the property cannot read.
+    /// A property cites a record the companion binary file does not hold, or holds in a shape the property cannot read, so the
+    /// property is kept as text.
     /// </summary>
     MissingRecord,
 }
@@ -85,20 +110,11 @@ public enum VB6ImportSeverity
 /// One thing a VB6 import reports about the file it read.
 /// </summary>
 /// <param name="Kind">What is reported.</param>
+/// <param name="Severity">How much the reported thing costs the import.</param>
 /// <param name="Line">The 1-based line of the designer file it is about.</param>
 /// <param name="Message">The report, in the current UI culture.</param>
-public sealed record VB6ImportDiagnostic(VB6ImportDiagnosticKind Kind, int Line, string Message)
+public sealed record VB6ImportDiagnostic(VB6ImportDiagnosticKind Kind, VB6ImportSeverity Severity, int Line, string Message)
 {
-    /// <summary>
-    /// How much the reported thing costs the import.
-    /// </summary>
-    public VB6ImportSeverity Severity => Kind switch
-    {
-        VB6ImportDiagnosticKind.NoDesignerBlock or VB6ImportDiagnosticKind.NotAFormRoot => VB6ImportSeverity.Error,
-        VB6ImportDiagnosticKind.UnmodelledClass or VB6ImportDiagnosticKind.UnreadLibraryReference => VB6ImportSeverity.Information,
-        _ => VB6ImportSeverity.Warning,
-    };
-
     /// <summary>
     /// The line, the severity and the message.
     /// </summary>
@@ -114,13 +130,23 @@ internal sealed class DiagnosticBag
 
     private readonly List<VB6ImportDiagnostic> diagnostics = [];
 
-    public IReadOnlyList<VB6ImportDiagnostic> Items => diagnostics;
+    // In the order of the lines they are about; diagnostics about the same line in the order they were reported.
+    public IReadOnlyList<VB6ImportDiagnostic> Items => [.. diagnostics.OrderBy(d => d.Line)];
 
-    public bool HasErrors => diagnostics.Any(d => d.Severity == VB6ImportSeverity.Error);
+    public void Add(VB6ImportDiagnosticKind kind, int line, params object?[] arguments) =>
+        Add(kind, SeverityOf(kind), line, arguments);
 
-    public void Add(VB6ImportDiagnosticKind kind, int line, params object?[] arguments)
+    public void Add(VB6ImportDiagnosticKind kind, VB6ImportSeverity severity, int line, params object?[] arguments)
     {
         var format = Messages.GetString(kind.ToString(), CultureInfo.CurrentUICulture) ?? kind.ToString();
-        diagnostics.Add(new VB6ImportDiagnostic(kind, line, string.Format(CultureInfo.CurrentCulture, format, arguments)));
+        diagnostics.Add(new VB6ImportDiagnostic(kind, severity, line, string.Format(CultureInfo.CurrentCulture, format, arguments)));
     }
+
+    private static VB6ImportSeverity SeverityOf(VB6ImportDiagnosticKind kind) => kind switch
+    {
+        VB6ImportDiagnosticKind.NoDesignerBlock or VB6ImportDiagnosticKind.NotAFormRoot => VB6ImportSeverity.Error,
+        VB6ImportDiagnosticKind.UnmodelledClass or VB6ImportDiagnosticKind.UnreadLibraryReference
+            or VB6ImportDiagnosticKind.UnmodelledHeaderLine => VB6ImportSeverity.Information,
+        _ => VB6ImportSeverity.Warning,
+    };
 }

@@ -16,7 +16,7 @@
     <value>The file holds no form: it has no Begin block.</value>
   </data>
   <data name="NotAFormRoot" xml:space="preserve">
-    <value>{0} is not a form, a UserControl or a PropertyPage.</value>
+    <value>{0} is not a form, an MDIForm, a UserControl or a PropertyPage, so the file's designer block is kept as text.</value>
     <comment>{0} is the root block's class, such as VB.CommandButton.</comment>
   </data>
   <data name="MalformedLine" xml:space="preserve">
@@ -24,12 +24,28 @@
     <comment>{0} is the line.</comment>
   </data>
   <data name="UnbalancedBlock" xml:space="preserve">
-    <value>{0} has no matching End.</value>
-    <comment>{0} is the block's name, or the stray End line.</comment>
+    <value>{0} is never closed, so it ends where its container or the file ends.</value>
+    <comment>{0} is the name of the block or the property bag, such as Command1 or Font.</comment>
+  </data>
+  <data name="UnmatchedEnd" xml:space="preserve">
+    <value>This line closes no open property bag, so it is skipped: {0}</value>
+    <comment>{0} is the line, such as EndProperty.</comment>
+  </data>
+  <data name="NamelessComponent" xml:space="preserve">
+    <value>This {0} block has no name, so it is kept as text.</value>
+    <comment>{0} is the block's class, such as VB.CommandButton.</comment>
+  </data>
+  <data name="NestingTooDeep" xml:space="preserve">
+    <value>{0} is nested more than {1} blocks deep, so it is kept as text, its contents included.</value>
+    <comment>{0} is the block's name; {1} is the deepest nesting read, 2,500.</comment>
   </data>
   <data name="UnreadLibraryReference" xml:space="preserve">
-    <value>The control library {0} is not named by a type library id, so it is not listed.</value>
+    <value>The control library {0} is not named by a type library id, so its line is kept as text.</value>
     <comment>{0} is the Object line's value.</comment>
+  </data>
+  <data name="UnmodelledHeaderLine" xml:space="preserve">
+    <value>Header line {0} does not name a control library, so it is kept as text.</value>
+    <comment>{0} is the line's name, such as Reference.</comment>
   </data>
   <data name="UnmodelledClass" xml:space="preserve">
     <value>Class {0} of control {1} is not modelled, so the control is kept as text.</value>
@@ -44,11 +60,11 @@
     <comment>{0} is the property's name; {1} is the component's name.</comment>
   </data>
   <data name="MissingCompanion" xml:space="preserve">
-    <value>Property {0} in {1} cites {2}, which was not found.</value>
-    <comment>{0} is the property's name; {1} is the component's name; {2} is the binary file's name, such as Form1.frx.</comment>
+    <value>Property {0} in {1} cites {2}, which was not found, so it is kept as text.</value>
+    <comment>{0} is the property's name; {1} is the component's name; {2} is the binary file looked for: its path beside the designer file, or its name, such as Form1.frx, when the designer file was read as text.</comment>
   </data>
   <data name="MissingRecord" xml:space="preserve">
-    <value>Property {0} in {1} cites offset {2} of {3}, which holds no record the property can read.</value>
+    <value>Property {0} in {1} cites offset {2} of {3}, which holds no record the property can read, so it is kept as text.</value>
     <comment>{0} is the property's name; {1} is the component's name; {2} is the hexadecimal offset; {3} is the binary file's name.</comment>
   </data>
 </root>

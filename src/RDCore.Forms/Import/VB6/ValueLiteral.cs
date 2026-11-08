@@ -50,9 +50,10 @@ internal abstract record ValueLiteral
             return new Number(0, true);
         }
 
+        // a designer file writes no NaN and no infinity, and a number past a Double's range, such as 1E400, is a word.
         var number = text.EndsWith('&') ? text[..^1] : text;
         return double.TryParse(number, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent,
-                CultureInfo.InvariantCulture, out var parsed)
+                CultureInfo.InvariantCulture, out var parsed) && double.IsFinite(parsed)
             ? new Number(parsed, Math.Floor(parsed) == parsed)
             : new Word(value);
     }

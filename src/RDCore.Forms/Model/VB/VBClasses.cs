@@ -30,6 +30,20 @@ public static class VBClasses
         [.. KeyAndMouse, Load, Resize]);
 
     /// <summary>
+    /// <c>VB.MDIForm</c>: an MDI form's designer root. Its background defaults to the application workspace's colour. It has no font
+    /// and no scale of its own.
+    /// </summary>
+    /// <remarks>
+    /// VB6 lets only a control with an <c>Align</c> property, such as a PictureBox, or one a running program does not show, such as a
+    /// Timer, sit on an MDIForm. The model does not check this: an MDIForm holds the controls placed in it.
+    /// </remarks>
+    public static readonly ComponentClass MDIForm = new("VB.MDIForm", "MDIForm", ComponentKind.Root,
+        [P.Caption, P.BackColor, P.Enabled, P.Icon, P.MousePointer, P.MouseIcon, P.Picture, P.StartUpPosition, P.Appearance, P.RightToLeft,
+         P.HelpContextID, P.Visible, P.Left, P.Top, P.Width, P.Height, P.Tag],
+        [Click, DblClick, MouseDown, MouseMove, MouseUp, Load, Resize],
+        Defaults((P.BackColor, FormColor.FromSystem(SystemColor.AppWorkspace))), isContainer: true);
+
+    /// <summary>
     /// <c>VB.UserControl</c>: a UserControl's designer root.
     /// </summary>
     public static readonly ComponentClass UserControl = Root("VB.UserControl", "UserControl",
@@ -172,7 +186,7 @@ public static class VBClasses
     /// Every class of the catalog.
     /// </summary>
     public static IReadOnlyList<ComponentClass> All { get; } =
-        [Form, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
+        [Form, MDIForm, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
          Timer, HScrollBar, VScrollBar, Shape, Line, Menu];
 
     private static readonly Dictionary<string, ComponentClass> byTypeName =
