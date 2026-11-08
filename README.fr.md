@@ -3,7 +3,7 @@
 
 ![VIVAT CUCUMIS](./assets/vivat-cucumis-stonecore.png)
 
-RDCore.Forms est RDForms, la bibliothèque de formulaires de la plateforme [RDCore](https://github.com/rubberduck-vba/RDCore). Elle décrit les formulaires, leurs contrôles et leurs événements, les affiche avec [Avalonia](https://avaloniaui.net) sous Windows, Linux et macOS, et importe les formulaires des projets Visual Basic 6.0 (fichiers `.frm` et `.frx`).
+RDCore.Forms est RDForms, la bibliothèque de formulaires de la plateforme [RDCore](https://github.com/rubberduck-vba/RDCore). Elle décrit les formulaires, leurs contrôles et leurs événements, et importe les formulaires des projets Visual Basic 6.0 (fichiers `.frm` et `.frx`). Son moteur de rendu affiche ces formulaires avec [Avalonia](https://avaloniaui.net) sous Windows, Linux et macOS.
 
 Le _runtime_ de RDCore exécute le code d'un formulaire. RDCore.Forms affiche le formulaire et transmet à ce code les événements de ses contrôles.
 
@@ -13,6 +13,9 @@ Ce référentiel contient deux bibliothèques :
 |---|---|
 | **RDCore.Forms** | Le modèle des formulaires, sans dépendance d'interface : les classes de composants, leurs propriétés et leurs événements, les instances d'un formulaire, et les lecteurs qui importent un formulaire dans le modèle. Le serveur de langage lit et analyse un formulaire avec elle, sans charger Avalonia. |
 | **RDCore.Forms.Avalonia** | Les contrôles et le rendu : les contrôles d'un formulaire, et la fenêtre construite à partir du modèle. |
+
+> [!NOTE]
+> **Non implémenté.** RDCore.Forms.Avalonia ne contient aucun contrôle ni aucun moteur de rendu : aucun formulaire n'est affiché à l'écran.
 
 ## État du projet
 
@@ -29,7 +32,7 @@ dotnet build RDCore.Forms.slnx
 dotnet test RDCore.Forms.slnx
 ```
 
-Les tests des contrôles s'exécutent sur la plateforme _headless_ d'Avalonia, sans affichage.
+Les tests s'exécutent dans une session _headless_ d'Avalonia, sans affichage.
 
 ## Licence
 
