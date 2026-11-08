@@ -38,7 +38,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-Chaque fichier source provenant de HexIDE porte, en en-tête, l'avis de droit d'auteur de HexIDE et le _commit_ dont il provient.
+Chaque fichier source provenant de HexIDE porte, en en-tête, l'avis de droit d'auteur de HexIDE et le _commit_ dont il provient. Les formulaires de test du dossier `tests/RDCore.Forms.Tests/Import/VB6/Fixtures/HexIDE` sont copiés tels quels du corpus de HexIDE, au même _commit_, sous la même licence.
 
 ## Paquets tiers
 
@@ -91,7 +91,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-Each source file that comes from HexIDE carries, in its header, HexIDE's copyright notice and the commit it comes from.
+Each source file that comes from HexIDE carries, in its header, HexIDE's copyright notice and the commit it comes from. The test forms in `tests/RDCore.Forms.Tests/Import/VB6/Fixtures/HexIDE` are copied as is from HexIDE's corpus, at the same commit, under the same licence.
 
 ## Third-party packages
 

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="NoDesignerBlock" xml:space="preserve">
+    <value>Le fichier ne contient aucun formulaire : il n'a aucun bloc Begin.</value>
+  </data>
+  <data name="NotAFormRoot" xml:space="preserve">
+    <value>{0} n'est ni un formulaire, ni un UserControl, ni une PropertyPage.</value>
+  </data>
+  <data name="MalformedLine" xml:space="preserve">
+    <value>Cette ligne n'est ni un Begin, ni un End, ni une propriété : {0}</value>
+  </data>
+  <data name="UnbalancedBlock" xml:space="preserve">
+    <value>{0} n'a pas de End correspondant.</value>
+  </data>
+  <data name="UnreadLibraryReference" xml:space="preserve">
+    <value>La bibliothèque de contrôles {0} n'est pas désignée par l'identifiant d'une bibliothèque de types; elle n'est donc pas listée.</value>
+  </data>
+  <data name="UnmodelledClass" xml:space="preserve">
+    <value>La classe {0} du contrôle {1} n'est pas modélisée; le contrôle est donc conservé sous forme de texte.</value>
+  </data>
+  <data name="MisplacedComponent" xml:space="preserve">
+    <value>{0} ne peut pas contenir {1}; {1} est donc placé dans {2}, où sa position est lue telle qu'écrite.</value>
+  </data>
+  <data name="InvalidValue" xml:space="preserve">
+    <value>La propriété {0} de {1} avait une valeur invalide; elle est donc conservée sous forme de texte.</value>
+  </data>
+  <data name="MissingCompanion" xml:space="preserve">
+    <value>La propriété {0} de {1} cite {2}, qui est introuvable.</value>
+  </data>
+  <data name="MissingRecord" xml:space="preserve">
+    <value>La propriété {0} de {1} cite la position {2} de {3}, qui ne contient aucun enregistrement que la propriété peut lire.</value>
+  </data>
+</root>

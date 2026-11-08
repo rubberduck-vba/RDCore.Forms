@@ -4,6 +4,18 @@
 * text=auto
 
 ###############################################################################
+# VB6 designer files and their companions are read byte for byte: their line
+# endings and code page are never converted.
+###############################################################################
+*.frm binary
+*.ctl binary
+*.pag binary
+*.frx binary
+*.ctx binary
+*.pgx binary
+tests/RDCore.Forms.Tests/Import/VB6/Fixtures/*.txt -text
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by
