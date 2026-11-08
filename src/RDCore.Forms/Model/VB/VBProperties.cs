@@ -15,12 +15,12 @@ namespace RDCore.Forms.Model.VB;
 public static class VBProperties
 {
     /// <summary>
-    /// The distance from the inside left edge of the container to the component's left edge, in twips.
+    /// The component's left edge in its container, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Left = new("Left", PropertyCategory.Position);
 
     /// <summary>
-    /// The distance from the inside top edge of the container to the component's top edge, in twips.
+    /// The component's top edge in its container, in twips.
     /// </summary>
     public static readonly PropertyDefinition<double> Top = new("Top", PropertyCategory.Position);
 
@@ -35,7 +35,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<double> Height = new("Height", PropertyCategory.Position);
 
     /// <summary>
-    /// The text of a form's title bar, of a button, or beside a check box.
+    /// The text of a form's title bar, a property page's tab, a button's face, a label, a frame's title or a menu item, or the text
+    /// beside a check box or an option button.
     /// </summary>
     public static readonly PropertyDefinition<string> Caption = new("Caption", PropertyCategory.Appearance, "");
 
@@ -125,7 +126,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> UseMnemonic = new("UseMnemonic", PropertyCategory.Misc, true);
 
     /// <summary>
-    /// Whether a Label wraps its caption onto more lines, and grows to show them when <see cref="AutoSize"/> is set.
+    /// Whether a Label whose <see cref="AutoSize"/> is set grows down, wrapping its caption at its width, or across, keeping its caption
+    /// on one line. It has no effect when <see cref="AutoSize"/> is not set.
     /// </summary>
     public static readonly PropertyDefinition<bool> WordWrap = new("WordWrap", PropertyCategory.Misc);
 
@@ -282,7 +284,7 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> OptionButtonValue = new("Value", PropertyCategory.Misc);
 
     /// <summary>
-    /// Whether the user can change a TextBox's text or a list's selection.
+    /// Whether the user is prevented from changing a TextBox's or a ComboBox's text.
     /// </summary>
     public static readonly PropertyDefinition<bool> Locked = new("Locked", PropertyCategory.Behavior);
 

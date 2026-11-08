@@ -8,8 +8,7 @@ namespace RDCore.Forms.Model;
 /// </summary>
 /// <remarks>
 /// The form's code is not part of its definition. Positions and sizes (<c>Left</c>, <c>Top</c>, <c>Width</c>, <c>Height</c>) are in
-/// twips, whatever the form's <see cref="Scale"/>; a VB Line's endpoints are the exception, in its container's scale, as its designer
-/// file holds them.
+/// twips, whatever the form's <see cref="Scale"/>; a VB Line's endpoints are the exception, in its container's scale.
 /// </remarks>
 public sealed class FormDefinition
 {
@@ -81,7 +80,7 @@ public sealed record FormScale(ScaleMode Mode, double Left = 0, double Top = 0, 
 /// <summary>
 /// A control library a form declares, such as <c>MSCOMCTL.OCX</c>.
 /// </summary>
-/// <param name="Id">The library's identifier.</param>
+/// <param name="Id">The GUID of the library's type library.</param>
 /// <param name="Version">The library's version, such as <c>2.0</c>.</param>
 /// <param name="FileName">The library's file name, as the form's file names it.</param>
 public sealed record ControlLibraryReference(Guid Id, string Version, string FileName);

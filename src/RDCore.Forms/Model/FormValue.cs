@@ -1,7 +1,7 @@
 ﻿namespace RDCore.Forms.Model;
 
 /// <summary>
-/// The kinds of value a <see cref="FormValue"/> holds: VB's <c>Variant</c> subtypes, plus an object and an array.
+/// The kinds of value a <see cref="FormValue"/> holds: one per VB <c>Variant</c> subtype.
 /// </summary>
 public enum FormValueKind
 {
@@ -78,7 +78,7 @@ public enum FormValueKind
 /// </summary>
 /// <remarks>
 /// A form value converts nothing. A control receives a value of the type its member declares, because the code that runs the form
-/// let-coerces it before the call, as VB does for a late-bound call too. A control that cannot take a value it is given answers with a
+/// let-coerces it before the call, a late-bound call included. A control that cannot take a value it is given answers with a
 /// <see cref="FormError"/>.
 /// </remarks>
 public readonly struct FormValue : IEquatable<FormValue>
@@ -192,6 +192,7 @@ public readonly struct FormValue : IEquatable<FormValue>
     /// </summary>
     /// <param name="value">The value.</param>
     /// <returns>The form value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
     public static FormValue FromString(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -217,6 +218,7 @@ public readonly struct FormValue : IEquatable<FormValue>
     /// </summary>
     /// <param name="array">The array.</param>
     /// <returns>The form value.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="array"/> is <see langword="null"/>.</exception>
     public static FormValue FromArray(FormArray array)
     {
         ArgumentNullException.ThrowIfNull(array);

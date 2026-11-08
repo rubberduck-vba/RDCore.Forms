@@ -10,8 +10,9 @@ namespace RDCore.Forms.Model.VB;
 /// The component classes of VB6's <c>VB</c> library: its designer roots, its intrinsic controls and its menu.
 /// </summary>
 /// <remarks>
-/// Each class lists the properties of it that the model holds, then the ones every class of its kind has: <c>Left</c>, <c>Top</c>,
-/// <c>Width</c> and <c>Height</c> for a component with a place and a size, then <c>Visible</c> for a control, and <c>Tag</c>. A
+/// Each class lists the properties of it that the model holds, then the ones every class of its kind has: <c>Left</c> and
+/// <c>Top</c> for a component with a place, <c>Width</c> and <c>Height</c> for one with a size, <c>Visible</c> for a control a
+/// running program shows, and <c>Tag</c>. A
 /// property a designer file sets that a class does not list is kept as an <see cref="UnmodelledProperty"/>.
 /// </remarks>
 public static class VBClasses
@@ -56,7 +57,8 @@ public static class VBClasses
         [Click, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
-    /// <c>VB.TextBox</c>. Its colours default to the window's, where most controls default to the button face's.
+    /// <c>VB.TextBox</c>. Its colours default to the window's (<c>Window</c>, <c>WindowText</c>), where most controls default to the
+    /// button's (<c>ButtonFace</c>, <c>ButtonText</c>).
     /// </summary>
     public static readonly ComponentClass TextBox = Control("VB.TextBox", "Text",
         [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText],
@@ -89,7 +91,7 @@ public static class VBClasses
         [Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
-    /// <c>VB.Frame</c>, a container. Its contents are placed from its own top left corner, not from inside its border.
+    /// <c>VB.Frame</c>, a container.
     /// </summary>
     public static readonly ComponentClass Frame = Control("VB.Frame", "Frame",
         [P.Caption, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.MousePointer, P.TabIndex, P.ToolTipText],
@@ -99,7 +101,7 @@ public static class VBClasses
     /// <c>VB.ListBox</c>. Its colours default to the window's.
     /// </summary>
     public static readonly ComponentClass ListBox = Control("VB.ListBox", "List",
-        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.Locked, P.MultiSelect, P.DragIcon, P.MousePointer, P.RightToLeft,
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.MultiSelect, P.DragIcon, P.MousePointer, P.RightToLeft,
          P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
         [Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));

@@ -33,7 +33,7 @@ public sealed class ComponentInstance
     }
 
     /// <summary>
-    /// Raised after a property's value changes, by a set or a reset.
+    /// Raised after a property is set or reset, whether or not its value differs.
     /// </summary>
     public event EventHandler<ComponentPropertyChangedEventArgs>? PropertyChanged;
 
@@ -62,13 +62,13 @@ public sealed class ComponentInstance
     public int? Index { get; set; }
 
     /// <summary>
-    /// The component this one is placed in, or <see langword="null"/> for a form's root and for a component not placed yet.
+    /// The component this one is placed in, or <see langword="null"/> for a form's root and for a component placed in none.
     /// </summary>
     public ComponentInstance? Container { get; private set; }
 
     /// <summary>
-    /// The components placed in this one, in the order its designer file holds them: controls, which a designer draws in that
-    /// order, and, for a root or a menu, its menu items.
+    /// The components placed in this one, in the order they were placed (a designer file's order, for a form read from one):
+    /// controls, which a designer draws in that order, and, for a root or a menu, its menu items.
     /// </summary>
     public IReadOnlyList<ComponentInstance> Contents => contents;
 
@@ -86,7 +86,7 @@ public sealed class ComponentInstance
     /// Places this component in <paramref name="container"/>, and takes it out of the one it was in.
     /// </summary>
     /// <param name="container">The new container, or <see langword="null"/> to take the component out of its container.</param>
-    /// <param name="index">Where among the container's contents to place it; a negative index, or one past the end, places it last.</param>
+    /// <param name="index">Where among the container's contents to place it; a negative index, or one at or past the end, places it last.</param>
     /// <exception cref="InvalidOperationException">
     /// The placement is not one a form can hold: a root placed in anything, a menu item placed anywhere but in a root or another menu
     /// item, a control placed in a component that holds no controls, or a component placed in itself or in its own contents.
@@ -121,7 +121,7 @@ public sealed class ComponentInstance
     }
 
     /// <summary>
-    /// Every component in this one's contents, and in theirs, depth first in the order the designer file holds them.
+    /// Every component in this one's contents, and in theirs, depth first, each component's contents in the order of its <see cref="Contents"/>.
     /// </summary>
     /// <returns>The descendants of this component, without this component.</returns>
     public IEnumerable<ComponentInstance> Descendants()

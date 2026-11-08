@@ -55,7 +55,7 @@ public sealed class ComponentClass
     /// cannot see it.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// <paramref name="typeName"/> or <paramref name="defaultName"/> is empty; two properties or two events share a name; or a default
+    /// <paramref name="typeName"/> or <paramref name="defaultName"/> is empty or white space; two properties or two events share a name; or a default
     /// is given for a property the class does not have, or is not a value the property can hold.
     /// </exception>
     public ComponentClass(string typeName, string defaultName, ComponentKind kind,
@@ -159,7 +159,7 @@ public sealed class ComponentClass
     public EventDefinition? Event(string name) => eventsByName.GetValueOrDefault(name);
 
     /// <summary>
-    /// Whether the class has <paramref name="property"/>: that definition, not just one of the same name.
+    /// Whether the class has <paramref name="property"/>, the definition compared by reference.
     /// </summary>
     /// <param name="property">The property definition.</param>
     /// <returns><see langword="true"/> when the class has the property.</returns>
