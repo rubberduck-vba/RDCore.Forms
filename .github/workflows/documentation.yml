@@ -5,6 +5,7 @@ on:
   branches: [main]
  pull_request:
   branches: [main]
+ workflow_dispatch:
 
 permissions:
  contents: read
@@ -24,35 +25,52 @@ jobs:
      with:
       persist-credentials: false
 
+   # until the repository has a DocFX site, the site's root redirects to the repository.
+   - name: Find the site
+     id: site
+     run: |
+      if [ -f docs/docfx.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+
    - name: Setup .NET
+     if: steps.site.outputs.exists == 'true'
      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
      with:
       dotnet-version: 10.0
 
    # the API metadata is read from both projects, so their packages, Avalonia's among them, are restored first.
    - name: Restore
+     if: steps.site.outputs.exists == 'true'
      run: dotnet restore RDCore.Forms.slnx
 
    - name: Install DocFX
+     if: steps.site.outputs.exists == 'true'
      run: dotnet tool update -g docfx
 
    # a pull request fails on a broken link or cross-reference; main publishes what it builds.
    - name: Build Docs (pull request)
-     if: github.event_name == 'pull_request'
+     if: steps.site.outputs.exists == 'true' && github.event_name == 'pull_request'
      run: docfx docs/docfx.json --warningsAsErrors
 
    - name: Build Docs
-     if: github.event_name == 'push'
+     if: steps.site.outputs.exists == 'true' && github.event_name != 'pull_request'
      run: docfx docs/docfx.json
 
+   - name: Redirect page
+     if: steps.site.outputs.exists != 'true'
+     env:
+      TARGET: https://github.com/rubberduck-vba/RDCore.Forms
+     run: |
+      mkdir -p docs/_site
+      printf '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><title>RDCore.Forms</title><meta http-equiv="refresh" content="0; url=%s"><link rel="canonical" href="%s"></head>\n<body><a href="%s">RDCore.Forms</a></body></html>\n' "$TARGET" "$TARGET" "$TARGET" > docs/_site/index.html
+
    - name: Upload Site
-     if: github.event_name == 'push'
+     if: github.event_name != 'pull_request'
      uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
      with:
       path: docs/_site
 
  deploy:
-  if: github.event_name == 'push'
+  if: github.event_name != 'pull_request'
   needs: build-docs
   runs-on: ubuntu-latest
   permissions:
