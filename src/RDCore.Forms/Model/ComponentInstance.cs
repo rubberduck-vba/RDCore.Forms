@@ -126,11 +126,28 @@ public sealed class ComponentInstance
     /// <returns>The descendants of this component, without this component.</returns>
     public IEnumerable<ComponentInstance> Descendants()
     {
-        foreach (var child in contents)
+        // an explicit stack, so a deep nesting costs neither the call stack nor a chain of nested enumerators.
+        var pending = new Stack<IEnumerator<ComponentInstance>>();
+        pending.Push(contents.GetEnumerator());
+        try
         {
-            yield return child;
-            foreach (var descendant in child.Descendants())
-                yield return descendant;
+            while (pending.TryPeek(out var siblings))
+            {
+                if (!siblings.MoveNext())
+                {
+                    pending.Pop().Dispose();
+                    continue;
+                }
+
+                var child = siblings.Current;
+                yield return child;
+                pending.Push(child.contents.GetEnumerator());
+            }
+        }
+        finally
+        {
+            while (pending.TryPop(out var siblings))
+                siblings.Dispose();
         }
     }
 
