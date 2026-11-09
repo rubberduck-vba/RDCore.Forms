@@ -4,9 +4,5 @@
   href: getting-started.md
 - name: Import
   href: import/
-- name: Controls
-  href: controls/
-- name: Format
-  href: format/
 - name: API
   href: api/
