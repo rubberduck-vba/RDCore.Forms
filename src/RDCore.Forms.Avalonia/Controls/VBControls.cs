@@ -21,15 +21,16 @@ public static class VBControls
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// A FileListBox lists the files of the machine's file system, from the process's current directory.
+    /// A DriveListBox, a DirListBox and a FileListBox show the machine's file system, from the process's current directory.
     /// </remarks>
     public static Control? Create(ComponentInstance instance) => Create(instance, MachineFileSystem);
 
     /// <summary>
-    /// Makes the control that shows a component of one of VB's intrinsic control classes, with the file system its file lists show.
+    /// Makes the control that shows a component of one of VB's intrinsic control classes, with the file system its file system lists
+    /// show.
     /// </summary>
     /// <param name="instance">The component.</param>
-    /// <param name="fileSystem">The file system a FileListBox lists the files of, from its current directory.</param>
+    /// <param name="fileSystem">The file system a DriveListBox, a DirListBox and a FileListBox show, from its current directory.</param>
     /// <returns>
     /// The control, or <see langword="null"/> where its class has none: a menu and a form's root.
     /// </returns>
@@ -41,6 +42,10 @@ public static class VBControls
         var type = instance.Class;
         if (ReferenceEquals(type, VBClasses.FileListBox))
             return new VBFileListBox(instance, fileSystem);
+        if (ReferenceEquals(type, VBClasses.DirListBox))
+            return new VBDirListBox(instance, fileSystem);
+        if (ReferenceEquals(type, VBClasses.DriveListBox))
+            return new VBDriveListBox(instance, fileSystem);
         if (ReferenceEquals(type, VBClasses.CommandButton))
             return new VBCommandButton(instance);
         if (ReferenceEquals(type, VBClasses.TextBox))

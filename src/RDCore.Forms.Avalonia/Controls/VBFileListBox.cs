@@ -1,10 +1,7 @@
 ﻿using System.IO.Abstractions;
 using System.Text.RegularExpressions;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
 using P = RDCore.Forms.Model.VB.VBProperties;
@@ -41,23 +38,11 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     private string? listedPattern;
     private bool listedHidden;
     private bool listedSystem;
-    // Whether the press now held is a left press on an item, which raises Click at its release.
-    private bool pressedOnItem;
-
     static VBFileListBox()
     {
         // First, so that a key's KeyDown comes before the Click of the selection it moves.
         ControlKeys.Attach<VBFileListBox>();
-        // A right or middle press selects nothing, as on a ListBox.
-        PointerPressedEvent.AddClassHandler<VBFileListBox>((list, e) =>
-        {
-            if (!e.GetCurrentPoint(list).Properties.IsLeftButtonPressed)
-                e.Handled = true;
-        }, RoutingStrategies.Tunnel);
-        // Before the mouse events, so that Click comes before MouseUp.
-        PointerPressedEvent.AddClassHandler<VBFileListBox>((list, e) => list.Pressed(e), handledEventsToo: true);
-        PointerMovedEvent.AddClassHandler<VBFileListBox>((list, e) => list.Moved(e), handledEventsToo: true);
-        PointerReleasedEvent.AddClassHandler<VBFileListBox>((list, e) => list.Released(e), handledEventsToo: true);
+        SingleSelectList.Attach<VBFileListBox>();
         ControlEvents.AttachMouse<VBFileListBox>(DblClick.InPlaceOfMouseDown);
         FocusableProperty.OverrideDefaultValue<VBFileListBox>(true);
         ControlEvents.AttachFocus<VBFileListBox>();
@@ -198,26 +183,14 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     {
         var before = SelectedIndex;
         base.OnKeyDown(e);
-        if (SelectedIndex != before)
-            VBControl.Raise(this, VBEvents.Click);
+        SingleSelectList.KeyMoved(this, before);
     }
 
     /// <inheritdoc/>
     protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-        if (e.Handled || string.IsNullOrEmpty(e.Text) || ItemCount == 0)
-            return;
-        e.Handled = true;
-        foreach (var character in e.Text)
-        {
-            if (ListItems.NextStartingWith(Items, SelectedIndex, character) is not { } index)
-                continue;
-            SelectedIndex = index;
-            ScrollIntoView(index);
-            ContainerFromIndex(index)?.Focus(NavigationMethod.Unspecified);
-            VBControl.Raise(this, VBEvents.Click);
-        }
+        SingleSelectList.Typed(this, e);
     }
 
     private void Apply(ComponentPropertyChangedEventArgs e)
@@ -234,9 +207,7 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
             ComponentBinding.ApplyCommon(this, e.Property, e.After);
     }
 
-    // A folder as Path holds it: full, from the list's own Path, and without a separator at its end.
-    private string Folder(string value) =>
-        fileSystem.Path.TrimEndingDirectorySeparator(fileSystem.Path.GetFullPath(fileSystem.Path.Combine(path, value)));
+    private string Folder(string value) => FolderPaths.Resolve(fileSystem, path, value);
 
     private void SetPath(string folder)
     {
@@ -295,34 +266,5 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
         var anyExtension = pattern.EndsWith(".*", StringComparison.Ordinal);
         var stem = Regex.Escape(anyExtension ? pattern[..^2] : pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
         return new Regex(anyExtension ? $@"^{stem}(\..*)?$" : $"^{stem}$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    }
-
-    private void Pressed(PointerPressedEventArgs e) =>
-        pressedOnItem = e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed && IndexAt(e.Source) >= 0;
-
-    private void Moved(PointerEventArgs e)
-    {
-        if (!pressedOnItem || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            return;
-        var index = IndexAt(this.InputHitTest(e.GetPosition(this)));
-        if (index >= 0 && index != SelectedIndex)
-            SelectedIndex = index;
-    }
-
-    private void Released(PointerReleasedEventArgs e)
-    {
-        var click = pressedOnItem && e.InitialPressMouseButton == MouseButton.Left && !ControlEvents.IsSecondPress(this);
-        pressedOnItem = false;
-        if (click)
-            VBControl.Raise(this, VBEvents.Click);
-    }
-
-    // The index of the item an event's source is on, or -1 for the empty area and anything outside the items.
-    private int IndexAt(object? source)
-    {
-        for (var visual = source as Visual; visual is not null && !ReferenceEquals(visual, this); visual = visual.GetVisualParent())
-            if (visual is ListBoxItem item)
-                return IndexFromContainer(item);
-        return -1;
     }
 }

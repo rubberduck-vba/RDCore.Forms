@@ -1,4 +1,6 @@
 ﻿using System.IO.Abstractions.TestingHelpers;
+using Avalonia;
+using Avalonia.Input;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Avalonia.Rendering;
 using RDCore.Forms.Model;
@@ -27,7 +29,12 @@ public sealed class FileListControlTests
         [In("sys.txt")] = new("") { Attributes = FileAttributes.System },
         [In("ro.txt")] = new("") { Attributes = FileAttributes.ReadOnly },
         [In("SubOne", "x.bas")] = new(""),
+        [In("SubOne", "deep")] = new MockDirectoryData(),
+        [In("sub2")] = new MockDirectoryData(),
+        [In("HiddenDir")] = new MockDirectoryData { Attributes = FileAttributes.Directory | FileAttributes.Hidden },
     }, Root);
+
+    private static readonly string DriveRoot = Path.GetPathRoot(Root)!;
 
     private static ComponentInstance File() => new(VBClasses.FileListBox, "File1");
 
@@ -288,5 +295,195 @@ public sealed class FileListControlTests
         });
 
         Assert.AreEqual(Root, path);
+    }
+
+    private static ComponentInstance Dir() => new(VBClasses.DirListBox, "Dir1");
+
+    // The folders from -n, the root, to the last one Path holds.
+    private static string[] Folders(VBDirListBox list)
+    {
+        var top = -1;
+        while (list.GetList(top - 1) != "")
+            top--;
+        return [.. Enumerable.Range(top, list.ListCount - top).Select(list.GetList)];
+    }
+
+    [TestMethod]
+    public void ADirList_ShowsThePathUnderTheFoldersAboveIt_ThenTheFoldersItHolds_SortedIgnoringCase_WithoutHiddenOnes()
+    {
+        var (path, index, count, folders) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            return (list.Path, list.ListIndex, list.ListCount, Folders(list));
+        });
+
+        Assert.AreEqual(Root, path);
+        Assert.AreEqual(-1, index);
+        Assert.AreEqual(2, count);
+        Expect.Lines(new[] { DriveRoot, Root, In("sub2"), In("SubOne") }, folders);
+    }
+
+    [TestMethod]
+    public void ADirListsPath_KeepsTheCaseItIsGiven_AndRaisesChange_OnlyWhereItChanges()
+    {
+        var (path, above, count, index, raised) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            list.ListIndex = 0;
+            list.Path = In("subone", "deep");
+            list.Path = In("subone", "deep");
+            window.Close();
+            return (list.Path, list.GetList(-2), list.ListCount, list.ListIndex, sink.Raised);
+        });
+
+        Assert.AreEqual(In("subone", "deep"), path);
+        Assert.AreEqual(In("subone"), above);
+        Assert.AreEqual(0, count);
+        Assert.AreEqual(-1, index);
+        Expect.Lines(new[] { "Dir1.Click", "Dir1.Change" }, raised);
+    }
+
+    [TestMethod]
+    public void ADirListsRelativePath_IsTakenFromItsOwnPath_AndAMissingFolderIs76()
+    {
+        var (path, error) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            list.Path = list.GetList(1);
+            list.Path = "..";
+            return (list.Path, Assert.ThrowsExactly<FormErrorException>(() => list.Path = "nothere").Error.Number);
+        });
+
+        Assert.AreEqual(Root, path);
+        Assert.AreEqual(76, error);
+    }
+
+    [TestMethod]
+    public void ADirListsListIndex_SelectsAFolderAboveOrBelow_AndRaisesClick_WithoutChangingThePath()
+    {
+        var (path, index, raised, below, past) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            list.ListIndex = 0;
+            list.ListIndex = -2;
+            var below = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = -3).Error.Number;
+            var past = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = 2).Error.Number;
+            window.Close();
+            return (list.Path, list.ListIndex, sink.Raised, below, past);
+        });
+
+        Assert.AreEqual(Root, path);
+        Assert.AreEqual(-2, index);
+        Expect.Lines(new[] { "Dir1.Click", "Dir1.Click" }, raised);
+        Assert.AreEqual(380, below);
+        Assert.AreEqual(380, past);
+    }
+
+    [TestMethod]
+    public void ADoubleClickOnAFolder_MakesItThePath()
+    {
+        var (path, raised) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            var (window, sink) = ControlHost.Show((list, new Rect(10, 5, 160, 120)));
+            var item = list.ContainerFromIndex(3)!;
+            var pointer = new Pointer(Pointer.GetNextFreeId(), PointerType.Mouse, isPrimary: true);
+            var point = item.TranslatePoint(new Point(4, 4), window)!.Value;
+            foreach (var clickCount in new[] { 1, 2 })
+            {
+                item.RaiseEvent(new PointerPressedEventArgs(item, pointer, window, point, 0,
+                    new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed), KeyModifiers.None, clickCount));
+                item.RaiseEvent(new PointerReleasedEventArgs(item, pointer, window, point, 0,
+                    new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+            }
+            window.Close();
+            return (list.Path, sink.WithoutMoves.Where(e => e is "Dir1.Change" or "Dir1.Click").ToArray());
+        });
+
+        Assert.AreEqual(In("SubOne"), path);
+        Expect.Lines(new[] { "Dir1.Click", "Dir1.Change" }, raised);
+    }
+
+    [TestMethod]
+    public void ADirListsPathAndAFileListsPath_TakeADriveAsTheDriveListReadsIt_AsTheCurrentDirectoryOnIt()
+    {
+        var (dir, file) = UI.Run(() =>
+        {
+            var files = Tree();
+            var drive = new VBDriveListBox(new ComponentInstance(VBClasses.DriveListBox, "Drive1"), files);
+            var dirList = new VBDirListBox(Dir(), files);
+            var fileList = new VBFileListBox(File(), files);
+            dirList.Path = In("SubOne");
+            fileList.Path = In("SubOne");
+            dirList.Path = drive.Drive;
+            fileList.Path = drive.Drive;
+            return (dirList.Path, fileList.Path);
+        });
+
+        // A drive without a letter reads as its root's path, which is a path like any other.
+        Assert.AreEqual(OperatingSystem.IsWindows() ? Root : DriveRoot, dir);
+        Assert.AreEqual(OperatingSystem.IsWindows() ? Root : DriveRoot, file);
+    }
+
+    private static ComponentInstance Drive() => new(VBClasses.DriveListBox, "Drive1");
+
+    [TestMethod]
+    [OSCondition(OperatingSystems.Windows)]
+    public void ADriveList_ShowsEachDrivesLetterAndLabel_AndChoosesTheCurrentDirectorysDrive()
+    {
+        var (items, drive, index) = UI.Run(() =>
+        {
+            var files = Tree();
+            files.AddDrive(@"D:\", new MockDriveData { VolumeLabel = "Data" });
+            files.AddDrive(@"B:\", new MockDriveData { VolumeLabel = "" });
+            var list = new VBDriveListBox(Drive(), files);
+            return (Enumerable.Range(0, list.ListCount).Select(list.GetList).ToArray(), list.Drive, list.ListIndex);
+        });
+
+        CollectionAssert.Contains(items, "d: [Data]");
+        CollectionAssert.Contains(items, "b:");
+        Assert.AreEqual("c:", drive[..2]);
+        Assert.AreEqual(drive, items[index]);
+    }
+
+    [TestMethod]
+    [OSCondition(OperatingSystems.Windows)]
+    public void ADriveListsDrive_TakesALetterOrAPathOnTheDrive_AndRaisesChange_OnlyForAnotherDrive()
+    {
+        var (drive, raised, error) = UI.Run(() =>
+        {
+            var files = Tree();
+            files.AddDrive(@"D:\", new MockDriveData { VolumeLabel = "Data" });
+            var list = new VBDriveListBox(Drive(), files);
+            var (window, sink) = ControlHost.Show(list);
+            list.Drive = "c";
+            list.Drive = @"C:\Windows";
+            list.Drive = @"d:\x";
+            list.Drive = "d: [Data]";
+            var error = Assert.ThrowsExactly<FormErrorException>(() => list.Drive = "z:").Error.Number;
+            window.Close();
+            return (list.Drive, sink.Raised, error);
+        });
+
+        Assert.AreEqual("d: [Data]", drive);
+        Expect.Lines(new[] { "Drive1.Change" }, raised);
+        Assert.AreEqual(68, error);
+    }
+
+    [TestMethod]
+    [OSCondition(OperatingSystems.Linux | OperatingSystems.OSX)]
+    public void ADriveWithoutALetter_ShowsAsItsRootsPath_AndIsChosenByAPathOnIt()
+    {
+        var (items, drive) = UI.Run(() =>
+        {
+            var list = new VBDriveListBox(Drive(), Tree());
+            list.Drive = In("SubOne");
+            return (Enumerable.Range(0, list.ListCount).Select(list.GetList).ToArray(), list.Drive);
+        });
+
+        CollectionAssert.Contains(items, "/");
+        Assert.AreEqual("/", drive);
     }
 }
