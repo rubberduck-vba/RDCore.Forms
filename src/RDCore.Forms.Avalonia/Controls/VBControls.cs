@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System.IO.Abstractions;
+using Avalonia.Controls;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
 
@@ -9,6 +10,8 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// </summary>
 public static class VBControls
 {
+    private static readonly IFileSystem MachineFileSystem = new FileSystem();
+
     /// <summary>
     /// Makes the control that shows a component of one of VB's intrinsic control classes.
     /// </summary>
@@ -17,10 +20,27 @@ public static class VBControls
     /// The control, or <see langword="null"/> where its class has none: a menu and a form's root.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> is <see langword="null"/>.</exception>
-    public static Control? Create(ComponentInstance instance)
+    /// <remarks>
+    /// A FileListBox lists the files of the machine's file system, from the process's current directory.
+    /// </remarks>
+    public static Control? Create(ComponentInstance instance) => Create(instance, MachineFileSystem);
+
+    /// <summary>
+    /// Makes the control that shows a component of one of VB's intrinsic control classes, with the file system its file lists show.
+    /// </summary>
+    /// <param name="instance">The component.</param>
+    /// <param name="fileSystem">The file system a FileListBox lists the files of, from its current directory.</param>
+    /// <returns>
+    /// The control, or <see langword="null"/> where its class has none: a menu and a form's root.
+    /// </returns>
+    /// <exception cref="ArgumentNullException"><paramref name="instance"/> or <paramref name="fileSystem"/> is <see langword="null"/>.</exception>
+    public static Control? Create(ComponentInstance instance, IFileSystem fileSystem)
     {
         ArgumentNullException.ThrowIfNull(instance);
+        ArgumentNullException.ThrowIfNull(fileSystem);
         var type = instance.Class;
+        if (ReferenceEquals(type, VBClasses.FileListBox))
+            return new VBFileListBox(instance, fileSystem);
         if (ReferenceEquals(type, VBClasses.CommandButton))
             return new VBCommandButton(instance);
         if (ReferenceEquals(type, VBClasses.TextBox))
