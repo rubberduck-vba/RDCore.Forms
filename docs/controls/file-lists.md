@@ -39,7 +39,7 @@ A press, a key or a typed character selects a folder and raises Click as on a [L
 
 ## FileListBox
 
-[`VBFileListBox`](../api/RDCore.Forms.Avalonia.Controls.VBFileListBox.yml)
+[`VBFileListBox`](../api/RDCore.Forms.Avalonia.Controls.VBFileListBox.yml). It raises Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, PathChange and PatternChange.
 
 |Member|Behaviour|Error|
 |---|---|---|
