@@ -41,7 +41,7 @@ Une lecture ne lève pas d'exception à cause du contenu d'un fichier. Elle cons
 |`UnmatchedEnd`|Avertissement|Un `EndProperty` qui ne ferme rien est omis.|
 |`InvalidValue`|Avertissement|La propriété est conservée sous forme d'`UnmodelledProperty` : une valeur qu'elle ne peut pas contenir, un nombre hors de la plage de son type, ou un `Index` qui n'est pas un nombre de 0 à 32767.|
 |`MissingCompanion`, `MissingRecord`|Avertissement|La propriété garde sa valeur par défaut, et sa citation est conservée sous forme d'`UnmodelledProperty`.|
-|`MisplacedComponent`|Avertissement|Un composant placé dans un autre qui ne peut pas le contenir est placé dans le conteneur englobant le plus proche qui le peut, à sa position écrite. Un contrôle écrit à l'intérieur d'un Timer est placé au `Left` et au `Top` du Timer ajoutés aux siens, comme VB6 le place.|
+|`MisplacedComponent`|Avertissement|Un composant placé dans un autre qui ne peut pas le contenir est placé dans le conteneur englobant le plus proche qui le peut, à sa position écrite; un contrôle écrit à l'intérieur d'un Timer est plutôt placé au `Left` et au `Top` du Timer ajoutés aux siens, comme VB6 le place.|
 |`UnmodelledClass`|Information|Le composant est conservé sous forme d'`UnmodelledComponent`, avec son texte.|
 |`UnreadLibraryReference`, `UnmodelledHeaderLine`|Information|La ligne d'en-tête est conservée dans `UnmodelledHeader`.|
 
