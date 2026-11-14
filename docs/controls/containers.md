@@ -66,7 +66,7 @@ It raises Resize whether or not it or its form is shown.
 A PictureBox on the form itself whose `Align` is set is docked to that edge of the form's client area, as measured with VB6. [`AlignLayout`](../api/RDCore.Forms.Model.VB.AlignLayout.yml) lays the boxes out.
 
 - The top and bottom boxes are laid out first, each across the form's whole width. The left and right boxes then take the height between them.
-- On each edge, the box nearest the edge is the last one in the form's file. A box aligned at run time, or added by a program and aligned, goes inside the others.
+- On each edge, the box nearest the edge is the last one in the form's file, whatever its `TabIndex`, and `ZOrder` does not change it. A box aligned at run time, or added by a program and aligned, goes inside the others.
 - Each box keeps its own `Height`, or its `Width` for a left or right box, and takes that much room in whole pixels. Where the top and bottom boxes leave no height, the bottom ones go up past the top ones and the left and right boxes are 0 high.
 - A hidden box takes no room and keeps its place. Shown again, it docks where it was among the others.
 - The boxes follow the form's size, and each box's `Align`, `Visible` and size. A box whose `Align` is set to 0 keeps its last place and size.
@@ -81,16 +81,16 @@ A program's assignments to an aligned box, through [`VBRunTime.Assign`](../api/R
 |`Width`|387, 'Width' property can't be set on this control|Set. The boxes inside it move.|
 |`Left`|387, 'Left' property can't be set on this control|No error; it stays where it is.|
 |`Top`|No error; it stays where it is.|387, 'Top' property can't be set on this control|
-|`Move` with a new size|Its height is set; the rest stays as it is.|RDForms' own: its width is set; the rest stays as it is.|
+|`Move` with a new size|Its height is set; the rest stays as it is.|Its width is set; the rest stays as it is (RDForms' own, not measured with VB6).|
 |`Align` other than 0 to 4|380, Invalid property value|380, Invalid property value|
 
 An aligned box raises Resize as its size changes, like any PictureBox, in this order:
 
 |Change|Resize|
 |---|---|
-|Its form first shown|The form's, then each aligned box's, the top and bottom ones first, its size unchanged.|
+|Its form first shown|The form's, then each aligned box's, the top and bottom ones first, although no box's size changes.|
 |The form's size|The form's, then each box whose size it changes.|
-|A box's own height or width|The boxes it moves, then its own.|
+|A box's own height or width|Each other box whose size it changes, then its own.|
 
 ## Pictures
 

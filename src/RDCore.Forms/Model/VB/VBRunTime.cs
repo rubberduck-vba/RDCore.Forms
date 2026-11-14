@@ -14,7 +14,7 @@ public static class VBRunTime
     /// </summary>
     /// <param name="component">The component assigned.</param>
     /// <param name="property">The property assigned.</param>
-    /// <param name="value">The value, of the property's type, an extent in pixels.</param>
+    /// <param name="value">The value, of the property's type; an extent is in pixels.</param>
     /// <exception cref="ArgumentException">The component's class does not have <paramref name="property"/>.</exception>
     /// <exception cref="FormErrorException">
     /// 382 for a property a program cannot set (<see cref="ComponentClass.IsReadOnlyAtRunTime"/>); 380 for a value the property cannot

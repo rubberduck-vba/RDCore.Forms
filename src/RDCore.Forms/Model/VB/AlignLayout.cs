@@ -138,7 +138,8 @@ public sealed class AlignLayout
     /// <param name="property">The property assigned.</param>
     /// <returns>Error 387, or <see langword="null"/> where the assignment is not refused for the alignment.</returns>
     /// <remarks>
-    /// The box's other edge along the form's is not refused: an assignment of it leaves it where it is.
+    /// The <c>Top</c> of a box docked to the top or the bottom, and the <c>Left</c> of one docked to the left or the right, are not
+    /// refused: an assignment of either leaves the box where it is.
     /// </remarks>
     public static FormError? Refusal(ComponentInstance component, PropertyDefinition property)
     {
