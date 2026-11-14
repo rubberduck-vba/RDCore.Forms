@@ -112,11 +112,13 @@ public static class VBClasses
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
 
     /// <summary>
-    /// <c>VB.Label</c>, windowless. Its background is opaque by default.
+    /// <c>VB.Label</c>, windowless. Its background is opaque by default. Its <c>Picture</c> and <c>PicturePosition</c> are an RD-VBA
+    /// addition, laid out as MSForms' Label lays them out.
     /// </summary>
     public static readonly ComponentClass Label = Control("VB.Label", "Label",
         [P.Caption, P.Enabled, P.Font, P.BackColor, P.BackStyle, P.Alignment, P.Appearance, P.AutoSize, P.BorderStyle, P.ForeColor,
-         P.MousePointer, P.RightToLeft, P.ToolTipText, P.UseMnemonic, P.WhatsThisHelpID, P.WordWrap, P.TabIndex],
+         P.MousePointer, P.RightToLeft, P.ToolTipText, P.UseMnemonic, P.WhatsThisHelpID, P.WordWrap, P.TabIndex, P.Picture,
+         P.PicturePosition],
         [Click, DblClick, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackStyle, BackStyle.Opaque)), isWindowless: true);
 

@@ -70,7 +70,8 @@ A `Picture` holds the bytes of a picture file. A picture from a VB6 form is read
 |Format|Drawn|
 |---|---|
 |PNG|Yes, its transparent pixels showing what is behind them.|
-|BMP, GIF, JPEG|Yes. An animated GIF is not animated.|
+|BMP, JPEG|Yes.|
+|GIF|Yes. Its transparent colour shows what is under the control: the form's `Picture` under an Image or a transparent Label, the `BackColor` of a PictureBox or an opaque Label. An animated GIF is not animated.|
 |ICO, CUR|Yes. VB6 draws a cursor that is a form's `Picture` in black; RDForms draws it in its own colours.|
 |WMF, EMF|No. A metafile is recognized and accepted, and not drawn.|
 
@@ -81,6 +82,8 @@ Before anything decodes a picture, [`FormPictures.Inspect`](../api/RDCore.Forms.
 - wider or taller than 16,384 pixels, or of more than 16,777,216 pixels in all. An icon or a cursor is refused when any of its images is.
 
 A refused picture is error 481, "Invalid picture", and so is one whose header passes but whose body the decoder cannot read. It is not drawn, the form still shows, and the control's `PictureError` holds the error. [`VBPicture.Decode`](../api/RDCore.Forms.Avalonia.Controls.VBPicture.yml) decodes a picture the same way for other uses.
+
+The controls given the same bytes share one decode, as VB shares one picture object between the controls it is set on. The bytes are decoded once for any number of controls, and again only after none of them holds them.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
