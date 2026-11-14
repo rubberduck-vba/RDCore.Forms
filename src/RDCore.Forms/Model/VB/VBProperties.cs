@@ -217,7 +217,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<FormColor> MaskColor = new("MaskColor", PropertyCategory.Appearance, FormColor.FromRgb(0xC0, 0xC0, 0xC0));
 
     /// <summary>
-    /// Whether a graphical button leaves its <see cref="MaskColor"/> out of its pictures. An icon or a cursor is drawn whole either way.
+    /// Whether a graphical button leaves its <see cref="MaskColor"/> out of its pictures; False by default. An icon or a cursor
+    /// is drawn whole either way.
     /// </summary>
     public static readonly PropertyDefinition<bool> UseMaskColor = new("UseMaskColor", PropertyCategory.Appearance);
 
