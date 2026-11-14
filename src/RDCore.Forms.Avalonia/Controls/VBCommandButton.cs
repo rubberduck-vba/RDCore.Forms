@@ -26,7 +26,8 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// is not drawn, and its <c>BackColor</c> is not painted. A Graphical button paints its <c>BackColor</c>, and shows its caption at the
 /// bottom and its picture centred above it, both one pixel right and down while it is pressed. While pressed it shows its
 /// <c>DownPicture</c>, and while disabled its <c>DisabledPicture</c>, where it has one; a disabled button with no
-/// <c>DisabledPicture</c> shows its <c>Picture</c> greyed.
+/// <c>DisabledPicture</c> shows its <c>Picture</c> greyed. Its caption is in the system's <c>ButtonText</c> colour: a CommandButton has
+/// no <c>ForeColor</c>.
 /// </para>
 /// </remarks>
 public sealed class VBCommandButton : Button, IRaisesKeyEvents
@@ -54,6 +55,8 @@ public sealed class VBCommandButton : Button, IRaisesKeyEvents
         ArgumentNullException.ThrowIfNull(instance);
         if (instance.Get(P.ButtonStyle) == ButtonStyle.Graphical)
             GraphicalFace.ShowIn(this, face = new GraphicalFace());
+        // A CommandButton has no ForeColor: Windows draws its caption in the button text colour.
+        Foreground = FormPalette.ToBrush(FormColor.FromSystem(SystemColor.ButtonText));
         ComponentBinding.Bind(this, instance, VBClasses.CommandButton, Apply);
     }
 

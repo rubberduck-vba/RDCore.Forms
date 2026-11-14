@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Headless;
+using Avalonia.Media;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
@@ -33,6 +34,25 @@ public sealed class ButtonControlTests
             "Command1.Click",
             "Command1.MouseUp(Integer 1, Integer 0, Single 150, Single 75)",
         }, raised);
+    }
+
+    // A CommandButton has no ForeColor: its caption is in the system's ButtonText colour, and a ForeColor is not taken.
+    [TestMethod]
+    public void ACommandButtonsCaption_IsInTheButtonTextColour_AndItTakesNoForeColor()
+    {
+        var (colour, taken) = UI.Run(() =>
+        {
+            var instance = new ComponentInstance(VBClasses.CommandButton, "Command1");
+            var button = new VBCommandButton(instance);
+            var (window, _) = ControlHost.Show(button);
+            var colour = ((ISolidColorBrush)button.Foreground!).Color;
+            var taken = instance.TrySet(P.ForeColor, FormColor.FromRgb(0xFF, 0, 0));
+            window.Close();
+            return (colour, taken);
+        });
+
+        Assert.AreEqual(((ISolidColorBrush)FormPalette.ToBrush(FormColor.FromSystem(SystemColor.ButtonText))).Color, colour);
+        Assert.IsFalse(taken);
     }
 
     [TestMethod]
