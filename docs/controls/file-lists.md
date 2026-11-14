@@ -63,9 +63,9 @@ With a `MultiSelect` of Simple or Extended, a FileListBox selects files as a [Li
 
 |Statement|Effect|
 |---|---|
-|`ListIndex = -1`|Raises Click and changes nothing, with no file listed too.|
+|`ListIndex = -1`|Raises Click and changes nothing, also when no file is listed.|
 |`ListIndex` set to its own value|Does nothing.|
-|`ListIndex` set to any other value|381.|
+|`ListIndex` set to any other value|Raises error 381.|
 |`FileName` set to a file|Gives the file the focus and selects nothing.|
 |`SetSelected(index, True)`|Adds the file and gives it the focus, and raises Click; on a selected file, does nothing.|
 |`SetSelected(index, False)`|Removes the file and leaves the focus where it is, and raises Click; on a file not selected, does nothing.|
