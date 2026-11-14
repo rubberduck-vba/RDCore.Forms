@@ -24,27 +24,42 @@ public static class VBProperties
 {
     /// <summary>
     /// A control's left edge in its container, in pixels whatever the container's scale; a form's client area's left edge on the
-    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>.
+    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned PictureBox keeps the one
+    /// its <see cref="AlignLayout"/> gives it.
     /// </summary>
-    public static readonly PropertyDefinition<double> Left = new("Left", PropertyCategory.Position);
+    public static readonly PropertyDefinition<double> Left = new("Left", PropertyCategory.Position)
+    {
+        Coerce = (component, left) => AlignLayout.Kept(component, Left!, left),
+    };
 
     /// <summary>
     /// A control's top edge in its container, in pixels whatever the container's scale; a form's client area's top edge on the
-    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>.
+    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned PictureBox keeps the one
+    /// its <see cref="AlignLayout"/> gives it.
     /// </summary>
-    public static readonly PropertyDefinition<double> Top = new("Top", PropertyCategory.Position);
+    public static readonly PropertyDefinition<double> Top = new("Top", PropertyCategory.Position)
+    {
+        Coerce = (component, top) => AlignLayout.Kept(component, Top!, top),
+    };
 
     /// <summary>
     /// A control's width, in pixels whatever its container's scale; a form's client area's width, in pixels. A program's code reads it
-    /// in its own unit: see <see cref="CodeUnits"/>.
+    /// in its own unit: see <see cref="CodeUnits"/>. A PictureBox aligned to the top or the bottom keeps the form's.
     /// </summary>
-    public static readonly PropertyDefinition<double> Width = new("Width", PropertyCategory.Position);
+    public static readonly PropertyDefinition<double> Width = new("Width", PropertyCategory.Position)
+    {
+        Coerce = (component, width) => AlignLayout.Kept(component, Width!, width),
+    };
 
     /// <summary>
     /// A control's height, in pixels whatever its container's scale; a form's client area's height, in pixels. A program's code reads
-    /// it in its own unit: see <see cref="CodeUnits"/>.
+    /// it in its own unit: see <see cref="CodeUnits"/>. A PictureBox aligned to the left or the right keeps the one its
+    /// <see cref="AlignLayout"/> gives it.
     /// </summary>
-    public static readonly PropertyDefinition<double> Height = new("Height", PropertyCategory.Position);
+    public static readonly PropertyDefinition<double> Height = new("Height", PropertyCategory.Position)
+    {
+        Coerce = (component, height) => AlignLayout.Kept(component, Height!, height),
+    };
 
     /// <summary>
     /// The unit of a form's or a PictureBox's scale: the unit of its <c>ScaleLeft</c>, <c>ScaleTop</c>, <c>ScaleWidth</c> and
@@ -176,9 +191,14 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> WordWrap = new("WordWrap", PropertyCategory.Misc);
 
     /// <summary>
-    /// The edge of its form a PictureBox is docked to.
+    /// The edge of its form a PictureBox is docked to: see <see cref="AlignLayout"/>. Setting it on a box in another container, or to
+    /// <see cref="VB.Align.None"/> on a box of an MDI form, leaves it as it was.
     /// </summary>
-    public static readonly PropertyDefinition<Align> Align = new("Align", PropertyCategory.Position);
+    public static readonly PropertyDefinition<Align> Align = new("Align", PropertyCategory.Position)
+    {
+        Valid = Enum.IsDefined,
+        Coerce = AlignLayout.Taken,
+    };
 
     /// <summary>
     /// Whether a form or a PictureBox keeps what its drawing methods draw and raises no Paint event. RDForms keeps the drawing either

@@ -226,6 +226,13 @@ public sealed class ComponentInstance
         return true;
     }
 
+    // A value a layout gives the component, past the property's coercion: an aligned PictureBox's place on its form.
+    internal void Place<T>(PropertyDefinition<T> property, T value)
+    {
+        RequireProperty(property);
+        Store(property, value);
+    }
+
     /// <summary>
     /// Clears <paramref name="property"/>, so it has its class's default again.
     /// </summary>

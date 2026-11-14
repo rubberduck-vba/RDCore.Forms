@@ -438,11 +438,21 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
         }
         Apply();
         ShowTheDefault();
+        // While it is open, the window lays out the aligned boxes after it raises the form's Resize.
+        Aligned.FollowsTheForm = false;
         if (opened)
             return;
         opened = true;
         resizedAt = SizeOfRoot();
         VBControl.Raise(View, VBEvents.Resize);
+        // The first Show raises each aligned box's Resize after the form's, the top and bottom ones first.
+        var docked = Aligned.Docked.Where(box => box.Get(P.Visible)).ToArray();
+        foreach (var box in docked.Where(box => box.Get(P.Align) is Align.Top or Align.Bottom)
+                     .Concat(docked.Where(box => box.Get(P.Align) is Align.Left or Align.Right)))
+        {
+            if (View.ControlOf(box) is { } control)
+                VBControl.Raise(control, VBEvents.Resize);
+        }
         if (activatePending)
         {
             activatePending = false;
@@ -476,6 +486,7 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
         Root.PropertyChanged -= OnRootChanged;
         foreach (var component in Controls)
             component.PropertyChanged -= OnControlChanged;
+        Aligned.FollowsTheForm = true;
         MenuHosts.Unregister(this);
         if (ReferenceEquals(active, this))
             active = null;
@@ -537,12 +548,17 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
 
     private (double Width, double Height) SizeOfRoot() => (Root.Get(P.Width), Root.Get(P.Height));
 
+    private AlignLayout Aligned => AlignLayout.Of(View.Form);
+
+    // The aligned boxes follow the form's size after its Resize, and raise theirs after it.
     private void RaiseResize()
     {
-        if (!opened || SizeOfRoot() == resizedAt)
-            return;
-        resizedAt = SizeOfRoot();
-        VBControl.Raise(View, VBEvents.Resize);
+        if (opened && SizeOfRoot() != resizedAt)
+        {
+            resizedAt = SizeOfRoot();
+            VBControl.Raise(View, VBEvents.Resize);
+        }
+        Aligned.LayOut();
     }
 
     private void OnWindowActivated()
