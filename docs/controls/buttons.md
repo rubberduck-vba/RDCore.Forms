@@ -14,6 +14,7 @@ The behaviour below was measured with VB6.
 - Enter on the button raises its Click and no key event.
 - `Default` True makes it the button Enter clicks, and `Cancel` True the button Esc clicks, from any control of the form: see [Enter and Esc](form-events.md#enter-and-esc).
 - The button Enter clicks has the default look: the default button while no CommandButton has the focus, and the focused CommandButton otherwise.
+- `Value` True from code raises Click before the statement returns, with no focus or mouse event, even where the button is disabled or hidden, or its form is disabled, hidden or not yet shown. Click reads `Value` True, and it is False again after. `Value` False does nothing. Setting `Value` True in Click raises Click again, inside the first.
 
 These are RDForms' own, not measured with VB6:
 

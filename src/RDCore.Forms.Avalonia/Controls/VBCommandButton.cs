@@ -19,7 +19,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// container, and raises no key event. Enter on the button clicks it, with no key event, and its <c>Default</c> and <c>Cancel</c> make it
 /// the button that Enter and Esc click from the form's other controls (<see cref="Rendering.VBFormWindow"/>). On a form's window, the button
 /// that Enter clicks has the default look: a border two pixels wide in the system's <c>Highlight</c> colour, and the <c>:default</c>
-/// pseudo-class.
+/// pseudo-class. Its <c>Value</c> set to True clicks it, shown or not, enabled or not (<see cref="VBProperties.CommandButtonValue"/>).
 /// </para>
 /// <para>
 /// Its <c>Style</c> is read as it is made, and a later change is ignored. A Standard button shows its caption only: its <c>Picture</c>
@@ -31,6 +31,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// </remarks>
 public sealed class VBCommandButton : Button, IRaisesKeyEvents
 {
+    private readonly ComponentInstance instance;
     private readonly GraphicalFace? face;
 
     static VBCommandButton()
@@ -52,6 +53,7 @@ public sealed class VBCommandButton : Button, IRaisesKeyEvents
     public VBCommandButton(ComponentInstance instance)
     {
         ArgumentNullException.ThrowIfNull(instance);
+        this.instance = instance;
         if (instance.Get(P.ButtonStyle) == ButtonStyle.Graphical)
             GraphicalFace.ShowIn(this, face = new GraphicalFace());
         ComponentBinding.Bind(this, instance, VBClasses.CommandButton, Apply);
@@ -88,7 +90,17 @@ public sealed class VBCommandButton : Button, IRaisesKeyEvents
 
     private void Apply(ComponentPropertyChangedEventArgs e)
     {
-        if (ReferenceEquals(e.Property, P.Caption))
+        if (ReferenceEquals(e.Property, P.CommandButtonValue))
+        {
+            // True clicks the button, whether it is shown, enabled or neither, with no focus and no mouse event. Click reads True,
+            // and the Value is False again after it: unset, so that a form's file holds none.
+            if (e.After is true)
+            {
+                VBControl.Raise(this, VBEvents.Click);
+                instance.Reset(P.CommandButtonValue);
+            }
+        }
+        else if (ReferenceEquals(e.Property, P.Caption))
             GraphicalFace.ShowCaption(this, face, (string)e.After!);
         else if (GraphicalFace.IsDrawnByFace(e.Property))
             face?.Take(e.Property, (byte[]?)e.After);
