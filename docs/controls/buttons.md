@@ -70,8 +70,23 @@ A Graphical button is down while it is pressed, and a Graphical CheckBox or Opti
 
 A picture is drawn at its size in pixels. A greyed `Picture` or caption is drawn at half its opacity, and a disabled button keeps its `BackColor`: this look is RDForms' own, not measured with VB6.
 
-> [!NOTE]
-> **Not implemented.** `MaskColor` and `UseMaskColor` are not read, so a picture's background is drawn.
+### MaskColor
+
+Where `UseMaskColor` is True, a picture's pixels of the `MaskColor` show the button's face, in its `BackColor`. By default `MaskColor` is silver (`&H00C0C0C0&`) and `UseMaskColor` is False.
+
+|Case|Behaviour|
+|---|---|
+|A pixel of a colour near the `MaskColor`|Drawn: only the exact colour is left out.|
+|A system colour as the `MaskColor`|The colour it stands for is left out.|
+|`DownPicture` and `DisabledPicture`|Masked as the `Picture` is.|
+|A bitmap, a GIF or a JPEG|Masked.|
+|An icon or a cursor|Drawn whole, whatever `UseMaskColor` says.|
+|`MaskColor` or `UseMaskColor` set at run time|The button is drawn again with the new value.|
+
+These are RDForms' own, not measured with VB6:
+
+- A PNG, which VB6 does not load, is masked as a bitmap.
+- A `Picture` greyed while the button is disabled keeps its masked pixels out: they show the face.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
