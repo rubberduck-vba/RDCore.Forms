@@ -69,7 +69,7 @@ A PictureBox on the form itself whose `Align` is set is docked to that edge of t
 - On each edge, the box nearest the edge is the last one in the form's file. A box aligned at run time, or added by a program and aligned, goes inside the others.
 - Each box keeps its own `Height`, or its `Width` for a left or right box, and takes that much room in whole pixels. Where the top and bottom boxes leave no height, the bottom ones go up past the top ones and the left and right boxes are 0 high.
 - A hidden box takes no room and keeps its place. Shown again, it docks where it was among the others.
-- The boxes follow the form's size, and each box's `Align`, `Visible` and size. A box that is no longer aligned keeps its last place and size.
+- The boxes follow the form's size, and each box's `Align`, `Visible` and size. A box whose `Align` is set to 0 keeps its last place and size.
 - A box in a Frame or in another PictureBox is not aligned: its `Align` reads 0 whatever its file says, and a program's assignment leaves it so.
 - On an MDI form, a box is aligned to the top unless its file says otherwise, and an assignment of 0 to its `Align` leaves it as it was.
 

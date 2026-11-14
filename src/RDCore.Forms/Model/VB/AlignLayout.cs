@@ -16,7 +16,7 @@ namespace RDCore.Forms.Model.VB;
 /// </para>
 /// <para>
 /// The layout follows the form's size, and each box's <c>Align</c>, <c>Visible</c>, <c>Width</c> and <c>Height</c>, as they
-/// change, and the boxes a program adds and removes. A box that is no longer aligned keeps its last place and size.
+/// change, and the boxes a program adds and removes. A box whose <c>Align</c> is set to <see cref="Align.None"/> keeps its last place and size.
 /// </para>
 /// </remarks>
 public sealed class AlignLayout
