@@ -129,7 +129,7 @@ public sealed class FormDefinition
     /// after the form's others. Its other properties have their class's defaults, so that a caption or a text is "".
     /// </para>
     /// <para>
-    /// Any other name is taken: one that starts with a digit, holds a space, is a keyword, or is the form's own.
+    /// Any other name is accepted, even one that starts with a digit, holds a space, is a keyword, or is the form's own name.
     /// </para>
     /// </remarks>
     public ComponentInstance AddControl(ComponentClass type, string name, ComponentInstance? container = null)
@@ -161,7 +161,7 @@ public sealed class FormDefinition
     }
 
     /// <summary>
-    /// Removes the control of a name, as a program's <c>Controls.Remove</c> does with a name.
+    /// Removes the control that has a name, as a program's <c>Controls.Remove</c> does with a name.
     /// </summary>
     /// <param name="name">The control's name, compared without regard to case.</param>
     /// <exception cref="FormErrorException">
