@@ -278,7 +278,7 @@ public sealed class ComponentInstance
     internal void Place<T>(PropertyDefinition<T> property, T value)
     {
         RequireProperty(property);
-        Store(property, value);
+        Store([(property, value)], property);
     }
 
     /// <summary>
