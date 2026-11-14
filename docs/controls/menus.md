@@ -79,6 +79,7 @@ recent.Unload(1);                           // Unload mnuRecent(1)
 |`Unload` of an element that is not loaded|340, Control array element doesn't exist|
 |`Unload` of the last visible item of a menu|361, Can't load or unload this object|
 |`Load` or `Unload` of an item that is not an element of an array|361, Can't load or unload this object|
+|`Load` or `Unload` of an array's name with no index|361, Can't load or unload this object|
 
 The last visible item of the bar can be unloaded, and the bar goes with it.
 
