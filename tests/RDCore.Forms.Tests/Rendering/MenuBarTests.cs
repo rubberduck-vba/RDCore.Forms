@@ -357,4 +357,28 @@ public sealed class MenuBarTests
 
         static string[] Headers(ItemsControl items) => [.. items.Items.OfType<MenuItem>().Select(m => (string)m.Header!)];
     }
+
+    [TestMethod]
+    public void UnloadingTheLastVisibleMenuOfTheBar_TakesTheBarAway()
+    {
+        var (before, after) = UI.Run(() =>
+        {
+            var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 300d).Set(P.Height, 200d);
+            Menu(root, "mnuBar", "B0").Index = 0;
+            var window = Open(root, new RecordingSink());
+            var bar = window.MenuBar.Menu.ArrayOf("mnuBar")!;
+            bar.Load(1);
+            bar[0].Visible = false;
+            Dispatcher.UIThread.RunJobs();
+            var shown = window.MenuBar.IsVisible;
+            bar.Unload(1);
+            Dispatcher.UIThread.RunJobs();
+            var result = (shown, window.MenuBar.IsVisible);
+            window.Close();
+            return result;
+        });
+
+        Assert.IsTrue(before);
+        Assert.IsFalse(after);
+    }
 }

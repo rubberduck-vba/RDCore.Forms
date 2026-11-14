@@ -188,6 +188,41 @@ public sealed class FormMenuArrayTests
         CollectionAssert.AreEqual(new int?[] { 0, 1, 3, 4, 5, 32767 }, mru.Select(element => element.Index).ToArray());
     }
 
+    // VB6 reads a file that lists an array's elements out of index order: they are shown in the file's order, and the members go in
+    // index order.
+    [TestMethod]
+    public void AFileThatListsTheElementsOutOfOrder_ShowsThemInItsOrder_AndTheMembersGoInIndexOrder()
+    {
+        const string outOfOrder = """
+            VERSION 5.00
+            Begin VB.Form Form1
+               Caption         =   "Form1"
+               Begin VB.Menu mnuFile
+                  Caption         =   "&File"
+                  Begin VB.Menu mnuArr
+                     Caption         =   "A2"
+                     Index           =   2
+                  End
+                  Begin VB.Menu mnuArr
+                     Caption         =   "A0"
+                     Index           =   0
+                  End
+               End
+            End
+            Attribute VB_Name = "Form1"
+            """;
+        var menu = FormMenu.Of(VB6FormReader.Read(outOfOrder.ReplaceLineEndings("\r\n")).Form!.Root);
+        var array = Array(menu, "mnuArr");
+        var read = (array.LBound, array.UBound, Captions: array.Select(element => element.Caption).ToArray());
+        Load(array, 1, "A1");
+        Load(array, 3, "A3");
+
+        Assert.AreEqual((0, 2), (read.LBound, read.UBound));
+        CollectionAssert.AreEqual(new[] { "A0", "A2" }, read.Captions);
+        CollectionAssert.AreEqual(new[] { "A2", "A3", "A0", "A1" }, Captions(menu, "mnuFile"));
+        CollectionAssert.AreEqual(new[] { "A0", "A1", "A2", "A3" }, array.Select(element => element.Caption).ToArray());
+    }
+
     [TestMethod]
     public void EachRefusal_IsVB6sError_AndChangesNothing()
     {
