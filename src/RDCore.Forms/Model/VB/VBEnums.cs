@@ -432,3 +432,26 @@ public enum MousePointer
     /// </summary>
     Custom = 99,
 }
+
+/// <summary>
+/// Where a top-level menu goes on its form's menu bar while an object of an OLE container is active: its <c>NegotiatePosition</c>.
+/// </summary>
+public enum NegotiatePosition
+{
+    /// <summary>
+    /// Not shown while an object is active, the default.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// On the left.
+    /// </summary>
+    Left = 1,
+    /// <summary>
+    /// In the middle.
+    /// </summary>
+    Middle = 2,
+    /// <summary>
+    /// On the right.
+    /// </summary>
+    Right = 3,
+}
