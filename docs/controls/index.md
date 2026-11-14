@@ -84,7 +84,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |---|---|
 |`Visible`, `Enabled`|Hide or disable the control, and every control it holds. A disabled form takes no input in any of its controls.|
 |`BackColor`, `ForeColor`|A system colour is drawn in Windows 11's default palette ([`FormPalette`](../api/RDCore.Forms.Avalonia.Controls.FormPalette.yml)), on every platform.|
-|`Font`|The control's font.|
+|`Font`|The control's font, held at the size VB6 draws it at: see [Fonts](fonts.md).|
 |`ToolTipText`|Shown as the control's tooltip; an empty text shows none.|
 |`MousePointer`|The pointer over the control. Custom, drawn from `MouseIcon` in VB6, shows the arrow.|
 

@@ -126,9 +126,13 @@ public static class VBProperties
     public static readonly PropertyDefinition<int> WhatsThisHelpID = new("WhatsThisHelpID", PropertyCategory.Misc);
 
     /// <summary>
-    /// The font of the component's text.
+    /// The font of the component's text. A component holds a font at the size VB6 draws it at, <see cref="FormFont.AtDrawnSize"/>, as
+    /// VB6 holds it: MS Sans Serif set to 8 points holds 8.25, and a font that takes another name then is drawn from 8.25.
     /// </summary>
-    public static readonly PropertyDefinition<FormFont> Font = new("Font", PropertyCategory.Appearance, FormFont.Default);
+    public static readonly PropertyDefinition<FormFont> Font = new("Font", PropertyCategory.Appearance, FormFont.Default)
+    {
+        Coerce = (_, font) => font.AtDrawnSize(),
+    };
 
     /// <summary>
     /// How the control aligns its text, or its caption.
@@ -181,6 +185,12 @@ public static class VBProperties
     /// way; where this is False, it raises Paint.
     /// </summary>
     public static readonly PropertyDefinition<bool> AutoRedraw = new("AutoRedraw", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether the text a form's or a PictureBox's <c>Print</c> method draws leaves what is under it. Where it is False, each line's
+    /// cell is filled with the <c>BackColor</c> first. True by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> FontTransparent = new("FontTransparent", PropertyCategory.Appearance, true);
 
     /// <summary>
     /// The width in pixels of the lines a form's or a PictureBox's drawing methods draw.
@@ -390,9 +400,11 @@ public static class VBProperties
 
     /// <summary>
     /// How a Line's colour, or the colour of a form's or a PictureBox's drawing, combines with what is drawn under it: a raster
-    /// operation from 1 to 16. 13, the default, draws the colour as it is.
+    /// operation from 1 to 16, GDI's of the same number. 13, the default, draws the colour as it is. Another value is refused (380 for
+    /// a program).
     /// </summary>
-    public static readonly PropertyDefinition<short> DrawMode = new("DrawMode", PropertyCategory.Appearance, 13);
+    public static readonly PropertyDefinition<short> DrawMode =
+        new("DrawMode", PropertyCategory.Appearance, 13) { Valid = mode => mode is >= 1 and <= 16 };
 
     /// <summary>
     /// How much a scroll bar's value changes when the user clicks its track.
