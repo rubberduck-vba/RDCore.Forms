@@ -23,13 +23,13 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// <c>Change</c> as it is released where the value differs from the one it started at.
 /// </para>
 /// <para>
-/// With the focus, the arrow keys move it by <c>SmallChange</c>, Left and Up toward <c>Min</c>, and Page Up and Page Down by
-/// <c>LargeChange</c>. Home takes it to the lower of <c>Min</c> and <c>Max</c>, and End to the higher. Each raises <c>Change</c> where
+/// With the focus, the arrow keys move it by <c>SmallChange</c> and Page Up and Page Down by <c>LargeChange</c>: Left, Up and Page Up
+/// toward <c>Min</c>, and the others toward <c>Max</c>. Home takes it to the lower of <c>Min</c> and <c>Max</c>, and End to the higher. Each raises <c>Change</c> where
 /// the value changes.
 /// </para>
 /// <para>
 /// It raises KeyDown, KeyPress and KeyUp, the form's first where its <c>KeyPreview</c> is True: KeyDown before the key moves it, and
-/// KeyUp after. A KeyCode of 0 left by the form's KeyDown or its own cancels the key.
+/// KeyUp after. A <c>KeyCode</c> of 0 left by the form's KeyDown or its own cancels the key.
 /// </para>
 /// <para>
 /// <c>Min</c> is at its left or top end and <c>Max</c> at its right or bottom end, so a <c>Min</c> greater than <c>Max</c> runs it
