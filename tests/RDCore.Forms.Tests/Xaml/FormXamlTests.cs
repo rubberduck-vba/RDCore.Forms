@@ -221,6 +221,17 @@ public sealed class FormXamlTests
         CollectionAssert.AreEqual(new[] { "InvalidValue Warning" }, Kinds(none));
     }
 
+    // VB6's CommandButton has no ForeColor, and the model's has none.
+    [TestMethod]
+    public void ACommandButtonsForeColor_IsKeptAsText_AndReported()
+    {
+        var read = Read("""<CommandButton Name="Command1" ForeColor="#FF0000" />""");
+        var button = read.Form!.Find("Command1")!;
+
+        CollectionAssert.AreEqual(new[] { "UnknownProperty Warning" }, Kinds(read));
+        CollectionAssert.AreEqual(new[] { new UnmodelledProperty("ForeColor", "#FF0000") }, button.UnmodelledProperties);
+    }
+
     [TestMethod]
     public void WhatTheModelCannotHold_IsKeptAsText_AndReported()
     {
