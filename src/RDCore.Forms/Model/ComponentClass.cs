@@ -148,13 +148,15 @@ public sealed class ComponentClass
     public string DefaultName { get; }
 
     /// <summary>
-    /// The name of the member the class's default member stands for, or <see langword="null"/> where the class has none: the member
+    /// The name of the member the class's default member stands for, or <see langword="null"/> where the model names none: the member
     /// that a program reads and assigns through an instance itself, as <c>Command1 = True</c> sets a VB CommandButton's <c>Value</c>.
     /// </summary>
     /// <remarks>
     /// In a VB6 type library, the default member is a hidden member of its own, <c>_Default</c>, with the dispatch ID 0. The name given
     /// here is the member it reads and assigns. It may be one the class does not hold as a property, such as a DriveListBox's
-    /// <c>Drive</c>, or one that takes an argument, such as a form's <c>Controls</c>.
+    /// <c>Drive</c>, or one that takes an argument, such as a form's <c>Controls</c> (<c>Form1("Command1")</c>), which VB refuses
+    /// with error 450 without one. The model names none for <see cref="VB.VBClasses.UserControl"/> and
+    /// <see cref="VB.VBClasses.PropertyPage"/>.
     /// </remarks>
     public string? DefaultMember { get; }
 
