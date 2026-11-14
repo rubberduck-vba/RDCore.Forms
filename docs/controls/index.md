@@ -88,6 +88,35 @@ The window follows the root's `Caption`, `Width`, `Height`, `MaxButton`, `MinBut
 |`ToolTipText`|Shown as the control's tooltip; an empty text shows none.|
 |`MousePointer`|The pointer over the control. Custom, drawn from `MouseIcon` in VB6, shows the arrow.|
 
+## Run-time controls
+
+[`FormDefinition.AddControl`](../api/RDCore.Forms.Model.FormDefinition.yml) and `RemoveControl` add and remove controls as a program's `Controls.Add` and `Controls.Remove` do. A shown form's view places and removes the controls at once.
+
+|Rule|Behaviour|
+|---|---|
+|Class|Named by its ProgID, such as `VB.CommandButton`, without regard to case. A menu's or a form's class is refused.|
+|Name|Any name not taken by another control, compared without regard to case: one that starts with a digit, holds a space, is a keyword, or is the form's own. An empty name is refused, and so is a name of white space only (RDForms' own).|
+|Container|The form, or a Frame or a PictureBox of the form.|
+|Defaults|Hidden, at 0, 0, and 80 by 32 pixels (1200 by 480 twips) where the class has an extent. The next `TabIndex` after the form's others. A caption or a text is "".|
+|Stacking|Under the controls already in its container, windowed or windowless.|
+|Order|`FormDefinition.Controls` holds the form's file's controls depth first, then those added, in the order added, whatever their container.|
+|Events|An added control raises its events to the window's sink as the form's other controls do. Adding one raises no event of the form.|
+|Removal|Only a control added at run time, with the controls it holds. The other `TabIndex` values close up. A control that had the focus gives it to the first control of the tab order that takes it (RDForms' own).|
+
+|Error|When|
+|---|---|
+|711|No VB class has the ProgID.|
+|720|The class is a menu's or a form's.|
+|721|The container holds no controls, such as a CommandButton.|
+|727|The name is taken.|
+|728|The name is empty.|
+|729|The control to remove was not added at run time.|
+|730|No control has the name to remove, or it was removed already.|
+|740|The control to remove holds a control that was not added at run time. Nothing is removed.|
+
+> [!NOTE]
+> **Not implemented.** A ListBox added at run time keeps a height of 32 pixels; VB6 sets it to a whole number of items (450 twips). The `Controls` collection itself, error 735 for a control used after its removal, and a form's file controls coming back after Unload and Load belong to the runtime that runs the program.
+
 ## Errors
 
 A member that refuses a value throws a [`FormErrorException`](../api/RDCore.Forms.Model.FormErrorException.yml) that holds VB's error number and description, such as 380 for a `ListIndex` outside the items.
