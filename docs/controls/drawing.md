@@ -64,9 +64,9 @@ MS Sans Serif's column and line height are VB6's. VB6 draws it at the largest of
 |27|36|48|18|20|
 |36|48|58|24|26|
 
-Asked for 14 points, about 18.7 pixels, VB6 draws it at 18 pixels: its column is 9 pixels and its line 24.
+Asked for 14 points, about 18.7 pixels, VB6 draws it at 18 pixels: its column is 9 pixels and its line 24. An italic face's column is RDForms' own: the regular face's.
 
-Another font's column and line height are RDForms' own: the column is the OS/2 average width of the font file that draws the text, at its size, and the line is its ascent and descent together. A text's width is always the width of the font that draws it, so MS Sans Serif's text, drawn in a libre sans serif, is not as wide as in VB6.
+Another font's column and line height are RDForms' own: the column is the OS/2 average width of the font file that draws the text, at its size, and the line is its ascent and descent together. A text's width is always the width of the font that draws it, so MS Sans Serif's text, drawn in a libre sans serif, has that font's widths, not VB6's.
 
 ## Erasing
 
