@@ -10,7 +10,8 @@ namespace RDCore.Forms.Avalonia.Controls;
 
 // A form font as the Print method draws it, in whole pixels: each glyph's advance is rounded, as a GDI font's are, and there is no
 // kerning, so a text is as wide drawn as measured. The column is the font's average character width, as VB6 uses its tmAveCharWidth:
-// the OS/2 table's, at the font's size. A line is the font's ascent and descent together.
+// the OS/2 table's, at the font's size. A line is the font's ascent and descent together. MS Sans Serif, a bitmap font the renderer
+// does not draw, keeps VB6's line and column, measured.
 internal sealed class PrintFont
 {
     private static readonly ConcurrentDictionary<FormFont, PrintFont> fonts = new();
@@ -27,8 +28,9 @@ internal sealed class PrintFont
         var metrics = typeface.Metrics;
         unit = em / Math.Max(1, (int)metrics.DesignEmHeight);
         Ascent = (int)Math.Round(Math.Abs(metrics.Ascent) * unit);
-        Line = Math.Max(1, (int)Math.Ceiling((Math.Abs(metrics.Ascent) + Math.Abs(metrics.Descent)) * unit - 1e-9));
-        Column = Math.Max(1, AverageWidth() is > 0 and var average
+        var measured = FormFonts.MSSansSerif(font);
+        Line = measured?.Line ?? Math.Max(1, (int)Math.Ceiling((Math.Abs(metrics.Ascent) + Math.Abs(metrics.Descent)) * unit - 1e-9));
+        Column = measured?.Column ?? Math.Max(1, AverageWidth() is > 0 and var average
             ? (int)Math.Round(average * unit, MidpointRounding.AwayFromZero)
             : Advance(Glyph('x')));
     }

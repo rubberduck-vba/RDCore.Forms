@@ -60,24 +60,33 @@ public static class FormFonts
     // Another font's are RDForms' own: VB6 takes them from the font's hinting, so the line as drawn here, rounded up, stands in.
     internal static double LineHeight(FormFont font)
     {
-        if (string.Equals(font.Name, "MS Sans Serif", StringComparison.OrdinalIgnoreCase))
-        {
-            var pixels = Math.Round(ToFontSize(font), MidpointRounding.AwayFromZero);
-            var height = MSSansSerifSizes[0].Height;
-            foreach (var (size, line) in MSSansSerifSizes)
-                if (size <= pixels)
-                    height = line;
-            return height;
-        }
+        if (MSSansSerif(font) is { } metrics)
+            return metrics.Line;
         var text = new TextBlock { Text = "Ag" };
         Apply(text, font);
         text.Measure(global::Avalonia.Size.Infinity);
         return Math.Ceiling(text.DesiredSize.Height);
     }
 
-    // MS Sans Serif's sizes in pixels, and the height of a line at each, as VB6 measures them.
-    private static readonly (double Size, double Height)[] MSSansSerifSizes =
-        [(11, 13), (13, 16), (16, 20), (18, 24), (20, 25), (24, 29), (26, 32), (32, 37)];
+    // MS Sans Serif's line and Print column in whole pixels, as VB6 measures them at the size it is drawn at, or null for another
+    // font. An italic face's column is RDForms' own: the regular one's.
+    internal static (int Line, int Column)? MSSansSerif(FormFont font)
+    {
+        if (!string.Equals(font.Name, "MS Sans Serif", StringComparison.OrdinalIgnoreCase))
+            return null;
+        var pixels = Math.Round(ToFontSize(font), MidpointRounding.AwayFromZero);
+        var drawn = MSSansSerifSizes[0];
+        foreach (var size in MSSansSerifSizes)
+            if (size.Size <= pixels)
+                drawn = size;
+        return (drawn.Line, font.Bold ? drawn.BoldColumn : drawn.Column);
+    }
+
+    // MS Sans Serif's sizes in pixels, and at each the height of a line and the width of a column, regular and bold, as VB6
+    // measures them.
+    private static readonly (double Size, int Line, int Column, int BoldColumn)[] MSSansSerifSizes =
+        [(11, 13, 5, 6), (13, 16, 7, 8), (16, 20, 8, 9), (18, 24, 9, 10), (20, 25, 10, 11), (24, 29, 12, 13), (26, 32, 14, 16),
+            (32, 37, 16, 17), (36, 48, 18, 20), (48, 58, 24, 26)];
 
     // Whether this machine has a font of exactly this family: a platform may answer a family it lacks with a substitute. The NULs
     // are removed because a symbol font's name is read a byte at a time, so Wingdings comes back as "\0W\0i\0n...".

@@ -193,6 +193,35 @@ public sealed class PrintTests
         Assert.AreEqual("142.5\t195\t195\t0\t105\t210\t315\t105", half);
     }
 
+    // As measured with VB6, native and p-code agreeing: MS Sans Serif is drawn at the largest of its sizes no larger than the size
+    // asked, and keeps its line and its column, in pixels, at that size; a bold face's column is wider. Tab(2) moves the current point
+    // one column.
+    [TestMethod]
+    [DataRow(8.25, false, "13\t5")]
+    [DataRow(8.25, true, "13\t6")]
+    [DataRow(10, false, "16\t7")]
+    [DataRow(12, false, "20\t8")]
+    [DataRow(14, true, "24\t10")]
+    [DataRow(20, false, "32\t14")]
+    [DataRow(20, true, "32\t16")]
+    [DataRow(26, false, "37\t16")]
+    [DataRow(27, false, "48\t18")]
+    [DataRow(36, true, "58\t26")]
+    public void MSSansSerif_KeepsVB6sLineAndColumn_AtTheSizeItIsDrawnAt(double size, bool bold, string expected)
+    {
+        var measured = UI.Run(() =>
+        {
+            var font = new FormFont("MS Sans Serif", size, bold ? FormFont.BoldWeight : FormFont.NormalWeight);
+            var surface = new VBDrawingLayer(Box().Set(P.ScaleMode, ScaleMode.Pixel).Set(P.Font, font));
+            surface.CurrentX = 0;
+            surface.CurrentY = 0;
+            surface.Print([Tab(2)], false);
+            return $"{surface.TextHeight("Ag")}\t{surface.CurrentX}";
+        });
+
+        Assert.AreEqual(expected, measured);
+    }
+
     // In pixels, over a red box: five spaces are a cell 15 pixels wide and 14 high.
     [TestMethod]
     [DataRow(false, (short)13, "FFFFFF\tFFFFFF\tFFFFFF\tFF\tFF")]
