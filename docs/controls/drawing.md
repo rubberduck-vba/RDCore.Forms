@@ -49,7 +49,7 @@ A column is the font's average character width, and a print zone is 14 columns. 
 
 Where `FontTransparent` is False, each line's cell, its width and a line high, is filled with the `BackColor` before the text is drawn. `DrawMode` does not apply to text, and text is drawn with no smoothing.
 
-MS Sans Serif's column and line height are VB6's. VB6 draws it at the largest of its sizes no larger than the size asked in whole pixels, or at its least, and each size has its own:
+MS Sans Serif's column and line height are VB6's. VB6 draws it at the largest of its sizes that is no larger than the size asked, in whole pixels, or at its smallest size when the size asked is smaller than all of them. Each size has its own:
 
 |Size drawn (points)|Size drawn (pixels)|Line height (pixels)|Column (pixels)|Bold column (pixels)|
 |---|---|---|---|---|
