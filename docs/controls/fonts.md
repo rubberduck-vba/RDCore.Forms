@@ -21,7 +21,7 @@ A font is drawn at a whole number of pixels, 96 to an inch, so its size is a mul
 
 A bitmap font's size is not always the nearest one below the size asked, and does not always grow with it: GDI draws a size the font's file lacks by scaling one it has. MS Sans Serif asked for 107.25 points, 143 pixels, is drawn at 112.5 points, 150 pixels, and asked for 108 points is drawn at 108.
 
-A font keeps the size it reads back, and a font given another name is drawn from that size. MS Sans Serif set to 14 points holds 13.5, and named Arial then it holds 13.5, where Arial set to 14 points holds 14.25.
+A font keeps the size it reads back, and a font given another name is drawn from that size. MS Sans Serif set to 14 points holds 13.5. Given the name Arial after that, it holds 13.5, as Arial set to 13.5 points does; Arial set to 14 points holds 14.25.
 
 Past 160 pixels, a bitmap font is drawn at whole pixels. That is RDForms' own.
 
@@ -70,7 +70,7 @@ MS Sans Serif's line height and [`Print`](drawing.md) column are VB6's at each s
 |143, 146–156|112.5|150|180|75|80|
 |157–160|120|160|184|80|84|
 
-A size asked is the size in points times 4/3, rounded half up: 14 points, about 18.7 pixels, are asked as 19 and drawn at 18, with a column of 9 pixels and a line of 24.
+A size asked is the size in points times 4/3, rounded half up: 14 points, about 18.7 pixels, is asked as 19 and drawn at 18, with a column of 9 pixels and a line of 24.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
