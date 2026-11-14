@@ -14,6 +14,8 @@
   href: timers-scrollbars-shapes.md
 - name: Drawing
   href: drawing.md
+- name: Fonts
+  href: fonts.md
 - name: Form events
   href: form-events.md
 - name: Methods
