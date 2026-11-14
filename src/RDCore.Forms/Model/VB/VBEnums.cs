@@ -432,3 +432,91 @@ public enum MousePointer
     /// </summary>
     Custom = 99,
 }
+
+/// <summary>
+/// What a VB Data control does when its user moves before the first record: its <c>BOFAction</c>.
+/// </summary>
+public enum DataBOFAction
+{
+    /// <summary>
+    /// The first record stays current: <c>vbBOFActionMoveFirst</c>, the default.
+    /// </summary>
+    MoveFirst = 0,
+    /// <summary>
+    /// The position before the first record becomes current: <c>vbBOFActionBOF</c>.
+    /// </summary>
+    BOF = 1,
+}
+
+/// <summary>
+/// What a VB Data control does when its user moves past the last record: its <c>EOFAction</c>.
+/// </summary>
+public enum DataEOFAction
+{
+    /// <summary>
+    /// The last record stays current: <c>vbEOFActionMoveLast</c>, the default.
+    /// </summary>
+    MoveLast = 0,
+    /// <summary>
+    /// The position after the last record becomes current: <c>vbEOFActionEOF</c>.
+    /// </summary>
+    EOF = 1,
+    /// <summary>
+    /// A new record is added: <c>vbEOFActionAddNew</c>.
+    /// </summary>
+    AddNew = 2,
+}
+
+/// <summary>
+/// The kind of recordset a VB Data control opens: its <c>RecordsetType</c>.
+/// </summary>
+public enum DataRecordsetType
+{
+    /// <summary>
+    /// A table: <c>vbRSTypeTable</c>.
+    /// </summary>
+    Table = 0,
+    /// <summary>
+    /// A dynaset, the default: <c>vbRSTypeDynaset</c>.
+    /// </summary>
+    Dynaset = 1,
+    /// <summary>
+    /// A snapshot: <c>vbRSTypeSnapShot</c>.
+    /// </summary>
+    Snapshot = 2,
+}
+
+/// <summary>
+/// The database engine a VB Data control opens its database with: its <c>DefaultType</c>.
+/// </summary>
+public enum DataDefaultType
+{
+    /// <summary>
+    /// ODBCDirect: <c>dbUseODBC</c>.
+    /// </summary>
+    UseODBC = 1,
+    /// <summary>
+    /// The Jet engine, the default: <c>dbUseJet</c>.
+    /// </summary>
+    UseJet = 2,
+}
+
+/// <summary>
+/// The cursor an ODBCDirect VB Data control opens: its <c>DefaultCursorType</c>. A program can set a value that names none of these,
+/// as VB6 lets it.
+/// </summary>
+public enum DataDefaultCursorType
+{
+    /// <summary>
+    /// The driver chooses: <c>vbUseDefaultCursor</c>, the default.
+    /// </summary>
+    Default = 0,
+    /// <summary>
+    /// The ODBC cursor library: <c>vbUseODBCCursor</c>.
+    /// </summary>
+    ODBC = 1,
+    /// <summary>
+    /// The server's cursors: <c>vbUseServerSideCursor</c>.
+    /// </summary>
+    ServerSide = 2,
+}
