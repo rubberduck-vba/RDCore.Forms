@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Avalonia;
 using Avalonia.Input;
 using RDCore.Forms.Avalonia.Controls;
@@ -18,7 +19,12 @@ public sealed class FileListControlTests
 
     private static string In(params string[] parts) => Path.Combine([Root, .. parts]);
 
-    private static MockFileSystem Tree() => new(new Dictionary<string, MockFileData>
+    // The tree, on a file system whose drives are as this OS's own are named.
+    private static IFileSystem Tree() => OnThisOs(Mock());
+
+    private static IFileSystem OnThisOs(MockFileSystem files) => OperatingSystem.IsWindows() ? files : new RootDrives(files);
+
+    private static MockFileSystem Mock() => new(new Dictionary<string, MockFileData>
     {
         [In("b.bas")] = new(""),
         [In("a.txt")] = new(""),
@@ -270,8 +276,8 @@ public sealed class FileListControlTests
     {
         var (before, after) = UI.Run(() =>
         {
-            var files = Tree();
-            var list = new VBFileListBox(File(), files);
+            var files = Mock();
+            var list = new VBFileListBox(File(), OnThisOs(files));
             files.AddFile(In("new.txt"), new MockFileData(""));
             var before = list.ListCount;
             list.Refresh();
@@ -324,24 +330,55 @@ public sealed class FileListControlTests
     }
 
     [TestMethod]
-    public void ADirListsPath_KeepsTheCaseItIsGiven_AndRaisesChange_OnlyWhereItChanges()
+    public void ADirListsPath_RaisesChange_OnlyWhereItChanges()
     {
         var (path, above, count, index, raised) = UI.Run(() =>
         {
             var list = new VBDirListBox(Dir(), Tree());
             var (window, sink) = ControlHost.Show(list);
             list.ListIndex = 0;
-            list.Path = In("subone", "deep");
-            list.Path = In("subone", "deep");
+            list.Path = In("SubOne", "deep");
+            list.Path = In("SubOne", "deep");
             window.Close();
             return (list.Path, list.GetList(-2), list.ListCount, list.ListIndex, sink.Raised);
         });
 
-        Assert.AreEqual(In("subone", "deep"), path);
-        Assert.AreEqual(In("subone"), above);
+        Assert.AreEqual(In("SubOne", "deep"), path);
+        Assert.AreEqual(In("SubOne"), above);
         Assert.AreEqual(0, count);
         Assert.AreEqual(-1, index);
         Expect.Lines(new[] { "Dir1.Click", "Dir1.Change" }, raised);
+    }
+
+    // A file system that ignores case, as Windows does, finds a folder named in another case; the list keeps the case given.
+    [TestMethod]
+    [OSCondition(OperatingSystems.Windows)]
+    public void ADirListsPath_KeepsTheCaseItIsGiven_WhereTheFileSystemIgnoresCase()
+    {
+        var (path, above) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            list.Path = In("subone", "deep");
+            return (list.Path, list.GetList(-2));
+        });
+
+        Assert.AreEqual(In("subone", "deep"), path);
+        Assert.AreEqual(In("subone"), above);
+    }
+
+    // A file system that compares case, as Linux's does, has no folder of that name in another case.
+    [TestMethod]
+    [OSCondition(OperatingSystems.Linux)]
+    public void ADirListsPathInAnotherCase_Is76_WhereTheFileSystemComparesCase()
+    {
+        var (error, path) = UI.Run(() =>
+        {
+            var list = new VBDirListBox(Dir(), Tree());
+            return (Assert.ThrowsExactly<FormErrorException>(() => list.Path = In("subone", "deep")).Error.Number, list.Path);
+        });
+
+        Assert.AreEqual(76, error);
+        Assert.AreEqual(Root, path);
     }
 
     [TestMethod]
@@ -435,7 +472,7 @@ public sealed class FileListControlTests
     {
         var (items, drive, index) = UI.Run(() =>
         {
-            var files = Tree();
+            var files = Mock();
             files.AddDrive(@"D:\", new MockDriveData { VolumeLabel = "Data" });
             files.AddDrive(@"B:\", new MockDriveData { VolumeLabel = "" });
             var list = new VBDriveListBox(Drive(), files);
@@ -454,7 +491,7 @@ public sealed class FileListControlTests
     {
         var (drive, raised, error) = UI.Run(() =>
         {
-            var files = Tree();
+            var files = Mock();
             files.AddDrive(@"D:\", new MockDriveData { VolumeLabel = "Data" });
             var list = new VBDriveListBox(Drive(), files);
             var (window, sink) = ControlHost.Show(list);
