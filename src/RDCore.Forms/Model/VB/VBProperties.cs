@@ -414,6 +414,12 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> OptionButtonValue = new("Value", PropertyCategory.Misc);
 
     /// <summary>
+    /// A CommandButton's Value, a Boolean to a program. Setting it to True clicks the button, which raises its Click with the Value
+    /// True, and the Value is False again once Click returns. False does nothing. A form's file holds no Value.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> CommandButtonValue = new("Value", PropertyCategory.Misc);
+
+    /// <summary>
     /// Whether the user is prevented from changing a TextBox's or a ComboBox's text.
     /// </summary>
     public static readonly PropertyDefinition<bool> Locked = new("Locked", PropertyCategory.Behavior);
