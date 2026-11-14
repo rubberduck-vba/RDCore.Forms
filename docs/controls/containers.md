@@ -104,7 +104,7 @@ A `Picture` holds the bytes of a picture file. A picture from a VB6 form is read
 |ICO, CUR|Yes. VB6 draws a cursor that is a form's `Picture` in black; RDForms draws it in its own colours.|
 |WMF, EMF|No. A metafile is recognized and accepted, and not drawn.|
 
-Before anything decodes a picture, [`FormPictures.Inspect`](../api/RDCore.Forms.Model.FormPictures.yml) reads its header, with every offset checked against the bytes. It refuses a picture:
+Before anything decodes a picture, [`FormPictures.Inspect`](../api/RDCore.Forms.Model.FormPictures.yml) reads its header with the RDCore SDK's `PictureHeader`, which checks every offset against the bytes. It refuses a picture:
 
 - of more than 16 MiB;
 - of a format it does not recognize, or whose header is cut short or holds an impossible value;

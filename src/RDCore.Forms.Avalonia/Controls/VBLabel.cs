@@ -9,7 +9,8 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using RDCore.SDK.Workspace.Pictures;
+using P =RDCore.Forms.Model.VB.VBProperties;
 
 namespace RDCore.Forms.Avalonia.Controls;
 
