@@ -129,4 +129,16 @@ public sealed class ComponentClassTests
         CollectionAssert.AreEquivalent(buttons, VBClasses.All.Where(c => c.Has(VBProperties.UseMaskColor)).ToArray());
         Assert.IsTrue(buttons.All(c => c.DefaultOf(VBProperties.MaskColor) == FormColor.FromRgb(0xC0, 0xC0, 0xC0) && !c.DefaultOf(VBProperties.UseMaskColor)));
     }
+
+    [TestMethod]
+    [DataRow("VB.HScrollBar")]
+    [DataRow("VB.VScrollBar")]
+    public void TheCatalog_GivesAScrollBarItsKeyEvents(string typeName)
+    {
+        var bar = VBClasses.ByTypeName(typeName)!;
+
+        CollectionAssert.AreEquivalent(new[] { "Change", "GotFocus", "KeyDown", "KeyPress", "KeyUp", "LostFocus", "Scroll" },
+            bar.Events.Select(e => e.Name).ToArray());
+        Assert.AreSame(VBEvents.KeyPress, bar.Event("keypress"));
+    }
 }
