@@ -168,10 +168,10 @@ public sealed class LabelPictureTests
     [TestMethod]
     public void BesideTheCaption_ThePictureLeavesItRoom_AndAboveIt_ThePictureKeepsItsHeight()
     {
-        // The label is one pixel taller than the picture, so the caption below it does not fit, whatever the font.
+        // The label is as tall as the picture, so the gap and the caption below it do not fit, whatever the font.
         var (beside, above) = UI.Run(() => (
             Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Abcdefgh").Set(P.PicturePosition, PicturePosition.LeftCenter)),
-            Laid(Label(73, 49, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.AboveCenter))));
+            Laid(Label(73, 48, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.AboveCenter))));
 
         Assert.IsGreaterThan(9d, beside.Text.Width);
         Assert.AreEqual(73 - beside.Text.Width - 1, beside.Picture.Width);
