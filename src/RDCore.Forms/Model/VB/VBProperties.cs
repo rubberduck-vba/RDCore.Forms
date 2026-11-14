@@ -126,9 +126,13 @@ public static class VBProperties
     public static readonly PropertyDefinition<int> WhatsThisHelpID = new("WhatsThisHelpID", PropertyCategory.Misc);
 
     /// <summary>
-    /// The font of the component's text.
+    /// The font of the component's text. A component holds a font at the size VB6 draws it at, <see cref="FormFont.AtDrawnSize"/>, as
+    /// VB6 holds it: MS Sans Serif set to 8 points holds 8.25, and a font that takes another name then is drawn from 8.25.
     /// </summary>
-    public static readonly PropertyDefinition<FormFont> Font = new("Font", PropertyCategory.Appearance, FormFont.Default);
+    public static readonly PropertyDefinition<FormFont> Font = new("Font", PropertyCategory.Appearance, FormFont.Default)
+    {
+        Coerce = (_, font) => font.AtDrawnSize(),
+    };
 
     /// <summary>
     /// How the control aligns its text, or its caption.

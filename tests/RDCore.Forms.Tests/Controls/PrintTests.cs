@@ -193,20 +193,29 @@ public sealed class PrintTests
         Assert.AreEqual("142.5\t195\t195\t0\t105\t210\t315\t105", half);
     }
 
-    // As measured with VB6, native and p-code agreeing: MS Sans Serif is drawn at the largest of its sizes no larger than the size
-    // asked, and keeps its line and its column, in pixels, at that size; a bold face's column is wider. Tab(2) moves the current point
-    // one column.
+    // As measured with VB6, native and p-code agreeing: MS Sans Serif keeps its line and its column, in pixels, at each size it is
+    // drawn at, which can be larger than the size asked, and neither grows with the size everywhere; a bold face's column is wider.
+    // Tab(2) moves the current point one column.
     [TestMethod]
     [DataRow(8.25, false, "13\t5")]
     [DataRow(8.25, true, "13\t6")]
     [DataRow(10, false, "16\t7")]
     [DataRow(12, false, "20\t8")]
     [DataRow(14, true, "24\t10")]
+    [DataRow(16.5, false, "26\t10")]
+    [DataRow(17.25, true, "29\t13")]
     [DataRow(20, false, "32\t14")]
     [DataRow(20, true, "32\t16")]
+    [DataRow(22.5, false, "36\t15")]
     [DataRow(26, false, "37\t16")]
     [DataRow(27, false, "48\t18")]
+    [DataRow(29.25, true, "48\t24")]
+    [DataRow(30, false, "46\t20")]
     [DataRow(36, true, "58\t26")]
+    [DataRow(40.5, false, "72\t27")]
+    [DataRow(66, false, "108\t45")]
+    [DataRow(107.25, true, "180\t80")]
+    [DataRow(120, false, "184\t80")]
     public void MSSansSerif_KeepsVB6sLineAndColumn_AtTheSizeItIsDrawnAt(double size, bool bold, string expected)
     {
         var measured = UI.Run(() =>

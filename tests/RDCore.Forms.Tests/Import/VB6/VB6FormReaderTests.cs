@@ -228,6 +228,18 @@ public sealed class VB6FormReaderTests
         Assert.AreEqual(FormFont.Default with { Name = "Arial", Size = 12 }, import.Form!.Find("Label1")!.Get(VBProperties.Font));
     }
 
+    // As measured with VB6: a font of the form's file holds the size VB6 draws it at, which is the size it reads back at Load.
+    [TestMethod]
+    [DataRow("MS Sans Serif", "8", 8.25)]
+    [DataRow("MS Sans Serif", "10", 9.75)]
+    [DataRow("Arial", "8", 8.25)]
+    public void AFontBagsSize_IsHeldAtTheSizeItIsDrawnAt(string name, string size, double expected)
+    {
+        var import = VB6FormReader.Read(Form(Label("BeginProperty Font ", $"   name = \"{name}\"", $"   size = {size}", "EndProperty")));
+
+        Assert.AreEqual(expected, import.Form!.Find("Label1")!.Get(VBProperties.Font).Size);
+    }
+
     [TestMethod]
     public void AFontBagWithAFieldItCannotRead_IsKeptAsText_AndTheFormsFontIsNotTakenAsWell()
     {
