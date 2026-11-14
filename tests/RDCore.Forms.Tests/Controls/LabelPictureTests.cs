@@ -181,6 +181,16 @@ public sealed class LabelPictureTests
     }
 
     [TestMethod]
+    public void ACaptionWiderThanTheLabel_StartsTheBlockAtItsLeftEdge()
+    {
+        var (picture, text) = UI.Run(() =>
+            Laid(Label(73, 60, Bitmap(16, 12, Red, Green), new string('W', 120)).Set(P.PicturePosition, PicturePosition.AboveLeft)));
+
+        Assert.IsGreaterThan(73d, text.Width);
+        Assert.AreEqual((0d, 0d), (picture.X, text.X));
+    }
+
+    [TestMethod]
     public void ABitmapsLowerLeftColour_IsTransparent_SoABitmapOfOneColourDrawsNothing()
     {
         var (masked, plain) = UI.Run(() =>
