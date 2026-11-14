@@ -129,22 +129,24 @@ public sealed class FileListControlTests
     }
 
     [TestMethod]
-    public void TheListIndex_SelectsAFile_AndRaisesClick_AndOutsideTheFilesIs380()
+    public void TheListIndex_SelectsAFile_AndRaisesClick_AndOutsideTheFilesIs381()
     {
-        var (fileName, raised, error) = UI.Run(() =>
+        var (fileName, raised, past, below) = UI.Run(() =>
         {
             var list = new VBFileListBox(File(), Tree());
             var (window, sink) = ControlHost.Show(list);
             list.ListIndex = 1;
             list.ListIndex = 1;
-            var error = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = 6).Error.Number;
+            var past = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = 6).Error.Number;
+            var below = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = -2).Error.Number;
             window.Close();
-            return (list.FileName, sink.Raised, error);
+            return (list.FileName, sink.Raised, past, below);
         });
 
         Assert.AreEqual("b.bas", fileName);
         Expect.Lines(new[] { "File1.Click" }, raised);
-        Assert.AreEqual(380, error);
+        Assert.AreEqual(381, past);
+        Assert.AreEqual(381, below);
     }
 
     [TestMethod]
@@ -414,8 +416,8 @@ public sealed class FileListControlTests
         Assert.AreEqual(Root, path);
         Assert.AreEqual(-2, index);
         Expect.Lines(new[] { "Dir1.Click", "Dir1.Click" }, raised);
-        Assert.AreEqual(380, below);
-        Assert.AreEqual(380, past);
+        Assert.AreEqual(381, below);
+        Assert.AreEqual(381, past);
     }
 
     [TestMethod]
@@ -483,6 +485,23 @@ public sealed class FileListControlTests
         CollectionAssert.Contains(items, "b:");
         Assert.AreEqual("c:", drive[..2]);
         Assert.AreEqual(drive, items[index]);
+    }
+
+    [TestMethod]
+    public void ADriveListsListIndexPastTheDrives_Is381_AndChangesNothing()
+    {
+        var (error, index, raised) = UI.Run(() =>
+        {
+            var list = new VBDriveListBox(Drive(), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            var error = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = list.ListCount).Error.Number;
+            window.Close();
+            return (error, list.ListIndex, sink.Raised);
+        });
+
+        Assert.AreEqual(381, error);
+        Assert.AreEqual(0, index);
+        Assert.IsEmpty(raised);
     }
 
     [TestMethod]

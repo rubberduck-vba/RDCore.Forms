@@ -144,7 +144,7 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     /// <summary>
     /// The selected file, -1 for none.
     /// </summary>
-    /// <exception cref="FormErrorException">Set outside -1 to <see cref="ListCount"/> - 1: 380, Invalid property value.</exception>
+    /// <exception cref="FormErrorException">Set outside -1 to <see cref="ListCount"/> - 1: 381, Invalid property array index.</exception>
     /// <remarks>
     /// Setting it raises Click when it moves the selection, and none when it is set again.
     /// </remarks>
@@ -154,7 +154,7 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
         set
         {
             if (value < -1 || value >= ItemCount)
-                throw new FormErrorException(FormError.InvalidPropertyValue);
+                throw new FormErrorException(FormError.InvalidPropertyArrayIndex);
             if (value == SelectedIndex)
                 return;
             SelectedIndex = value;

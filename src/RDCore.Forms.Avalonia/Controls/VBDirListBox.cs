@@ -104,7 +104,7 @@ public sealed class VBDirListBox : ListBox, IRaisesKeyEvents
     /// The selected folder: 0 to <see cref="ListCount"/> - 1 for a folder <see cref="Path"/> holds, -1 for <see cref="Path"/>, and -2
     /// and below for the folders above it.
     /// </summary>
-    /// <exception cref="FormErrorException">Set to no folder of the list: 380, Invalid property value.</exception>
+    /// <exception cref="FormErrorException">Set to no folder of the list: 381, Invalid property array index.</exception>
     /// <remarks>
     /// Setting it raises Click when it moves the selection, and none when it is set again. It leaves <see cref="Path"/> as it is.
     /// </remarks>
@@ -114,7 +114,7 @@ public sealed class VBDirListBox : ListBox, IRaisesKeyEvents
         set
         {
             if (value < -above || value >= ListCount)
-                throw new FormErrorException(FormError.InvalidPropertyValue);
+                throw new FormErrorException(FormError.InvalidPropertyArrayIndex);
             if (value == ListIndex)
                 return;
             SelectedIndex = value + above;
