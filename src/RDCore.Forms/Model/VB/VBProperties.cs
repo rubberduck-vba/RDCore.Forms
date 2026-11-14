@@ -211,6 +211,18 @@ public static class VBProperties
     public static readonly PropertyDefinition<byte[]?> DisabledPicture = new("DisabledPicture", PropertyCategory.Appearance, null);
 
     /// <summary>
+    /// The colour a graphical button leaves out of its pictures where <see cref="UseMaskColor"/> is set: its pixels of exactly this
+    /// colour show the button's face. Silver (<c>&amp;H00C0C0C0&amp;</c>) by default.
+    /// </summary>
+    public static readonly PropertyDefinition<FormColor> MaskColor = new("MaskColor", PropertyCategory.Appearance, FormColor.FromRgb(0xC0, 0xC0, 0xC0));
+
+    /// <summary>
+    /// Whether a graphical button leaves its <see cref="MaskColor"/> out of its pictures; False by default. An icon or a cursor
+    /// is drawn whole either way.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> UseMaskColor = new("UseMaskColor", PropertyCategory.Appearance);
+
+    /// <summary>
     /// The icon a form shows in its title bar, as the bytes of its icon or cursor file, or <see langword="null"/> for none. Any other
     /// picture, and one <see cref="FormPictures.Inspect"/> refuses, is not an icon.
     /// </summary>

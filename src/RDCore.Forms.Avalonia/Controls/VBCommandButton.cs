@@ -106,7 +106,7 @@ public sealed class VBCommandButton : Button, IRaisesKeyEvents
         else if (ReferenceEquals(e.Property, P.Caption))
             GraphicalFace.ShowCaption(this, face, (string)e.After!);
         else if (GraphicalFace.IsDrawnByFace(e.Property))
-            face?.Take(e.Property, (byte[]?)e.After);
+            face?.Take(e.Property, e.After);
         else if (ReferenceEquals(e.Property, P.ButtonStyle) || face is null && ReferenceEquals(e.Property, P.BackColor))
         {
             // The style is kept as the button was made, and a Standard button does not paint its BackColor.

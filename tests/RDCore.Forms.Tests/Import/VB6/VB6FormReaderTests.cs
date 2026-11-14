@@ -94,6 +94,25 @@ public sealed class VB6FormReaderTests
     }
 
     [TestMethod]
+    [DataRow("CommandButton")]
+    [DataRow("CheckBox")]
+    [DataRow("OptionButton")]
+    public void AButtonsMaskColorAndUseMaskColor_AreRead(string type)
+    {
+        var import = VB6FormReader.Read(Form(
+            $"   Begin VB.{type} Button1 ",
+            "      MaskColor       =   &H00FF00FF&",
+            "      Style           =   1  'Graphical",
+            "      UseMaskColor    =   -1  'True",
+            "   End"));
+        var button = import.Form!.Find("Button1")!;
+
+        Assert.AreEqual((FormColor.FromRgb(255, 0, 255), true), (button.Get(VBProperties.MaskColor), button.Get(VBProperties.UseMaskColor)));
+        Assert.IsEmpty(button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
+    [TestMethod]
     public void TheFileSystemLists_AreRead_AFileListBoxWithItsPatternAndItsAttributes()
     {
         var import = VB6FormReader.Read(Form(
