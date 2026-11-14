@@ -122,6 +122,27 @@ public sealed class LabelPictureTests
     }
 
     [TestMethod]
+    public void APositionSetOnAShownLabel_MovesItsPicture_AndOnePastMSFormsValuesIsRefused()
+    {
+        var (before, after, refused) = UI.Run(() =>
+        {
+            var label = Label(200, 93, Bitmap(16, 12, Red, Green), "Ab").Set(P.PicturePosition, PicturePosition.LeftCenter);
+            var control = new VBLabel(label);
+            var (window, _) = ControlHost.Show((control, new Rect(0, 0, 200, 93)));
+            Dispatcher.UIThread.RunJobs();
+            var before = control.PictureBounds!.Value;
+            label.Set(P.PicturePosition, PicturePosition.RightCenter);
+            Dispatcher.UIThread.RunJobs();
+            var after = control.PictureBounds!.Value;
+            window.Close();
+            return (before, after, !label.TrySet(P.PicturePosition, (PicturePosition)13));
+        });
+
+        Assert.IsGreaterThan(before.X, after.X);
+        Assert.IsTrue(refused);
+    }
+
+    [TestMethod]
     public void ThePictureIsAboveCenter_ByDefault_AndTheCaptionsAlignmentLeavesTheBlockWhereItIs()
     {
         var (position, laid) = UI.Run(() => (Label(200, 93, null).Get(P.PicturePosition),
@@ -147,10 +168,12 @@ public sealed class LabelPictureTests
     [TestMethod]
     public void BesideTheCaption_ThePictureLeavesItRoom_AndAboveIt_ThePictureKeepsItsHeight()
     {
+        // The label is one pixel taller than the picture, so the caption below it does not fit, whatever the font.
         var (beside, above) = UI.Run(() => (
-            Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.LeftCenter)),
-            Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.AboveCenter))));
+            Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Abcdefgh").Set(P.PicturePosition, PicturePosition.LeftCenter)),
+            Laid(Label(73, 49, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.AboveCenter))));
 
+        Assert.IsGreaterThan(9d, beside.Text.Width);
         Assert.AreEqual(73 - beside.Text.Width - 1, beside.Picture.Width);
         Assert.AreEqual(48, beside.Picture.Height);
         Assert.AreEqual(new Rect(4, 0, 64, 48), above.Picture);
@@ -226,27 +249,33 @@ public sealed class LabelPictureTests
     [TestMethod]
     public void TheSamePictureOnManyControls_IsDecodedOnce_AndAgainOnlyOnceNoneHoldsIt()
     {
-        var (shared, copy, again) = UI.Run(() =>
+        var (shared, copy, stillDrawn, again) = UI.Run(() =>
         {
             var picture = Bitmap(8, 8, Red, Green);
             var labels = Enumerable.Range(0, 100).Select(_ => Label(20, 20, null)).ToArray();
-            var (window, _) = ControlHost.Show([.. labels.Select((label, i) => ((Control)new VBLabel(label), new Rect(i % 10 * 20, i / 10 * 20, 20, 20)))]);
+            var controls = labels.Select(label => new VBLabel(label)).ToArray();
+            var (window, _) = ControlHost.Show([.. controls.Select((control, i) => ((Control)control, new Rect(i % 10 * 20, i / 10 * 20, 20, 20)))]);
             var before = VBPicture.DecodesOnThisThread;
             foreach (var label in labels)
                 label.Set(P.Picture, picture);
             var shared = VBPicture.DecodesOnThisThread - before;
             labels[0].Set(P.Picture, (byte[])picture.Clone());
             var copy = VBPicture.DecodesOnThisThread - before - shared;
+            // The others still draw the picture the first one let go of.
+            Dispatcher.UIThread.RunJobs();
+            var at = controls[5].PictureBounds!.Value;
+            var stillDrawn = PixelsAt(window, new PixelPoint((int)(100 + at.X + 4), (int)(at.Y + 4)))[0];
             foreach (var label in labels)
                 label.Set(P.Picture, null);
             labels[1].Set(P.Picture, picture);
             var again = VBPicture.DecodesOnThisThread - before - shared - copy;
             window.Close();
-            return (shared, copy, again);
+            return (shared, copy, stillDrawn, again);
         });
 
         Assert.AreEqual(1, shared);
         Assert.AreEqual(1, copy);
+        Assert.AreEqual(Red, stillDrawn);
         Assert.AreEqual(1, again);
     }
 }

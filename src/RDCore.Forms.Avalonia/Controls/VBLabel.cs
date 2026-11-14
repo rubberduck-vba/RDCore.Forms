@@ -193,8 +193,10 @@ internal sealed class LabelFace : Control
         var side = position <= PicturePosition.RightBottom;
         var (width, height) = (finalSize.Width, finalSize.Height);
         var pixels = picture.PixelSize;
-        // The caption wraps in the width the picture leaves beside it; the picture is then shrunk to the room the caption leaves.
-        text?.Measure(new Size(side ? Math.Max(0, width - pixels.Width - Gap) : width, double.PositiveInfinity));
+        // A caption that wraps does so in the width the picture leaves beside it; one that does not is measured whole. The picture is
+        // then shrunk to the room the caption leaves.
+        var room = side ? Math.Max(0, width - pixels.Width - Gap) : width;
+        text?.Measure(new Size(text.TextWrapping == TextWrapping.NoWrap ? double.PositiveInfinity : room, double.PositiveInfinity));
         var (tw, th) = text is null ? (0d, 0d) : (text.DesiredSize.Width, text.DesiredSize.Height);
         var pw = Math.Min(pixels.Width, Math.Max(0, side ? width - tw - Gap : width));
         var ph = Math.Min(pixels.Height, height);
