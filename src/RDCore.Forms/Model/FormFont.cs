@@ -70,7 +70,7 @@ public readonly record struct FormFont(
 
     // Each bitmap font's sizes in pixels as VB6 measures them, native and p-code agreeing: from each size asked in a run, up to the
     // next run's, the font is drawn at the run's size. The sizes do not grow with the size asked everywhere: GDI scales a size of
-    // the font's file to draw another, and MS Sans Serif asked for 143 pixels is drawn at 150, at 144 at 144.
+    // the font's file to draw another, and MS Sans Serif asked for 143 pixels is drawn at 150, and asked for 144 at 144.
     private static readonly Dictionary<string, (int Last, (int From, int Drawn)[] Runs)> BitmapSizes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["MS Sans Serif"] = (160,
