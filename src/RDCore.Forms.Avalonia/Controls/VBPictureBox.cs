@@ -28,7 +28,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// </para>
 /// <para>
 /// It raises Resize inside the change, as its size in whole pixels or its border's width changes after it is made: one for a
-/// <c>Move</c> or a picture that <c>AutoSize</c> fits, which set both sizes. A part of a pixel, the same size, a position, its
+/// <c>Move</c> or a picture that <c>AutoSize</c> fits, which set both sizes. A change of less than a pixel, the same size, a position, its
 /// <c>Visible</c> and its scale raise none. It raises Resize whether or not it or its form is shown.
 /// </para>
 /// <para>

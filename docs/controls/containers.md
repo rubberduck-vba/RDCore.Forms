@@ -55,7 +55,7 @@ A PictureBox raises Resize inside the statement that changes its size in whole p
 |`Move` to a new size|One for both sizes.|
 |`AutoSize` fitting a new picture size|One for both sizes.|
 |`BorderStyle`, which changes the client area|One.|
-|The same size, part of a pixel, a position, `Visible`, `ScaleMode` or the scale|None.|
+|The same size, a change of less than a pixel, a position, `Visible`, `ScaleMode` or the scale|None.|
 |Its form loading, an `AutoSize` fit to a picture from the `.frx` included|None.|
 
 It raises Resize whether or not it or its form is shown.
