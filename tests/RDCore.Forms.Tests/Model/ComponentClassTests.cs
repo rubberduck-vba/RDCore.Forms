@@ -76,4 +76,16 @@ public sealed class ComponentClassTests
         Assert.AreEqual(BackStyle.Opaque, VBClasses.Label.DefaultOf(VBProperties.BackStyle));
         Assert.AreEqual(BackStyle.Transparent, VBClasses.Shape.DefaultOf(VBProperties.BackStyle));
     }
+
+    [TestMethod]
+    [DataRow("VB.HScrollBar")]
+    [DataRow("VB.VScrollBar")]
+    public void TheCatalog_GivesAScrollBarItsKeyEvents(string typeName)
+    {
+        var bar = VBClasses.ByTypeName(typeName)!;
+
+        CollectionAssert.AreEquivalent(new[] { "Change", "GotFocus", "KeyDown", "KeyPress", "KeyUp", "LostFocus", "Scroll" },
+            bar.Events.Select(e => e.Name).ToArray());
+        Assert.AreSame(VBEvents.KeyPress, bar.Event("keypress"));
+    }
 }
