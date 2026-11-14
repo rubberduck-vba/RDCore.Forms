@@ -112,7 +112,9 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     /// with a folder sets <see cref="Path"/> to that folder first.
     /// </para>
     /// <para>
-    /// It raises PathChange where the folder changes and PatternChange where the <c>Pattern</c> does, and no Click.
+    /// It raises PathChange where the folder changes and PatternChange where the <c>Pattern</c> does, and no Click. A file's name
+    /// then raises DblClick; the same file again raises nothing. Where only the folder changes,
+    /// the DblClick is RDForms' own.
     /// </para>
     /// </remarks>
     public string FileName
@@ -129,10 +131,14 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
             string? file = null;
             if (name.IndexOfAny(['*', '?']) < 0)
                 file = FileIn(folder, name) ?? throw new FormErrorException(FormError.FileNotFound);
+            var before = (path, Pattern);
             SetPath(folder);
             Pattern = name;
-            if (file is not null)
-                SelectedIndex = Items.IndexOf(file);
+            if (file is null)
+                return;
+            SelectedIndex = Items.IndexOf(file);
+            if ((path, Pattern) != before)
+                VBControl.Raise(this, VBEvents.DblClick);
         }
     }
 

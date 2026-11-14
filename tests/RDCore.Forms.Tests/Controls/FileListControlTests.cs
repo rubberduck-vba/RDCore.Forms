@@ -150,12 +150,13 @@ public sealed class FileListControlTests
     }
 
     [TestMethod]
-    public void AFileName_BecomesThePattern_AndSelectsTheFile_AsItsNameIsOnDisk()
+    public void AFileName_BecomesThePattern_SelectsTheFile_AsItsNameIsOnDisk_AndRaisesDblClick_OnlyWhereItChanges()
     {
         var (pattern, fileName, index, items, raised) = UI.Run(() =>
         {
             var list = new VBFileListBox(File(), Tree());
             var (window, sink) = ControlHost.Show(list);
+            list.FileName = "c.txt";
             list.FileName = "c.txt";
             window.Close();
             return (list.Pattern, list.FileName, list.ListIndex, Items(list), sink.Raised);
@@ -165,7 +166,7 @@ public sealed class FileListControlTests
         Assert.AreEqual("C.TXT", fileName);
         Assert.AreEqual(0, index);
         Expect.Lines(new[] { "C.TXT" }, items);
-        Expect.Lines(new[] { "File1.PatternChange" }, raised);
+        Expect.Lines(new[] { "File1.PatternChange", "File1.DblClick" }, raised);
     }
 
     [TestMethod]
@@ -218,7 +219,7 @@ public sealed class FileListControlTests
         Assert.AreEqual(In("SubOne"), path);
         Assert.AreEqual("x.bas", fileName);
         Assert.AreEqual(0, index);
-        Expect.Lines(new[] { "File1.PathChange", "File1.PatternChange" }, raised);
+        Expect.Lines(new[] { "File1.PathChange", "File1.PatternChange", "File1.DblClick" }, raised);
     }
 
     [TestMethod]
