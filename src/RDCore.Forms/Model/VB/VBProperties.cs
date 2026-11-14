@@ -526,6 +526,15 @@ public static class VBProperties
     public static readonly PropertyDefinition<MenuShortcut?> Shortcut = new("Shortcut", PropertyCategory.Misc) { NotAvailableAtRunTime = true };
 
     /// <summary>
+    /// Where a top-level menu goes on its form's menu bar while an object of an OLE container is active. A program can neither read
+    /// nor set it.
+    /// </summary>
+    public static readonly PropertyDefinition<NegotiatePosition> NegotiatePosition = new("NegotiatePosition", PropertyCategory.Misc)
+    {
+        NotAvailableAtRunTime = true,
+    };
+
+    /// <summary>
     /// Whether choosing a menu item ticks or unticks it before its Click: an RD-VBA addition. False, the default, leaves
     /// <c>Checked</c> to the program, as a VB6 menu does.
     /// </summary>

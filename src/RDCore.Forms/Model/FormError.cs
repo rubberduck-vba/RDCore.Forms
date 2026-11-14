@@ -58,6 +58,19 @@ public readonly record struct FormError(int Number, string Description)
     public static FormError InvalidUseOfNull => Standard(94);
 
     /// <summary>
+    /// Error 340, "Control array element '<paramref name="index"/>' doesn't exist": an element of a control array that is not
+    /// loaded.
+    /// </summary>
+    /// <param name="index">The element's index.</param>
+    /// <returns>The error.</returns>
+    public static FormError ControlArrayElementDoesntExist(int index) => Formatted(340, index.ToString(CultureInfo.InvariantCulture));
+
+    /// <summary>
+    /// Error 341, "Invalid object array index": a negative index given to <c>Load</c>.
+    /// </summary>
+    public static FormError InvalidObjectArrayIndex => Standard(341);
+
+    /// <summary>
     /// Error 343, "Object not an array".
     /// </summary>
     public static FormError ObjectNotAnArray => Standard(343);

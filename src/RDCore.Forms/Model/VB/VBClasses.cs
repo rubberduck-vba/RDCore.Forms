@@ -245,7 +245,8 @@ public static class VBClasses
     /// for them, are its <see cref="Menus.FormMenu"/>.
     /// </summary>
     public static readonly ComponentClass Menu = new("VB.Menu", "mnu", ComponentKind.Menu,
-        [P.Caption, P.Enabled, P.Checked, P.WindowList, P.Visible, P.Shortcut, P.CheckOnClick, P.Picture, P.Tag], [Click], hasExtent: false,
+        [P.Caption, P.Enabled, P.Checked, P.WindowList, P.Visible, P.Shortcut, P.HelpContextID, P.NegotiatePosition, P.CheckOnClick, P.Picture,
+         P.Tag], [Click], hasExtent: false,
         defaultMember: DefaultMembers["VB.Menu"]);
 
     /// <summary>
