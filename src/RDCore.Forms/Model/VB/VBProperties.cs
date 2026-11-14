@@ -217,6 +217,18 @@ public static class VBProperties
     public static readonly PropertyDefinition<byte[]?> DisabledPicture = new("DisabledPicture", PropertyCategory.Appearance, null);
 
     /// <summary>
+    /// The colour a graphical button leaves out of its pictures where <see cref="UseMaskColor"/> is set: its pixels of exactly this
+    /// colour show the button's face. Silver (<c>&amp;H00C0C0C0&amp;</c>) by default.
+    /// </summary>
+    public static readonly PropertyDefinition<FormColor> MaskColor = new("MaskColor", PropertyCategory.Appearance, FormColor.FromRgb(0xC0, 0xC0, 0xC0));
+
+    /// <summary>
+    /// Whether a graphical button leaves its <see cref="MaskColor"/> out of its pictures; False by default. An icon or a cursor
+    /// is drawn whole either way.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> UseMaskColor = new("UseMaskColor", PropertyCategory.Appearance);
+
+    /// <summary>
     /// The icon a form shows in its title bar, as the bytes of its icon or cursor file, or <see langword="null"/> for none. Any other
     /// picture, and one <see cref="FormPictures.Inspect"/> refuses, is not an icon.
     /// </summary>
@@ -426,6 +438,12 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> OptionButtonValue = new("Value", PropertyCategory.Misc);
 
     /// <summary>
+    /// A CommandButton's Value, a Boolean to a program. Setting it to True clicks the button, which raises its Click with the Value
+    /// True, and the Value is False again once Click returns. False does nothing. A form's file holds no Value.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> CommandButtonValue = new("Value", PropertyCategory.Misc);
+
+    /// <summary>
     /// Whether the user is prevented from changing a TextBox's or a ComboBox's text.
     /// </summary>
     public static readonly PropertyDefinition<bool> Locked = new("Locked", PropertyCategory.Behavior);
@@ -433,27 +451,36 @@ public static class VBProperties
     /// <summary>
     /// Whether a ListBox selects more than one item, and how.
     /// </summary>
-    public static readonly PropertyDefinition<ListBoxMultiSelect> MultiSelect = new("MultiSelect", PropertyCategory.Behavior, ListBoxMultiSelect.None);
+    public static readonly PropertyDefinition<ListBoxMultiSelect> MultiSelect =
+        new("MultiSelect", PropertyCategory.Behavior, ListBoxMultiSelect.None) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// How a ComboBox is drawn and behaves.
     /// </summary>
-    public static readonly PropertyDefinition<ComboBoxStyle> ComboBoxStyle = new("Style", PropertyCategory.Behavior, VB.ComboBoxStyle.DropdownCombo);
+    public static readonly PropertyDefinition<ComboBoxStyle> ComboBoxStyle =
+        new("Style", PropertyCategory.Behavior, VB.ComboBoxStyle.DropdownCombo) { ReadOnlyAtRunTime = true };
+
+    /// <summary>
+    /// Whether a ListBox's or a Simple Combo's height is snapped to whole rows of its list. True by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> IntegralHeight = new("IntegralHeight", PropertyCategory.Behavior, true) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// How a CommandButton, CheckBox or OptionButton is drawn.
     /// </summary>
-    public static readonly PropertyDefinition<ButtonStyle> ButtonStyle = new("Style", PropertyCategory.Appearance, VB.ButtonStyle.Standard);
+    public static readonly PropertyDefinition<ButtonStyle> ButtonStyle =
+        new("Style", PropertyCategory.Appearance, VB.ButtonStyle.Standard) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// Where a form opens on the screen.
     /// </summary>
-    public static readonly PropertyDefinition<StartUpPosition> StartUpPosition = new("StartUpPosition", PropertyCategory.Position, VB.StartUpPosition.Manual);
+    public static readonly PropertyDefinition<StartUpPosition> StartUpPosition =
+        new("StartUpPosition", PropertyCategory.Position, VB.StartUpPosition.Manual) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// Whether a form has a button on the task bar.
     /// </summary>
-    public static readonly PropertyDefinition<bool> ShowInTaskbar = new("ShowInTaskbar", PropertyCategory.Misc, true);
+    public static readonly PropertyDefinition<bool> ShowInTaskbar = new("ShowInTaskbar", PropertyCategory.Misc, true) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// The control's position in its form's tab order.
@@ -484,12 +511,12 @@ public static class VBProperties
     /// <summary>
     /// Whether a form's title bar has a Maximize button.
     /// </summary>
-    public static readonly PropertyDefinition<bool> MaxButton = new("MaxButton", PropertyCategory.Appearance, true);
+    public static readonly PropertyDefinition<bool> MaxButton = new("MaxButton", PropertyCategory.Appearance, true) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// Whether a form's title bar has a Minimize button.
     /// </summary>
-    public static readonly PropertyDefinition<bool> MinButton = new("MinButton", PropertyCategory.Appearance, true);
+    public static readonly PropertyDefinition<bool> MinButton = new("MinButton", PropertyCategory.Appearance, true) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// Whether a menu item shows a check mark.
@@ -499,12 +526,12 @@ public static class VBProperties
     /// <summary>
     /// Whether a menu lists the open child windows of a multiple-document interface form.
     /// </summary>
-    public static readonly PropertyDefinition<bool> WindowList = new("WindowList", PropertyCategory.Misc);
+    public static readonly PropertyDefinition<bool> WindowList = new("WindowList", PropertyCategory.Misc) { ReadOnlyAtRunTime = true };
 
     /// <summary>
     /// The key that chooses a menu item from anywhere on its form, or <see langword="null"/> for none.
     /// </summary>
-    public static readonly PropertyDefinition<MenuShortcut?> Shortcut = new("Shortcut", PropertyCategory.Misc);
+    public static readonly PropertyDefinition<MenuShortcut?> Shortcut = new("Shortcut", PropertyCategory.Misc) { NotAvailableAtRunTime = true };
 
     /// <summary>
     /// Whether choosing a menu item ticks or unticks it before its Click: an RD-VBA addition. False, the default, leaves

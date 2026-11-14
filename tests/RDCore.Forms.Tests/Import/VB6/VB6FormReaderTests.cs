@@ -81,6 +81,37 @@ public sealed class VB6FormReaderTests
         Assert.IsEmpty(import.Diagnostics);
     }
 
+    // VB6's CommandButton has no ForeColor, and the model's has none: a file that gives it one keeps that line as text.
+    [TestMethod]
+    public void ACommandButtonsForeColor_IsKeptAsText()
+    {
+        var import = VB6FormReader.Read(Form("   Begin VB.CommandButton Command1 ", "      ForeColor       =   &H000000FF&", "   End"));
+        var button = import.Form!.Find("Command1")!;
+
+        Assert.IsFalse(VBClasses.CommandButton.Has(VBProperties.ForeColor));
+        Assert.Contains(new UnmodelledProperty("ForeColor", "&H000000FF&"), button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
+    [TestMethod]
+    [DataRow("CommandButton")]
+    [DataRow("CheckBox")]
+    [DataRow("OptionButton")]
+    public void AButtonsMaskColorAndUseMaskColor_AreRead(string type)
+    {
+        var import = VB6FormReader.Read(Form(
+            $"   Begin VB.{type} Button1 ",
+            "      MaskColor       =   &H00FF00FF&",
+            "      Style           =   1  'Graphical",
+            "      UseMaskColor    =   -1  'True",
+            "   End"));
+        var button = import.Form!.Find("Button1")!;
+
+        Assert.AreEqual((FormColor.FromRgb(255, 0, 255), true), (button.Get(VBProperties.MaskColor), button.Get(VBProperties.UseMaskColor)));
+        Assert.IsEmpty(button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
     [TestMethod]
     public void TheFileSystemLists_AreRead_AFileListBoxWithItsPatternAndItsAttributes()
     {
@@ -328,6 +359,23 @@ public sealed class VB6FormReaderTests
 
         Assert.IsFalse(picture.Get(VBProperties.FontTransparent));
         Assert.IsEmpty(picture.UnmodelledProperties);
+    }
+
+    [TestMethod]
+    public void AComboBoxsIntegralHeight_IsRead_AndIsTrueWhereTheFileLeavesItOut()
+    {
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.ComboBox Combo1 ",
+            "      IntegralHeight  =   0   'False",
+            "      Style           =   1  'Simple Combo",
+            "   End",
+            "   Begin VB.ComboBox Combo2 ",
+            "      Style           =   1  'Simple Combo",
+            "   End"));
+
+        Assert.IsFalse(import.Form!.Find("Combo1")!.Get(VBProperties.IntegralHeight));
+        Assert.IsTrue(import.Form.Find("Combo2")!.Get(VBProperties.IntegralHeight));
+        Assert.IsEmpty(import.Diagnostics);
     }
 
     [TestMethod]

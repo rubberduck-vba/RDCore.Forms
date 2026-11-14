@@ -39,6 +39,12 @@ namespace RDCore.Forms.Avalonia.Rendering;
 /// <c>MousePointer</c>. A disabled root takes no input in any of its controls.
 /// </para>
 /// <para>
+/// A control the form's <see cref="FormDefinition.AddControl(ComponentClass, string, ComponentInstance?)"/> adds is shown at once,
+/// under the controls of its plane already in its container, and last in the form's order. One that
+/// <see cref="FormDefinition.RemoveControl(ComponentInstance)"/> removes goes at once, with what it holds; where the focus was in it,
+/// the focus goes to the first control of the tab order that can take it.
+/// </para>
+/// <para>
 /// The root's drawing statements draw on its <see cref="Drawing"/>, under every control. The root's <c>Picture</c> is under its
 /// drawing, at its size in pixels from the top left corner, and a picture that is refused is not drawn (see <see cref="PictureError"/>).
 /// </para>
@@ -96,6 +102,8 @@ public sealed class VBFormView : Canvas
         Drawing = new VBDrawingLayer(form.Root) { ZIndex = int.MinValue };
         Children.Add(Drawing);
         Place(form.Root, this);
+        form.ControlAdded += (_, e) => Added(e);
+        form.ControlRemoved += (_, e) => Removed(e);
         ComponentBinding.Bind(this, form.Root, form.Root.Class, Apply);
         AddHandler(KeyDownEvent, OnKeyDown);
     }
@@ -153,6 +161,40 @@ public sealed class VBFormView : Canvas
             if (control is IVBContainer inner)
                 Place(component, inner.ChildHost);
         }
+    }
+
+    // A control added at run time: last in its container, so under the controls of its plane already there, and last in the form's
+    // order, which breaks a tie of TabIndex.
+    private void Added(FormControlEventArgs e)
+    {
+        var host = ReferenceEquals(e.Container, Form.Root) ? this : (controls.GetValueOrDefault(e.Container) as IVBContainer)?.ChildHost;
+        if (host is null || VBControls.Create(e.Control, fileSystem) is not { } control)
+            return;
+        var windowless = e.Control.Class.IsWindowless;
+        var plane = host.Children.Where(child => VBControl.GetInstance(child) is { } other && controls.ContainsKey(other)
+                                                 && other.Class.IsWindowless == windowless).Select(child => child.ZIndex).ToList();
+        control.ZIndex = plane.Count == 0 ? (windowless ? WindowlessTop : 0) : plane.Min() - 1;
+        host.Children.Add(control);
+        controls.Add(e.Control, control);
+        shown.Add(e.Control);
+    }
+
+    // A control removed at run time, with what it holds. Where the focus was in it, it goes to the first control of the tab order that
+    // can take it.
+    private void Removed(FormControlEventArgs e)
+    {
+        if (!controls.TryGetValue(e.Control, out var control))
+            return;
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Visual;
+        var hadTheFocus = focused is not null && (ReferenceEquals(focused, control) || control.IsVisualAncestorOf(focused));
+        (control.Parent as Panel)?.Children.Remove(control);
+        foreach (var component in e.Control.Descendants().Prepend(e.Control))
+        {
+            controls.Remove(component);
+            shown.Remove(component);
+        }
+        if (hadTheFocus)
+            FirstToTakeTheFocus()?.Focus(NavigationMethod.Tab);
     }
 
     private void Apply(ComponentPropertyChangedEventArgs e)
