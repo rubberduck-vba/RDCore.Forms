@@ -230,8 +230,8 @@ public sealed class MultiSelectListTests
                 reached.Add(list.ListIndex);
                 AvaloniaHeadlessPlatform.ForceRenderTimerTick();
                 Dispatcher.UIThread.RunJobs();
-                // After the first PageDown, the item reached is the last one shown whole.
-                wholeAtTheBottom ??= ShownWhole(list, list.ListIndex) && !ShownWhole(list, list.ListIndex + 1);
+                // After the first PageDown, the item reached is the last one shown whole, and the list has not scrolled.
+                wholeAtTheBottom ??= ShownWhole(list, 0) && ShownWhole(list, list.ListIndex) && !ShownWhole(list, list.ListIndex + 1);
             }
             var clicks = sink.Raised.Count(e => e.EndsWith(".Click", StringComparison.Ordinal));
             window.Close();
