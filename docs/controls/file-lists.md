@@ -17,12 +17,9 @@ The behaviour below was measured with VB6, except where a row says it is RDForms
 |Member|Behaviour|Error|
 |---|---|---|
 |Items|One per drive: its letter in lower case and a colon, then its volume label in brackets, such as `c: [Windows]`. A drive without a label shows its letter alone, and a drive without a letter, as on Linux and macOS, shows its root's path, such as `/` (RDForms' own).||
-|`Drive`|The chosen drive, as it shows; at first, the drive of the current directory. It is set to a letter, alone or followed by a colon and anything, such as `c`, `c:` or `C:\Windows`; a drive without a letter is set to a path on it (RDForms' own). The same drive again raises nothing. Another drive raises Change (RDForms' own).|68 for no drive of the list.|
-|`ListIndex`, `ListCount`, `GetList(index)`|The chosen drive's index, the number of drives, and a drive as it shows (RDForms' own).|381 for a `ListIndex` outside the drives.|
-|`Refresh()`|Reads the drives again, keeping the chosen one.||
-
-> [!NOTE]
-> **Not implemented.** VB6 takes a DriveListBox `ListIndex` of -1, reads it back as -1 and raises Change. RDForms refuses it with 381.
+|`Drive`|The chosen drive, as it shows, or "" where none is chosen; at first, the drive of the current directory. It is set to a letter, alone or followed by a colon and anything, such as `c`, `c:` or `C:\Windows`; a drive without a letter is set to a path on it (RDForms' own). The same drive again raises nothing. Another drive raises Change (RDForms' own, except from none).|380 for "", 68 for no drive of the list.|
+|`ListIndex`, `ListCount`, `GetList(index)`|The chosen drive's index, the number of drives, and a drive as it shows (RDForms' own). A `ListIndex` of -1 chooses no drive and raises Change; -1 again raises nothing.|381 for a `ListIndex` below -1 or past the drives.|
+|`Refresh()`|Reads the drives again, keeping the chosen one. With none chosen, it chooses the first and raises Change.||
 
 ## DirListBox
 
