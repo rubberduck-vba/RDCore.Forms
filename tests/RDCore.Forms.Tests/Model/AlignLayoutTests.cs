@@ -228,8 +228,10 @@ public sealed class AlignLayoutTests
             Refused(() => VBRunTime.Assign(right, P.Height, 10d)), Refused(() => VBRunTime.Assign(right, P.Top, 10d)),
         });
         StringAssert.Contains(Assert.ThrowsExactly<FormErrorException>(() => VBRunTime.Assign(top, P.Width, 10d)).Message, "Width");
+        var before = (At(layout, "PicT1"), At(layout, "PicL"));
         VBRunTime.Assign(top, P.Top, 10d);
         VBRunTime.Assign(left, P.Left, 10d);
+        Assert.AreEqual(before, (At(layout, "PicT1"), At(layout, "PicL")));
         VBRunTime.Assign(top, P.Height, 800 / TwipsPerPixel);
         Assert.AreEqual(("0,405 6000x800", "0,1200 900x2805"), (At(layout, "PicT1"), At(layout, "PicL")));
         Assert.IsNull(AlignLayout.Refusal(Box(layout, "PicP"), P.Width));
