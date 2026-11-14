@@ -30,7 +30,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// <item>The caption is in <c>ForeColor</c>, or the grey text colour where the control is disabled, on <c>BackColor</c>: three
 /// pixels in from the strip's left, centred down it by its font's line height, clipped to the strip. The buttons do not change with
 /// either colour, or with <c>Enabled</c>.</item>
-/// <item>Each glyph is 11 rows tall, centred on row (<c>Height</c> - 1) / 2, rounded down: a triangle six pixels wide at its middle
+/// <item>Each glyph is 11 rows tall, centred on the middle row of the control's height in pixels, rounded down (row 11 of 23 or of 24, counted from 0): a triangle six pixels wide at its middle
 /// row, and on the outer buttons a bar two pixels wide.</item>
 /// </list>
 /// </remarks>
