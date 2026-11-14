@@ -141,6 +141,66 @@ public enum Align
 }
 
 /// <summary>
+/// Where a Label draws its picture against its caption: its <c>PicturePosition</c>, an RD-VBA addition with the values of MSForms'
+/// <c>fmPicturePosition</c>. The first word places the picture, the second aligns the caption with it.
+/// </summary>
+public enum PicturePosition
+{
+    /// <summary>
+    /// The picture left of the caption, their tops aligned.
+    /// </summary>
+    LeftTop = 0,
+    /// <summary>
+    /// The picture left of the caption, their centres aligned.
+    /// </summary>
+    LeftCenter = 1,
+    /// <summary>
+    /// The picture left of the caption, their bottoms aligned.
+    /// </summary>
+    LeftBottom = 2,
+    /// <summary>
+    /// The picture right of the caption, their tops aligned.
+    /// </summary>
+    RightTop = 3,
+    /// <summary>
+    /// The picture right of the caption, their centres aligned.
+    /// </summary>
+    RightCenter = 4,
+    /// <summary>
+    /// The picture right of the caption, their bottoms aligned.
+    /// </summary>
+    RightBottom = 5,
+    /// <summary>
+    /// The picture above the caption, their left edges aligned.
+    /// </summary>
+    AboveLeft = 6,
+    /// <summary>
+    /// The picture above the caption, their centres aligned: the default.
+    /// </summary>
+    AboveCenter = 7,
+    /// <summary>
+    /// The picture above the caption, their right edges aligned.
+    /// </summary>
+    AboveRight = 8,
+    /// <summary>
+    /// The picture below the caption, their left edges aligned.
+    /// </summary>
+    BelowLeft = 9,
+    /// <summary>
+    /// The picture below the caption, their centres aligned.
+    /// </summary>
+    BelowCenter = 10,
+    /// <summary>
+    /// The picture below the caption, their right edges aligned.
+    /// </summary>
+    BelowRight = 11,
+    /// <summary>
+    /// The caption over the picture, both centred.
+    /// </summary>
+    Center = 12,
+}
+
+/// <summary>
 /// The figure a VB Shape draws: its <c>Shape</c>.
 /// </summary>
 public enum ShapeType

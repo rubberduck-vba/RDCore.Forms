@@ -229,6 +229,13 @@ public static class VBProperties
     public static readonly PropertyDefinition<byte[]?> Picture = new("Picture", PropertyCategory.Appearance, null);
 
     /// <summary>
+    /// Where a Label draws its <see cref="Picture"/> against its caption: an RD-VBA addition, as MSForms' Label has it.
+    /// <see cref="VB.PicturePosition.AboveCenter"/> by default.
+    /// </summary>
+    public static readonly PropertyDefinition<PicturePosition> PicturePosition =
+        new("PicturePosition", PropertyCategory.Appearance, VB.PicturePosition.AboveCenter) { Valid = Enum.IsDefined };
+
+    /// <summary>
     /// The picture a graphical button shows in place of its <see cref="Picture"/> while it is pressed, checked or selected, as the bytes
     /// of its image file, or <see langword="null"/> for none.
     /// </summary>
