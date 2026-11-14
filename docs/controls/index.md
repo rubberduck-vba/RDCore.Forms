@@ -115,7 +115,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |740|The control to remove holds a control that was not added at run time. Nothing is removed.|
 
 > [!NOTE]
-> **Not implemented.** A ListBox added at run time keeps a height of 32 pixels; VB6 sets it to a whole number of items (450 twips). The `Controls` collection itself, error 735 for a control used after its removal, and the controls of a form's file coming back after Unload and Load belong to the runtime that runs the program.
+> **Not implemented.** A ListBox added at run time to a form that is not shown keeps a height of 32 pixels until the form is shown, where its height is snapped to whole rows (450 twips, 30 pixels); VB6 snaps it as it is added. The `Controls` collection itself, error 735 for a control used after its removal, and the controls of a form's file coming back after Unload and Load belong to the runtime that runs the program.
 
 ## Properties set only at design time
 
