@@ -17,6 +17,48 @@ public sealed class ComponentClassTests
             new ComponentClass("Test.Widget", "Widget", ComponentKind.Control, [Caption, other], []));
     }
 
+    // The member each VB class's default member stands for, as VB6 reads and assigns it through the instance.
+    [TestMethod]
+    [DataRow("VB.Form", "Controls")]
+    [DataRow("VB.MDIForm", "Controls")]
+    [DataRow("VB.CommandButton", "Value")]
+    [DataRow("VB.CheckBox", "Value")]
+    [DataRow("VB.OptionButton", "Value")]
+    [DataRow("VB.HScrollBar", "Value")]
+    [DataRow("VB.VScrollBar", "Value")]
+    [DataRow("VB.TextBox", "Text")]
+    [DataRow("VB.ComboBox", "Text")]
+    [DataRow("VB.ListBox", "Text")]
+    [DataRow("VB.Label", "Caption")]
+    [DataRow("VB.Frame", "Caption")]
+    [DataRow("VB.PictureBox", "Picture")]
+    [DataRow("VB.Image", "Picture")]
+    [DataRow("VB.DriveListBox", "Drive")]
+    [DataRow("VB.DirListBox", "Path")]
+    [DataRow("VB.FileListBox", "FileName")]
+    [DataRow("VB.Shape", "Shape")]
+    [DataRow("VB.Line", "Visible")]
+    [DataRow("VB.Timer", "Enabled")]
+    [DataRow("VB.Menu", "Enabled")]
+    [DataRow("VB.UserControl", null)]
+    [DataRow("VB.PropertyPage", null)]
+    public void AVBClassesDefaultMember_IsTheMemberVB6ReadsAndAssignsThroughTheInstance(string typeName, string? member) =>
+        Assert.AreEqual(member, VBClasses.ByTypeName(typeName)!.DefaultMember);
+
+    [TestMethod]
+    public void EveryVBClass_ButAUserControlAndAPropertyPage_HasADefaultMember() =>
+        CollectionAssert.AreEquivalent(new[] { VBClasses.UserControl, VBClasses.PropertyPage }, VBClasses.All.Where(c => c.DefaultMember is null).ToArray());
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow(" ")]
+    public void ADefaultMemberWithNoName_IsRefused(string name) =>
+        Assert.ThrowsExactly<ArgumentException>(() => new ComponentClass("Test.Widget", "Widget", ComponentKind.Control, [], [], defaultMember: name));
+
+    [TestMethod]
+    public void AClassGivenNoDefaultMember_HasNone() =>
+        Assert.IsNull(new ComponentClass("Test.Widget", "Widget", ComponentKind.Control, [], []).DefaultMember);
+
     [TestMethod]
     public void ADefault_ForAPropertyTheClassHasNot_IsRefused()
     {
