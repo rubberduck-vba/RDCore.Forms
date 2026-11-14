@@ -81,7 +81,7 @@ public sealed class VBDriveListBox : ComboBox, IRaisesKeyEvents
     /// <summary>
     /// The chosen drive's index, from 0.
     /// </summary>
-    /// <exception cref="FormErrorException">Set outside 0 to <see cref="ListCount"/> - 1: 380, Invalid property value.</exception>
+    /// <exception cref="FormErrorException">Set outside 0 to <see cref="ListCount"/> - 1: 381, Invalid property array index.</exception>
     /// <remarks>
     /// Setting it chooses that drive, and raises Change where it is another.
     /// </remarks>
@@ -91,7 +91,7 @@ public sealed class VBDriveListBox : ComboBox, IRaisesKeyEvents
         set
         {
             if (value < 0 || value >= ItemCount)
-                throw new FormErrorException(FormError.InvalidPropertyValue);
+                throw new FormErrorException(FormError.InvalidPropertyArrayIndex);
             SelectedIndex = value;
         }
     }

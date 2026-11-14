@@ -46,18 +46,11 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// regard to case, and raises Click where the selection moved.
 /// </para>
 /// </remarks>
-public sealed class VBListBox : ListBox, IRaisesKeyEvents
+public sealed class VBListBox : ListBox, IRaisesKeyEvents, IMultiSelectList
 {
     private readonly ComponentInstance instance;
-    private readonly ListBoxMultiSelect multiSelect;
-    // Whether the press now held is a left press on an item, which raises Click at its release.
-    private bool pressedOnItem;
-    // A multi-select list's ListIndex: the focused item, which need not be selected.
-    private int focusIndex;
-    // An Extended list's anchor, which a Shift range runs from.
-    private int anchorIndex;
-    // A Shift press on an Extended list, whose range comes at the release.
-    private bool shiftPressed;
+    // A multi-select list's selection; none where its MultiSelect is None.
+    private readonly MultiSelection? multi;
     // Set while the list writes its own items to the component.
     private bool writingList;
     private readonly ItemIcons icons = new();
@@ -66,32 +59,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     {
         // First, so that a key's KeyDown comes before the Click of the selection it moves.
         ControlKeys.Attach<VBListBox>();
-        // VB selects nothing for a right or middle press, where Avalonia's ListBox selects on a right one. Handled on the way down,
-        // its own press handler never sees it; the mouse events take handled presses too. A left press on a multi-select list is
-        // taken here, for the same reason.
-        PointerPressedEvent.AddClassHandler<VBListBox>((list, e) =>
-        {
-            if (!e.GetCurrentPoint(list).Properties.IsLeftButtonPressed)
-                e.Handled = true;
-            else if (list.IsMultiSelect)
-            {
-                list.PressMulti(list.IndexAt(e.Source), e.KeyModifiers, e.ClickCount);
-                e.Handled = true;
-            }
-        }, RoutingStrategies.Tunnel);
-        // A multi-select list's keys, on the way down: its focused item would take Space first.
-        KeyDownEvent.AddClassHandler<VBListBox>((list, e) =>
-        {
-            if (list.IsMultiSelect && list.KeyMulti(e.Key, e.KeyModifiers))
-            {
-                e.Handled = true;
-                VBControl.Raise(list, VBEvents.Click);
-            }
-        }, RoutingStrategies.Tunnel);
-        // Before the mouse events, so that Click comes before MouseUp.
-        PointerPressedEvent.AddClassHandler<VBListBox>((list, e) => list.Pressed(e), handledEventsToo: true);
-        PointerMovedEvent.AddClassHandler<VBListBox>((list, e) => list.Moved(e), handledEventsToo: true);
-        PointerReleasedEvent.AddClassHandler<VBListBox>((list, e) => list.Released(e), handledEventsToo: true);
+        ListClicks.Attach<VBListBox>();
         ControlEvents.AttachMouse<VBListBox>(DblClick.InPlaceOfMouseDown);
         // A ListBox takes the focus itself, not only through its items.
         FocusableProperty.OverrideDefaultValue<VBListBox>(true);
@@ -110,16 +78,21 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     public VBListBox(ComponentInstance instance)
     {
         this.instance = instance;
-        multiSelect = instance?.Get(P.MultiSelect) ?? ListBoxMultiSelect.None;
-        if (IsMultiSelect)
+        var multiSelect = instance?.Get(P.MultiSelect) ?? ListBoxMultiSelect.None;
+        if (multiSelect != ListBoxMultiSelect.None)
+        {
             SelectionMode = SelectionMode.Multiple;
+            multi = new MultiSelection(this, multiSelect);
+        }
         ComponentBinding.Bind(this, instance!, VBClasses.ListBox, Apply);
     }
 
     /// <inheritdoc/>
     protected override Type StyleKeyOverride => typeof(ListBox);
 
-    private bool IsMultiSelect => multiSelect != ListBoxMultiSelect.None;
+    private bool IsMultiSelect => multi is not null;
+
+    MultiSelection? IMultiSelectList.Multi => multi;
 
     /// <summary>
     /// The number of items.
@@ -136,15 +109,15 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     /// </remarks>
     public int ListIndex
     {
-        get => IsMultiSelect ? focusIndex : SelectedIndex;
+        get => multi?.Focus ?? SelectedIndex;
         set
         {
             if (value < -1 || value >= ItemCount)
                 throw new FormErrorException(FormError.InvalidPropertyValue);
             if (value == ListIndex)
                 return;
-            if (IsMultiSelect)
-                focusIndex = value;
+            if (multi is not null)
+                multi.Focus = value;
             else
                 SelectedIndex = value;
             VBControl.Raise(this, VBEvents.Click);
@@ -154,7 +127,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     /// <summary>
     /// The number of items selected.
     /// </summary>
-    public int SelCount => IsMultiSelect ? Selection.SelectedIndexes.Count : SelectedIndex >= 0 ? 1 : 0;
+    public int SelCount => multi?.Count ?? (SelectedIndex >= 0 ? 1 : 0);
 
     /// <summary>
     /// The text of the item at <see cref="ListIndex"/>, or "" where there is none.
@@ -170,7 +143,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     public bool GetSelected(int index)
     {
         RequireItem(index);
-        return IsMultiSelect ? Selection.IsSelected(index) : index == SelectedIndex;
+        return multi?.IsSelected(index) ?? index == SelectedIndex;
     }
 
     /// <summary>
@@ -186,7 +159,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     public void SetSelected(int index, bool selected)
     {
         RequireItem(index);
-        if (!IsMultiSelect)
+        if (multi is null)
         {
             if (selected)
                 ListIndex = index;
@@ -194,16 +167,8 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
                 ListIndex = -1;
             return;
         }
-        if (Selection.IsSelected(index) == selected)
-            return;
-        if (selected)
-        {
-            Selection.Select(index);
-            focusIndex = index;
-        }
-        else
-            Selection.Deselect(index);
-        VBControl.Raise(this, VBEvents.Click);
+        if (multi.Set(index, selected))
+            VBControl.Raise(this, VBEvents.Click);
     }
 
     /// <summary>
@@ -252,8 +217,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
         if (index < 0 || index >= ItemCount)
             throw new FormErrorException(FormError.InvalidProcedureCall);
         Items.RemoveAt(index);
-        if (focusIndex >= ItemCount)
-            focusIndex = Math.Max(0, ItemCount - 1);
+        multi?.Removed();
         WriteList();
         ListItems.Removed(instance, ItemCount + 1, index);
     }
@@ -264,7 +228,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     public void Clear()
     {
         Items.Clear();
-        focusIndex = anchorIndex = 0;
+        multi?.Reset();
         WriteList();
         ListItems.Cleared(instance);
     }
@@ -348,7 +312,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
             Items.Clear();
             foreach (var item in (IReadOnlyList<string>)e.After!)
                 Items.Add(item);
-            focusIndex = anchorIndex = 0;
+            multi?.Reset();
         }
         else if (ReferenceEquals(e.Property, P.ItemIcon))
         {
@@ -383,156 +347,5 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents
     {
         if (index < 0 || index >= ItemCount)
             throw new FormErrorException(FormError.InvalidPropertyArrayIndex);
-    }
-
-    private void Pressed(PointerPressedEventArgs e) =>
-        pressedOnItem = e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed && IndexAt(e.Source) >= 0;
-
-    private void PressMulti(int index, KeyModifiers modifiers, int clickCount)
-    {
-        // The press is handled here, so Avalonia gives nothing the keyboard focus; its items take it, not the list.
-        if (index >= 0)
-            ContainerFromIndex(index)?.Focus(NavigationMethod.Pointer);
-        // Below the items nothing changes, and a double click's second press toggles nothing again.
-        if (index < 0 || clickCount > 1)
-            return;
-        focusIndex = index;
-        shiftPressed = false;
-        if (multiSelect == ListBoxMultiSelect.Simple)
-            Toggle(index);
-        else if (modifiers.HasFlag(KeyModifiers.Shift))
-        {
-            // The press leaves only the anchor's own state, and the range comes at the release.
-            var anchor = Anchor();
-            SelectOnly(Selection.IsSelected(anchor) ? anchor : -1);
-            shiftPressed = true;
-        }
-        else if ((modifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0)
-        {
-            Toggle(index);
-            anchorIndex = index;
-        }
-        else
-        {
-            SelectOnly(index);
-            anchorIndex = index;
-        }
-    }
-
-    private void Moved(PointerEventArgs e)
-    {
-        if (!pressedOnItem || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            return;
-        // Over the empty area, or outside the list, the selection stays on the last item reached.
-        var index = IndexAt(this.InputHitTest(e.GetPosition(this)));
-        if (index < 0)
-            return;
-        if (IsMultiSelect)
-        {
-            if (index == focusIndex)
-                return;
-            focusIndex = index;
-            if (multiSelect == ListBoxMultiSelect.Extended)
-                SelectRange(index);
-        }
-        else if (index != SelectedIndex)
-            SelectedIndex = index;
-    }
-
-    private void Released(PointerReleasedEventArgs e)
-    {
-        var click = pressedOnItem && e.InitialPressMouseButton == MouseButton.Left && !ControlEvents.IsSecondPress(this);
-        pressedOnItem = false;
-        if (shiftPressed)
-        {
-            shiftPressed = false;
-            SelectRange(focusIndex);
-        }
-        if (click)
-            VBControl.Raise(this, VBEvents.Click);
-    }
-
-    // Up, Down and Space, the keys measured. The others do nothing on a multi-select list.
-    private bool KeyMulti(Key key, KeyModifiers modifiers)
-    {
-        if (key is not (Key.Up or Key.Down or Key.Space) || ItemCount == 0)
-            return false;
-        if (key == Key.Space)
-        {
-            // Simple toggles the focused item, and Extended changes nothing, with Ctrl or without.
-            if (multiSelect == ListBoxMultiSelect.Simple && focusIndex >= 0 && focusIndex < ItemCount)
-                Toggle(focusIndex);
-            return true;
-        }
-        focusIndex = Math.Clamp(focusIndex + (key == Key.Down ? 1 : -1), 0, ItemCount - 1);
-        // The focused item comes into view and takes the keyboard focus, as with the mouse; not by a directional move, which would
-        // have Avalonia select it.
-        ScrollIntoView(focusIndex);
-        ContainerFromIndex(focusIndex)?.Focus(NavigationMethod.Unspecified);
-        if (multiSelect == ListBoxMultiSelect.Simple)
-            return true;
-        if (modifiers.HasFlag(KeyModifiers.Shift))
-            SelectRange(focusIndex);
-        else
-        {
-            // With Ctrl too: Ctrl+Up selects the item alone, as Up does.
-            SelectOnly(focusIndex);
-            anchorIndex = focusIndex;
-        }
-        return true;
-    }
-
-    // From the anchor to the target, the anchor keeping its own state, and nothing else selected.
-    private void SelectRange(int target)
-    {
-        var anchor = Anchor();
-        var anchorSelected = Selection.IsSelected(anchor);
-        Selection.BeginBatchUpdate();
-        try
-        {
-            Selection.Clear();
-            for (var i = Math.Min(anchor, target); i <= Math.Max(anchor, target); i++)
-                if (i != anchor || anchorSelected)
-                    Selection.Select(i);
-        }
-        finally
-        {
-            Selection.EndBatchUpdate();
-        }
-    }
-
-    private int Anchor() => Math.Clamp(anchorIndex, 0, Math.Max(0, ItemCount - 1));
-
-    private void Toggle(int index)
-    {
-        if (Selection.IsSelected(index))
-            Selection.Deselect(index);
-        else
-            Selection.Select(index);
-    }
-
-    // Only the item selected, or none for -1.
-    private void SelectOnly(int index)
-    {
-        Selection.BeginBatchUpdate();
-        try
-        {
-            Selection.Clear();
-            if (index >= 0)
-                Selection.Select(index);
-        }
-        finally
-        {
-            Selection.EndBatchUpdate();
-        }
-    }
-
-    // The index of the item a point or an event's source is on, or -1 for the empty area and anything outside the items.
-    private int IndexAt(object? source)
-    {
-        for (var visual = source as Visual; visual is not null && !ReferenceEquals(visual, this); visual = visual.GetVisualParent())
-            if (visual is ListBoxItem item)
-                return IndexFromContainer(item);
-        return -1;
     }
 }
