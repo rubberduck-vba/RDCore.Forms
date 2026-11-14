@@ -34,6 +34,7 @@ list.SetItemIcon(0, File.ReadAllBytes("open.png"));
 |---|---|
 |A left press on an item|Selects it at once; the selection follows the pointer over the items while the button is held. Click is raised at the release, before MouseUp, whether or not the selection changed and wherever the release lands.|
 |A press below the items, a right or middle press|Selects nothing and raises no Click.|
+|Navigation keys|Up and Left move one item back, Down and Right one item on, Home and End to the first and the last item. PageUp and PageDown move as many items as the list shows whole, less one, so that PageDown from the top reaches the last item shown whole. The same for every `MultiSelect`.|
 |A key or code that moves the selection|Raises Click, with `ListIndex` already the new value. Setting it again, a key that can go no further, and a change to the items raise none. A key's Click comes before its KeyUp: see [A control's key events](form-events.md#a-controls-key-events).|
 |A character typed|Where `MultiSelect` is None, selects the next item that starts with it, after the selected one and from the top again past the last, without regard to case.|
 |`GetSelected`, `SetSelected`|Read and set an item's selection; 381 for an index outside the items. `SetSelected` raises Click when it changes something.|
@@ -46,10 +47,10 @@ With a `MultiSelect` of Simple or Extended, `ListIndex` is the item with the foc
 
 |MultiSelect|Mouse|Keys|
 |---|---|---|
-|Simple|A press toggles the item, whatever the modifiers.|The arrow keys move only the focus; Space toggles.|
-|Extended|A press selects the item alone, Ctrl+press toggles it, and Shift+press selects from the anchor (the last item pressed or reached without Shift). A drag selects from the anchor.|Up and Down select the item alone; with Shift, from the anchor. Space changes nothing.|
+|Simple|A press toggles the item, whatever the modifiers.|The navigation keys move only the focus; Space toggles.|
+|Extended|A press selects the item alone, Ctrl+press toggles it, and Shift+press selects from the anchor (the last item pressed or reached without Shift). A drag selects from the anchor.|A navigation key selects the item it reaches alone; with Shift, from the anchor (RDForms' own for the keys other than Up and Down). Space changes nothing.|
 
-Every key such a list takes raises Click, whether or not anything changed. The other keys change nothing and raise no Click (RDForms' own).
+Every key such a list takes raises Click, whether or not anything changed: at the first or the last item too. The other keys change nothing and raise no Click (RDForms' own).
 
 ## ComboBox
 

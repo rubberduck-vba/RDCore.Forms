@@ -6,10 +6,11 @@ namespace RDCore.Forms.Avalonia.Controls;
 
 // The selection of a list whose MultiSelect is Simple or Extended, as VB6's ListBox and FileListBox keep it:
 //  - ListIndex is the item with the focus, 0 from the start, and the selection is a set of items apart from it.
-//  - Simple toggles the item pressed, whatever the modifiers; its Up and Down move only the focus, and Space toggles.
+//  - Simple toggles the item pressed, whatever the modifiers; its navigation keys (ListClicks.KeyTarget) move only the focus, and
+//    Space toggles.
 //  - Extended selects the item pressed alone, toggles it with Ctrl, and with Shift selects from the anchor, the last item pressed or
-//    reached without Shift. A drag moves the focus, and on an Extended list selects from the anchor too. Up and Down select the item
-//    alone, or from the anchor with Shift; Space changes nothing.
+//    reached without Shift. A drag moves the focus, and on an Extended list selects from the anchor too. A navigation key selects the
+//    item it reaches alone, or from the anchor with Shift; Space changes nothing.
 // The list raises Click for every key this takes, whether or not anything changed.
 internal sealed class MultiSelection(ListBox list, ListBoxMultiSelect mode)
 {
@@ -96,10 +97,10 @@ internal sealed class MultiSelection(ListBox list, ListBoxMultiSelect mode)
         SelectRange(Focus);
     }
 
-    // Up, Down and Space, the keys measured; whether the list takes the key. The others do nothing on a multi-select list.
+    // A navigation key or Space; whether the list takes the key. The others do nothing on a multi-select list.
     public bool KeyDown(Key key, KeyModifiers modifiers)
     {
-        if (key is not (Key.Up or Key.Down or Key.Space) || list.ItemCount == 0)
+        if (list.ItemCount == 0)
             return false;
         if (key == Key.Space)
         {
@@ -108,11 +109,12 @@ internal sealed class MultiSelection(ListBox list, ListBoxMultiSelect mode)
                 Toggle(Focus);
             return true;
         }
-        Focus = Math.Clamp(Focus + (key == Key.Down ? 1 : -1), 0, list.ItemCount - 1);
+        if (ListClicks.KeyTarget(list, key, Focus) is not { } target)
+            return false;
+        Focus = target;
         // The focused item comes into view and takes the keyboard focus, as with the mouse; not by a directional move, which would
         // have Avalonia select it.
-        list.ScrollIntoView(Focus);
-        list.ContainerFromIndex(Focus)?.Focus(NavigationMethod.Unspecified);
+        ListClicks.Reach(list, Focus);
         if (mode == ListBoxMultiSelect.Simple)
             return true;
         if (modifiers.HasFlag(KeyModifiers.Shift))

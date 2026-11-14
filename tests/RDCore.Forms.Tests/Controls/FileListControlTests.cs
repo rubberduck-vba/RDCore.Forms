@@ -598,6 +598,48 @@ public sealed class FileListControlTests
     }
 
     [TestMethod]
+    public void ADriveListsListIndexOfMinus1_ChoosesNoDrive_WithChangeOnce_AndRefreshChoosesTheFirstWithChange()
+    {
+        var log = UI.Run(() =>
+        {
+            var list = new VBDriveListBox(Drive(), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            var first = list.GetList(0);
+            var log = new List<string>();
+            void Step(string name, Action act)
+            {
+                sink.Raised.Clear();
+                var error = 0;
+                try
+                {
+                    act();
+                }
+                catch (FormErrorException e)
+                {
+                    error = e.Error.Number;
+                }
+                var drive = list.Drive == "" ? "none" : list.Drive == first ? "first" : list.Drive;
+                log.Add($"{name}: {error} {string.Join(" ", sink.Raised)} {list.ListIndex} {drive}");
+            }
+            Step("ListIndex = -1", () => list.ListIndex = -1);
+            Step("ListIndex = -1", () => list.ListIndex = -1);
+            Step("ListIndex = -2", () => list.ListIndex = -2);
+            Step("Drive = \"\"", () => list.Drive = "");
+            Step("Refresh", list.Refresh);
+            Step("Refresh", list.Refresh);
+            Step("Drive = \"\"", () => list.Drive = "");
+            window.Close();
+            return log;
+        });
+
+        Expect.Lines(new[]
+        {
+            "ListIndex = -1: 0 Drive1.Change -1 none", "ListIndex = -1: 0  -1 none", "ListIndex = -2: 381  -1 none", "Drive = \"\": 380  -1 none",
+            "Refresh: 0 Drive1.Change 0 first", "Refresh: 0  0 first", "Drive = \"\": 380  0 first",
+        }, log);
+    }
+
+    [TestMethod]
     [OSCondition(OperatingSystems.Windows)]
     public void ADriveListsDrive_TakesALetterOrAPathOnTheDrive_AndRaisesChange_OnlyForAnotherDrive()
     {

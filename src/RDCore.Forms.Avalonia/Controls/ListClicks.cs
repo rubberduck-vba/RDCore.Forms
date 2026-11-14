@@ -18,6 +18,7 @@ internal interface IMultiSelectList
 //  - A left press on an item selects it at once, the selection follows the pointer over the items while the button is held, and the
 //    release raises Click, before MouseUp. A press below the items, and any right or middle press, selects nothing and raises none.
 //  - A key that moves the selection raises Click, after its KeyDown and before its KeyUp; a key that can go no further raises none.
+//    A ListBox and a FileListBox move as KeyTarget says.
 //  - A character typed selects the next item whose text starts with it, without regard to case, and raises Click.
 // On a multi-select list the press, the drag and the keys go to its MultiSelection instead, every key it takes raises Click, and a
 // character typed does nothing.
@@ -41,14 +42,19 @@ internal static class ListClicks
                 e.Handled = true;
             }
         }, RoutingStrategies.Tunnel);
-        // A multi-select list's keys, on the way down: its focused item would take Space first.
+        // A multi-select list's keys, on the way down: its focused item would take Space first, and its scroll viewer PageUp and
+        // PageDown. A single-select ListBox's and FileListBox's navigation keys too, for the scroll viewer's sake.
         InputElement.KeyDownEvent.AddClassHandler<T>((list, e) =>
         {
-            if (Multi(list) is { } multi && multi.KeyDown(e.Key, e.KeyModifiers))
+            if (Multi(list) is { } multi)
             {
+                if (!multi.KeyDown(e.Key, e.KeyModifiers))
+                    return;
                 e.Handled = true;
                 VBControl.Raise(list, VBEvents.Click);
             }
+            else if (list is IMultiSelectList)
+                KeyMove(list, e);
         }, RoutingStrategies.Tunnel);
         InputElement.PointerPressedEvent.AddClassHandler<T>((list, e) =>
         {
@@ -89,6 +95,54 @@ internal static class ListClicks
     {
         if (list.SelectedIndex != before)
             VBControl.Raise(list, VBEvents.Click);
+    }
+
+    // The item a navigation key reaches from an item, as VB6's ListBox and FileListBox move whatever their MultiSelect: Left and Up one
+    // back, Right and Down one on, Home and End the first and the last, PageUp and PageDown as many as the list shows whole, less one.
+    // null for another key, or for a list with no items.
+    public static int? KeyTarget(ListBox list, Key key, int from)
+    {
+        var last = list.ItemCount - 1;
+        if (last < 0)
+            return null;
+        return key switch
+        {
+            Key.Left or Key.Up => Math.Max(0, from - 1),
+            Key.Right or Key.Down => Math.Min(last, from + 1),
+            Key.Home => 0,
+            Key.End => last,
+            Key.PageUp => Math.Max(0, from - Page(list)),
+            Key.PageDown => Math.Min(last, from + Page(list)),
+            _ => null,
+        };
+    }
+
+    // A single-select list's navigation key, before the list's own: the item it reaches is selected, with Click where it is another.
+    private static void KeyMove(ListBox list, KeyEventArgs e)
+    {
+        if (KeyTarget(list, e.Key, list.SelectedIndex) is not { } target)
+            return;
+        e.Handled = true;
+        var moved = target != list.SelectedIndex;
+        list.SelectedIndex = target;
+        Reach(list, target);
+        if (moved)
+            VBControl.Raise(list, VBEvents.Click);
+    }
+
+    // The item comes into view and takes the keyboard focus, so that the next key moves on from it.
+    public static void Reach(ListBox list, int index)
+    {
+        list.ScrollIntoView(index);
+        list.ContainerFromIndex(index)?.Focus(NavigationMethod.Unspecified);
+    }
+
+    // As many items as the list shows whole, less one, and at least one.
+    private static int Page(ListBox list)
+    {
+        var viewport = list.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault()?.Viewport.Height ?? 0;
+        var item = list.GetRealizedContainers().FirstOrDefault()?.Bounds.Height ?? 0;
+        return item > 0 ? Math.Max(1, (int)(viewport / item) - 1) : 1;
     }
 
     // After the list's own text input handling.
