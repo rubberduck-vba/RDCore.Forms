@@ -329,7 +329,7 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
             throw new ArgumentException($"{component.Class.TypeName} has no method {method.Name}.", nameof(method));
         var given = MethodArguments.Of(method, arguments);
         if (ReferenceEquals(method, VBMethods.Move))
-            Move(component, given, unit);
+            Move(component, control, given, unit);
         else if (ReferenceEquals(method, VBMethods.SetFocus))
             SetFocus(control);
         else if (ReferenceEquals(method, VBMethods.ZOrder))
@@ -341,7 +341,7 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
         return FormValue.Empty;
     }
 
-    private void Move(ComponentInstance component, FormValue?[] given, CodeUnit unit)
+    private void Move(ComponentInstance component, Control control, FormValue?[] given, CodeUnit unit)
     {
         PropertyDefinition<double>[] extents = [P.Left, P.Top, P.Width, P.Height];
         // Every value is checked before any is set.
@@ -358,13 +358,20 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
                 throw new FormErrorException(FormError.Overflow);
             moves.Add((extents[i], twips / ScaleModeExtensions.TwipsPerPixel));
         }
-        // The root's two sizes raise one Resize.
+        // The root's two sizes raise one Resize, and so do a PictureBox's.
         var root = ReferenceEquals(component, Root);
         following = root;
-        try
+        void SetAll()
         {
             foreach (var (property, pixels) in moves)
                 component.Set(property, pixels);
+        }
+        try
+        {
+            if (control is VBPictureBox box)
+                box.Resizing(SetAll);
+            else
+                SetAll();
         }
         finally
         {
