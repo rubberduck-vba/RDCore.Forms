@@ -8,12 +8,20 @@ using RDCore.Forms.Model.VB;
 
 namespace RDCore.Forms.Avalonia.Controls;
 
-// The Click of a list that selects one item, as a ListBox with a MultiSelect of None raises it:
+// A list whose MultiSelect can be Simple or Extended: its selection where it is, none where it is None.
+internal interface IMultiSelectList
+{
+    MultiSelection? Multi { get; }
+}
+
+// The Click of a list, as a ListBox raises it:
 //  - A left press on an item selects it at once, the selection follows the pointer over the items while the button is held, and the
 //    release raises Click, before MouseUp. A press below the items, and any right or middle press, selects nothing and raises none.
 //  - A key that moves the selection raises Click, after its KeyDown and before its KeyUp; a key that can go no further raises none.
 //  - A character typed selects the next item whose text starts with it, without regard to case, and raises Click.
-internal static class SingleSelectList
+// On a multi-select list the press, the drag and the keys go to its MultiSelection instead, every key it takes raises Click, and a
+// character typed does nothing.
+internal static class ListClicks
 {
     private static readonly ConditionalWeakTable<ListBox, object> pressedOnItem = [];
     private static readonly object marker = new();
@@ -22,11 +30,25 @@ internal static class SingleSelectList
     public static void Attach<T>() where T : ListBox
     {
         // Avalonia's ListBox selects on a right press. Handled on the way down, its own press handler never sees it; the mouse events
-        // take handled presses too.
+        // take handled presses too. A left press on a multi-select list is taken here, for the same reason.
         InputElement.PointerPressedEvent.AddClassHandler<T>((list, e) =>
         {
             if (!e.GetCurrentPoint(list).Properties.IsLeftButtonPressed)
                 e.Handled = true;
+            else if (Multi(list) is { } multi)
+            {
+                multi.Press(IndexAt(list, e.Source), e.KeyModifiers, e.ClickCount);
+                e.Handled = true;
+            }
+        }, RoutingStrategies.Tunnel);
+        // A multi-select list's keys, on the way down: its focused item would take Space first.
+        InputElement.KeyDownEvent.AddClassHandler<T>((list, e) =>
+        {
+            if (Multi(list) is { } multi && multi.KeyDown(e.Key, e.KeyModifiers))
+            {
+                e.Handled = true;
+                VBControl.Raise(list, VBEvents.Click);
+            }
         }, RoutingStrategies.Tunnel);
         InputElement.PointerPressedEvent.AddClassHandler<T>((list, e) =>
         {
@@ -41,7 +63,11 @@ internal static class SingleSelectList
                 return;
             // Over the empty area, or outside the list, the selection stays on the last item reached.
             var index = IndexAt(list, list.InputHitTest(e.GetPosition(list)));
-            if (index >= 0 && index != list.SelectedIndex)
+            if (index < 0)
+                return;
+            if (Multi(list) is { } multi)
+                multi.Drag(index);
+            else if (index != list.SelectedIndex)
                 list.SelectedIndex = index;
         }, handledEventsToo: true);
         InputElement.PointerReleasedEvent.AddClassHandler<T>((list, e) =>
@@ -49,6 +75,7 @@ internal static class SingleSelectList
             var click = pressedOnItem.TryGetValue(list, out _) && e.InitialPressMouseButton == MouseButton.Left
                         && !ControlEvents.IsSecondPress(list);
             pressedOnItem.Remove(list);
+            Multi(list)?.Release();
             if (click)
                 VBControl.Raise(list, VBEvents.Click);
         }, handledEventsToo: true);
@@ -67,7 +94,7 @@ internal static class SingleSelectList
     // After the list's own text input handling.
     public static void Typed(ListBox list, TextInputEventArgs e)
     {
-        if (e.Handled || string.IsNullOrEmpty(e.Text) || list.ItemCount == 0)
+        if (e.Handled || Multi(list) is not null || string.IsNullOrEmpty(e.Text) || list.ItemCount == 0)
             return;
         e.Handled = true;
         foreach (var character in e.Text)
@@ -90,4 +117,6 @@ internal static class SingleSelectList
                 return list.IndexFromContainer(item);
         return -1;
     }
+
+    private static MultiSelection? Multi(ListBox list) => (list as IMultiSelectList)?.Multi;
 }

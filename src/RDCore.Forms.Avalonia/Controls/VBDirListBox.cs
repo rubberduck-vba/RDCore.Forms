@@ -35,14 +35,14 @@ public sealed class VBDirListBox : ListBox, IRaisesKeyEvents
     {
         // First, so that a key's KeyDown comes before the Click of the selection it moves.
         ControlKeys.Attach<VBDirListBox>();
-        SingleSelectList.Attach<VBDirListBox>();
+        ListClicks.Attach<VBDirListBox>();
         // A double click's second press opens the folder pressed, after the Click of its first release; its own release raises none.
         PointerPressedEvent.AddClassHandler<VBDirListBox>((list, e) =>
         {
             if (e.ClickCount == 2 && e.GetCurrentPoint(list).Properties.IsLeftButtonPressed
-                && SingleSelectList.IndexAt(list, e.Source) is var index and >= 0)
+                && ListClicks.IndexAt(list, e.Source) is var index and >= 0)
             {
-                SingleSelectList.Forget(list);
+                ListClicks.Forget(list);
                 list.Path = ((Folder)list.Items[index]!).FullPath;
             }
         }, handledEventsToo: true);
@@ -141,14 +141,14 @@ public sealed class VBDirListBox : ListBox, IRaisesKeyEvents
     {
         var before = SelectedIndex;
         base.OnKeyDown(e);
-        SingleSelectList.KeyMoved(this, before);
+        ListClicks.KeyMoved(this, before);
     }
 
     /// <inheritdoc/>
     protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-        SingleSelectList.Typed(this, e);
+        ListClicks.Typed(this, e);
     }
 
     /// <inheritdoc/>

@@ -42,7 +42,7 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     {
         // First, so that a key's KeyDown comes before the Click of the selection it moves.
         ControlKeys.Attach<VBFileListBox>();
-        SingleSelectList.Attach<VBFileListBox>();
+        ListClicks.Attach<VBFileListBox>();
         ControlEvents.AttachMouse<VBFileListBox>(DblClick.InPlaceOfMouseDown);
         FocusableProperty.OverrideDefaultValue<VBFileListBox>(true);
         ControlEvents.AttachFocus<VBFileListBox>();
@@ -183,14 +183,14 @@ public sealed class VBFileListBox : ListBox, IRaisesKeyEvents
     {
         var before = SelectedIndex;
         base.OnKeyDown(e);
-        SingleSelectList.KeyMoved(this, before);
+        ListClicks.KeyMoved(this, before);
     }
 
     /// <inheritdoc/>
     protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-        SingleSelectList.Typed(this, e);
+        ListClicks.Typed(this, e);
     }
 
     private void Apply(ComponentPropertyChangedEventArgs e)
