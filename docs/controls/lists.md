@@ -48,7 +48,7 @@ With a `MultiSelect` of Simple or Extended, `ListIndex` is the item with the foc
 |MultiSelect|Mouse|Keys|
 |---|---|---|
 |Simple|A press toggles the item, whatever the modifiers.|The navigation keys move only the focus; Space toggles.|
-|Extended|A press selects the item alone, Ctrl+press toggles it, and Shift+press selects from the anchor (the last item pressed or reached without Shift). A drag selects from the anchor.|A navigation key selects the item it reaches alone; with Shift, from the anchor (RDForms' own, except for Up and Down). Space changes nothing.|
+|Extended|A press selects the item alone, Ctrl+press toggles it, and Shift+press selects from the anchor (the last item pressed or reached without Shift). A drag selects from the anchor.|A navigation key selects the item it reaches alone; with Shift, from the anchor (RDForms' own for the keys other than Up and Down). Space changes nothing.|
 
 Every key such a list takes raises Click, whether or not anything changed: at the first or the last item too. The other keys change nothing and raise no Click (RDForms' own).
 
