@@ -313,7 +313,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> Normal = new("Normal", PropertyCategory.Behavior, true);
 
     /// <summary>
-    /// Whether a FileListBox lists read-only files.
+    /// Whether a FileListBox lists read-only files, or whether a Data control opens its database for reading only, which a Data
+    /// control's class defaults to False.
     /// </summary>
     public static readonly PropertyDefinition<bool> ReadOnly = new("ReadOnly", PropertyCategory.Behavior, true);
 
@@ -321,6 +322,66 @@ public static class VBProperties
     /// Whether a FileListBox lists system files: VB's <c>System</c> property.
     /// </summary>
     public static readonly PropertyDefinition<bool> SystemFiles = new("System", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// The kind of database a Data control opens, and the connection's parameters for one that is not Jet's own, such as
+    /// <c>Excel 8.0;</c>.
+    /// </summary>
+    public static readonly PropertyDefinition<string> Connect = new("Connect", PropertyCategory.Misc, "Access");
+
+    /// <summary>
+    /// The database a Data control opens: a file, or a folder for a database of files.
+    /// </summary>
+    public static readonly PropertyDefinition<string> DatabaseName = new("DatabaseName", PropertyCategory.Misc, "");
+
+    /// <summary>
+    /// The table, query or SQL statement a Data control's recordset comes from.
+    /// </summary>
+    public static readonly PropertyDefinition<string> RecordSource = new("RecordSource", PropertyCategory.Misc, "");
+
+    /// <summary>
+    /// Whether a Data control opens its database for its program alone.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> Exclusive = new("Exclusive", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// The options a Data control opens its recordset with, a sum of DAO's <c>RecordsetOptionEnum</c> values.
+    /// </summary>
+    public static readonly PropertyDefinition<short> Options = new("Options", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// What a Data control does when its user moves before the first record. Another value is 380.
+    /// </summary>
+    public static readonly PropertyDefinition<DataBOFAction> BOFAction =
+        new("BOFAction", PropertyCategory.Behavior) { Valid = Enum.IsDefined };
+
+    /// <summary>
+    /// What a Data control does when its user moves past the last record. Another value is 380.
+    /// </summary>
+    public static readonly PropertyDefinition<DataEOFAction> EOFAction =
+        new("EOFAction", PropertyCategory.Behavior) { Valid = Enum.IsDefined };
+
+    /// <summary>
+    /// The kind of recordset a Data control opens. Another value is 380.
+    /// </summary>
+    public static readonly PropertyDefinition<DataRecordsetType> RecordsetType =
+        new("RecordsetType", PropertyCategory.Behavior, DataRecordsetType.Dynaset) { Valid = Enum.IsDefined };
+
+    /// <summary>
+    /// The database engine a Data control opens its database with. Another value is 380.
+    /// </summary>
+    public static readonly PropertyDefinition<DataDefaultType> DefaultType =
+        new("DefaultType", PropertyCategory.Behavior, DataDefaultType.UseJet) { Valid = Enum.IsDefined };
+
+    /// <summary>
+    /// The cursor an ODBCDirect Data control opens. A program can set a value that names none, such as 3, as VB6 lets it.
+    /// </summary>
+    public static readonly PropertyDefinition<DataDefaultCursorType> DefaultCursorType = new("DefaultCursorType", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// A Data control's <c>Negotiate</c>, which the model keeps as written. A program can neither read it nor set it.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> Negotiate = new("Negotiate", PropertyCategory.Misc) { NotAvailableAtRunTime = true };
 
     /// <summary>
     /// A ListBox's or ComboBox's items, in order.

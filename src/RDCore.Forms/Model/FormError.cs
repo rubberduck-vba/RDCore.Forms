@@ -53,6 +53,11 @@ public readonly record struct FormError(int Number, string Description)
     public static FormError PathNotFound => Standard(76);
 
     /// <summary>
+    /// Error 91, "Object variable or With block variable not set": such as a Data control's <c>UpdateRecord</c> with no recordset.
+    /// </summary>
+    public static FormError ObjectVariableNotSet => Standard(91);
+
+    /// <summary>
     /// Error 94, "Invalid use of Null".
     /// </summary>
     public static FormError InvalidUseOfNull => Standard(94);

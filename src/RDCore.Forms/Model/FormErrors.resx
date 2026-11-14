@@ -30,6 +30,9 @@
   <data name="Error76" xml:space="preserve">
     <value>Path not found</value>
   </data>
+  <data name="Error91" xml:space="preserve">
+    <value>Object variable or With block variable not set</value>
+  </data>
   <data name="Error94" xml:space="preserve">
     <value>Invalid use of Null</value>
   </data>

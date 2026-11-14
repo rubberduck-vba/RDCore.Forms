@@ -48,6 +48,7 @@ public static class VBClasses
         ["VB.Shape"] = "Shape",
         ["VB.Line"] = "Visible",
         ["VB.Timer"] = "Enabled",
+        ["VB.Data"] = "Caption",
         ["VB.Menu"] = "Enabled",
     };
 
@@ -243,6 +244,20 @@ public static class VBClasses
         defaultMember: DefaultMembers["VB.Line"]);
 
     /// <summary>
+    /// <c>VB.Data</c>: the four buttons that move through a database's records, and its caption between them. Its caption's colours
+    /// default to the window's. It takes no focus and has no <c>TabIndex</c>. Its <c>UpdateRecord</c> and <c>UpdateControls</c> act
+    /// on its recordset.
+    /// </summary>
+    public static readonly ComponentClass Data = Control("VB.Data", "Data",
+        [P.Caption, P.Align, P.Appearance, P.BackColor, P.ForeColor, P.Font, P.Enabled, P.MousePointer, P.MouseIcon, P.DragIcon, P.RightToLeft,
+         P.ToolTipText, P.WhatsThisHelpID, P.Connect, P.DatabaseName, P.RecordSource, P.RecordsetType, P.DefaultType, P.DefaultCursorType,
+         P.BOFAction, P.EOFAction, P.Exclusive, P.ReadOnly, P.Options, P.Negotiate],
+        [Validate, Error, Reposition, Resize, DragDrop, DragOver, MouseDown, MouseMove, MouseUp, OLECompleteDrag, OLEDragDrop, OLEDragOver,
+         OLEGiveFeedback, OLESetData, OLEStartDrag],
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.ReadOnly, false)),
+        methods: [M.UpdateRecord, M.UpdateControls]);
+
+    /// <summary>
     /// <c>VB.Menu</c>: a menu item. It has no place or size; its submenu's items are its contents. A form's menus, with VB's rules
     /// for them, are its <see cref="Menus.FormMenu"/>.
     /// </summary>
@@ -256,7 +271,7 @@ public static class VBClasses
     /// </summary>
     public static IReadOnlyList<ComponentClass> All { get; } =
         [Form, MDIForm, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
-         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox];
+         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data];
 
     private static readonly Dictionary<string, ComponentClass> byTypeName =
         All.ToDictionary(c => c.TypeName, StringComparer.OrdinalIgnoreCase);
@@ -280,13 +295,15 @@ public static class VBClasses
         new(typeName, defaultName, ComponentKind.Root, [.. properties, P.Left, P.Top, P.Width, P.Height, .. ScaleProperties, P.Tag], events,
             isContainer: true, methods: methods, defaultMember: DefaultMembers.GetValueOrDefault(typeName));
 
-    // A control that takes the mouse also has the ContextMenu of RD-VBA. One that can take the focus has SetFocus.
+    // A control that takes the mouse also has the ContextMenu of RD-VBA. One that can take the focus has SetFocus. A class's own
+    // methods follow the ones every control has.
     private static ComponentClass Control(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events,
-        IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false) =>
+        IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false,
+        MethodDefinition[]? methods = null) =>
         new(typeName, defaultName, ComponentKind.Control,
             [.. properties, P.Left, P.Top, P.Width, P.Height, P.Visible, P.Tag, .. events.Contains(MouseUp) ? [P.ContextMenu] : Array.Empty<PropertyDefinition>()],
             events, defaults, isContainer, isWindowless,
-            methods: [M.Move, M.Refresh, .. events.Contains(GotFocus) ? [M.SetFocus] : Array.Empty<MethodDefinition>(), M.ZOrder],
+            methods: [M.Move, M.Refresh, .. events.Contains(GotFocus) ? [M.SetFocus] : Array.Empty<MethodDefinition>(), M.ZOrder, .. methods ?? []],
             defaultMember: DefaultMembers.GetValueOrDefault(typeName));
 
     private static Dictionary<PropertyDefinition, object?> Defaults(params (PropertyDefinition Property, object? Value)[] defaults) =>

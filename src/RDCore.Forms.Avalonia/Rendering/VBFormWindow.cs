@@ -319,6 +319,10 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
     /// <c>Refresh</c> draws the component and its contents again. On the root or a PictureBox whose <c>AutoRedraw</c> is False, it raises
     /// Paint inside the call. VB6's <c>Refresh</c> was not measured: RDForms sets this rule.
     /// </para>
+    /// <para>
+    /// A Data control's <c>UpdateRecord</c> and <c>UpdateControls</c> are as <see cref="VBData.UpdateRecord"/> and
+    /// <see cref="VBData.UpdateControls"/>: error 91, as the control opens no recordset.
+    /// </para>
     /// </remarks>
     public FormValue Invoke(ComponentInstance component, MethodDefinition method, IReadOnlyList<FormValue?> arguments, CodeUnit unit = CodeUnit.Pixel)
     {
@@ -339,6 +343,10 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
             View.ZOrder(control, toFront: given[0] is not { } position || ToFront(position));
         else if (ReferenceEquals(method, VBMethods.Refresh))
             Refresh(component, control);
+        else if (ReferenceEquals(method, VBMethods.UpdateRecord) && control is VBData updated)
+            updated.UpdateRecord();
+        else if (ReferenceEquals(method, VBMethods.UpdateControls) && control is VBData updating)
+            updating.UpdateControls();
         else
             throw new FormErrorException(FormError.ObjectDoesntSupportPropertyOrMethod);
         return FormValue.Empty;
