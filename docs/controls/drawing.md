@@ -49,7 +49,24 @@ A column is the font's average character width, and a print zone is 14 columns. 
 
 Where `FontTransparent` is False, each line's cell, its width and a line high, is filled with the `BackColor` before the text is drawn. `DrawMode` does not apply to text, and text is drawn with no smoothing.
 
-The column and the line height are RDForms' own: the column is the OS/2 average width of the font file that draws the text, at its size, and the line is its ascent and descent together.
+MS Sans Serif's column and line height are VB6's. VB6 draws it at the largest of its sizes no larger than the size asked in whole pixels, or at its least, and each size has its own:
+
+|Size drawn (points)|Size drawn (pixels)|Line height (pixels)|Column (pixels)|Bold column (pixels)|
+|---|---|---|---|---|
+|8.25|11|13|5|6|
+|9.75|13|16|7|8|
+|12|16|20|8|9|
+|13.5|18|24|9|10|
+|15|20|25|10|11|
+|18|24|29|12|13|
+|19.5|26|32|14|16|
+|24|32|37|16|17|
+|27|36|48|18|20|
+|36|48|58|24|26|
+
+Asked for 14 points, about 18.7 pixels, VB6 draws it at 18 pixels: its column is 9 pixels and its line 24.
+
+Another font's column and line height are RDForms' own: the column is the OS/2 average width of the font file that draws the text, at its size, and the line is its ascent and descent together. A text's width is always the width of the font that draws it, so MS Sans Serif's text, drawn in a libre sans serif, is not as wide as in VB6.
 
 ## Erasing
 
@@ -100,7 +117,7 @@ The surface keeps what it draws whatever the component's `AutoRedraw`, and keeps
 |True|Not raised.|
 
 > [!NOTE]
-> **Not implemented.** `PaintPicture` has no surface member.
+> **Not implemented.** `PaintPicture` has no surface member. A font's `Size` reads back the size given, where VB6 reads back the size it draws MS Sans Serif at: 8 reads back 8.25.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
