@@ -50,14 +50,25 @@ A press, a key or a typed character selects a folder and raises Click as on a [L
 |`Pattern`|One or more patterns separated by semicolons, such as `*.txt;*.bas`; a file that matches any of them is listed. `*` stands for any characters and `?` for one, without regard to case; `*` and `*.*` also match a name with no extension. Setting it raises PatternChange. Setting the same pattern again raises nothing (RDForms' own).||
 |`Path`|The folder, read without a separator at its end. Setting another folder lists its files, selects none, and raises PathChange. A relative path is taken from the list's own `Path`, and the same folder again raises nothing (RDForms' own).|76 for a folder that does not exist.|
 |`FileName`|The selected file's name, or "". A file's name becomes the `Pattern`, which lists that file alone, and selects it; it reads back as the name is on disk. A pattern, with `*` or `?`, becomes the `Pattern` and selects nothing. A name with a folder sets `Path` first, which raises PathChange, then PatternChange. A file's name then raises DblClick; the same file again raises nothing. Where only the folder changes, the DblClick is RDForms' own. No Click.|53 for a file that does not exist; 76 for a folder that does not exist.|
-|`ListIndex`|The selected file, or -1 for none. Setting it raises Click when it moves the selection.|381 for a value outside -1 to `ListCount` - 1.|
+|`ListIndex`|The selected file, or -1 for none. Setting it raises Click when it moves the selection. See [MultiSelect](#multiselect) for a multi-select list.|381 for a value outside -1 to `ListCount` - 1.|
+|`GetSelected`, `SetSelected`|Read and set a file's selection. `SetSelected` raises Click when it changes something. On a single-select list it moves the selection, and clearing the selected file leaves none.|381 for an index outside the files.|
 |`ListCount`, `GetList(index)`|The number of files, and a file's name. `GetList` gives "" outside the list (RDForms' own).||
-|`Refresh()`|Reads the folder again. A file made or removed on disk shows only then, or when `Path`, `Pattern`, `Hidden` or `System` changes.||
+|`Refresh()`|Reads the folder again, and selects no file. A file made or removed on disk shows only then, or when `Path`, `Pattern`, `Hidden` or `System` changes.||
 
-A press, a key or a typed character selects a file and raises Click as on a [ListBox](lists.md#listbox) (RDForms' own).
+A press or a key selects a file and raises Click as on a [ListBox](lists.md#listbox), and a double click raises Click, then DblClick. A typed character selects a file as on a ListBox (RDForms' own).
 
-> [!NOTE]
-> **Not implemented.** A FileListBox selects one file at a time: its `MultiSelect` and `Selected` are not applied.
+### MultiSelect
+
+With a `MultiSelect` of Simple or Extended, a FileListBox selects files as a [ListBox with that `MultiSelect`](lists.md#multiselect) does. `ListIndex` is the file with the focus, which is the first file each time the files are listed, and `FileName` is that file's name, selected or not. A press with Ctrl or Shift follows the ListBox's rules (RDForms' own).
+
+|Statement|Effect|
+|---|---|
+|`ListIndex = -1`|Raises Click and changes nothing, with no file listed too.|
+|`ListIndex` set to its own value|Does nothing.|
+|`ListIndex` set to any other value|381.|
+|`FileName` set to a file|Gives the file the focus and selects nothing.|
+|`SetSelected(index, True)`|Adds the file and gives it the focus, and raises Click; on a selected file, does nothing.|
+|`SetSelected(index, False)`|Removes the file and leaves the focus where it is, and raises Click; on a file not selected, does nothing.|
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

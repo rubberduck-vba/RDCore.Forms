@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.IO.Abstractions.TestingHelpers;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
@@ -28,6 +29,13 @@ public sealed class MultiSelectListTests
                 var list = new VBListBox(new ComponentInstance(VBClasses.ListBox, "List1")
                     .Set(P.List, ["a", "b", "c", "d", "e"]).Set(P.MultiSelect, mode));
                 return new(list, () => list.ListIndex, list.GetSelected);
+            case "FileListBox":
+                var root = OperatingSystem.IsWindows() ? @"C:\five" : "/five";
+                var files = new MockFileSystem(new[] { "a.txt", "b.txt", "c.txt", "d.txt", "e.bas" }
+                    .ToDictionary(name => Path.Combine(root, name), _ => new MockFileData("")), root);
+                var fileList = new VBFileListBox(new ComponentInstance(VBClasses.FileListBox, "File1").Set(P.MultiSelect, mode),
+                    OperatingSystem.IsWindows() ? files : new RootDrives(files));
+                return new(fileList, () => fileList.ListIndex, fileList.GetSelected);
             default:
                 throw new ArgumentOutOfRangeException(nameof(type));
         }
@@ -81,6 +89,7 @@ public sealed class MultiSelectListTests
 
     [TestMethod]
     [DataRow("ListBox")]
+    [DataRow("FileListBox")]
     public void ASimpleListsPress_TogglesTheItem_WhateverTheModifiers_AndRaisesClick(string type)
     {
         var log = Steps(type, ListBoxMultiSelect.Simple,
@@ -96,6 +105,7 @@ public sealed class MultiSelectListTests
 
     [TestMethod]
     [DataRow("ListBox")]
+    [DataRow("FileListBox")]
     public void AnExtendedListsPress_SelectsTheItemAlone_TogglesItWithCtrl_AndSelectsFromTheAnchorWithShift(string type)
     {
         var log = Steps(type, ListBoxMultiSelect.Extended,
@@ -111,6 +121,7 @@ public sealed class MultiSelectListTests
 
     [TestMethod]
     [DataRow("ListBox")]
+    [DataRow("FileListBox")]
     public void ASimpleListsDown_MovesOnlyTheFocus_AndSpaceTogglesTheFocusedItem_EachWithClick(string type)
     {
         var log = Steps(type, ListBoxMultiSelect.Simple,
@@ -124,6 +135,7 @@ public sealed class MultiSelectListTests
 
     [TestMethod]
     [DataRow("ListBox")]
+    [DataRow("FileListBox")]
     public void AnExtendedListsDown_SelectsTheNextItemAlone_AndSpaceChangesNothing_EachWithClick(string type)
     {
         var log = Steps(type, ListBoxMultiSelect.Extended,
@@ -137,6 +149,23 @@ public sealed class MultiSelectListTests
     [TestMethod]
     [DataRow("ListBox", ListBoxMultiSelect.Simple)]
     [DataRow("ListBox", ListBoxMultiSelect.Extended)]
+    [DataRow("FileListBox", ListBoxMultiSelect.Simple)]
+    [DataRow("FileListBox", ListBoxMultiSelect.Extended)]
+    public void AKeyOtherThanUpDownAndSpace_ChangesNothing_AndRaisesNoClick(string type, ListBoxMultiSelect mode)
+    {
+        var log = Steps(type, mode,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            ("End", (w, _) => Stroke(w, Key.End, PhysicalKey.End, null)),
+            ("Home", (w, _) => Stroke(w, Key.Home, PhysicalKey.Home, null)));
+
+        Expect.Lines(["press 1: Click [1] 1", "End:  [1] 1", "Home:  [1] 1"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox", ListBoxMultiSelect.Simple)]
+    [DataRow("ListBox", ListBoxMultiSelect.Extended)]
+    [DataRow("FileListBox", ListBoxMultiSelect.Simple)]
+    [DataRow("FileListBox", ListBoxMultiSelect.Extended)]
     public void ADoubleClick_RaisesClickThenDblClick_AndTogglesTheItemOnce(string type, ListBoxMultiSelect mode)
     {
         var log = Steps(type, mode,

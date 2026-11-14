@@ -223,6 +223,98 @@ public sealed class FileListControlTests
     }
 
     [TestMethod]
+    public void ASingleSelectFileListsSelected_MovesTheSelection_AndClearingTheSelectedFileLeavesNone()
+    {
+        var (log, raised, read, set) = UI.Run(() =>
+        {
+            var list = new VBFileListBox(File(), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            var log = new List<string>();
+            void Step(string name, Action act)
+            {
+                act();
+                log.Add($"{name}: {sink.Raised.Count(e => e == "File1.Click")} {list.ListIndex} {list.FileName} {list.GetSelected(1)}");
+                sink.Raised.Clear();
+            }
+            Step("Selected(1) = True", () => list.SetSelected(1, true));
+            Step("Selected(3) = True", () => list.SetSelected(3, true));
+            Step("Selected(1) = True", () => list.SetSelected(1, true));
+            Step("Selected(3) = False", () => list.SetSelected(3, false));
+            Step("Selected(1) = False", () => list.SetSelected(1, false));
+            var read = Assert.ThrowsExactly<FormErrorException>(() => list.GetSelected(6)).Error.Number;
+            var set = Assert.ThrowsExactly<FormErrorException>(() => list.SetSelected(-1, true)).Error.Number;
+            window.Close();
+            return (log, sink.Raised, read, set);
+        });
+
+        Expect.Lines(["Selected(1) = True: 1 1 b.bas True", "Selected(3) = True: 1 3 noext False", "Selected(1) = True: 1 1 b.bas True",
+            "Selected(3) = False: 0 1 b.bas True", "Selected(1) = False: 1 -1  False"], log);
+        Assert.IsEmpty(raised);
+        Assert.AreEqual(381, read);
+        Assert.AreEqual(381, set);
+    }
+
+    [TestMethod]
+    [DataRow(ListBoxMultiSelect.Simple)]
+    [DataRow(ListBoxMultiSelect.Extended)]
+    public void AMultiSelectFileListsListIndex_IsTheFocusedFile_TheFirstEachTimeItLists_AndTakesOnlyMinus1AndItself(ListBoxMultiSelect mode)
+    {
+        var (log, error) = UI.Run(() =>
+        {
+            var list = new VBFileListBox(File().Set(P.MultiSelect, mode), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            var log = new List<string>();
+            void Step(string name, Action act)
+            {
+                act();
+                var selected = Enumerable.Range(0, list.ListCount).Where(list.GetSelected);
+                log.Add($"{name}: {string.Join(" ", sink.Raised.Select(e => e[6..]))} [{string.Join(",", selected)}] {list.ListIndex} {list.FileName}");
+                sink.Raised.Clear();
+            }
+            Step("shown", () => { });
+            Step("Selected(1) = True", () => list.SetSelected(1, true));
+            Step("Selected(3) = True", () => list.SetSelected(3, true));
+            Step("Selected(3) = True", () => list.SetSelected(3, true));
+            Step("Selected(3) = False", () => list.SetSelected(3, false));
+            Step("ListIndex = 3", () => list.ListIndex = 3);
+            Step("ListIndex = -1", () => list.ListIndex = -1);
+            var error = Assert.ThrowsExactly<FormErrorException>(() => list.ListIndex = 2).Error.Number;
+            Step("Refresh", list.Refresh);
+            Step("Pattern = *.none", () => list.Pattern = "*.none");
+            Step("ListIndex = 0", () => list.ListIndex = 0);
+            Step("ListIndex = -1", () => list.ListIndex = -1);
+            window.Close();
+            return (log, error);
+        });
+
+        Expect.Lines(["shown:  [] 0 a.txt", "Selected(1) = True: Click [1] 1 b.bas", "Selected(3) = True: Click [1,3] 3 noext",
+            "Selected(3) = True:  [1,3] 3 noext", "Selected(3) = False: Click [1] 3 noext", "ListIndex = 3:  [1] 3 noext",
+            "ListIndex = -1: Click [1] 3 noext", "Refresh:  [] 0 a.txt", "Pattern = *.none: PatternChange [] 0 ",
+            "ListIndex = 0:  [] 0 ", "ListIndex = -1: Click [] 0 "], log);
+        Assert.AreEqual(381, error);
+    }
+
+    [TestMethod]
+    public void AMultiSelectFileListsFileName_GivesTheFileTheFocus_AndSelectsNothing()
+    {
+        var (index, fileName, selected, raised) = UI.Run(() =>
+        {
+            var list = new VBFileListBox(File().Set(P.MultiSelect, ListBoxMultiSelect.Extended), Tree());
+            var (window, sink) = ControlHost.Show(list);
+            list.SetSelected(2, true);
+            sink.Raised.Clear();
+            list.FileName = "noext";
+            window.Close();
+            return (list.ListIndex, list.FileName, list.GetSelected(0), sink.Raised);
+        });
+
+        Assert.AreEqual(0, index);
+        Assert.AreEqual("noext", fileName);
+        Assert.IsFalse(selected);
+        Expect.Lines(new[] { "File1.PatternChange", "File1.DblClick" }, raised);
+    }
+
+    [TestMethod]
     public void APath_IsReadWithoutItsFinalSeparator_AndRaisesPathChange_OnlyWhereItChanges()
     {
         var (path, fileName, raised) = UI.Run(() =>
