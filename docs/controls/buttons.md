@@ -23,6 +23,8 @@ These are RDForms' own, not measured with VB6:
 
 A Standard CommandButton does not paint its `BackColor`. See [Style Graphical](#style-graphical) for its `Picture`.
 
+A CommandButton has no `ForeColor`, as in VB6, where a program's read or assignment of it is 438. Its caption is drawn in the system's `ButtonText` colour. A VB6 form file or a form document that gives it a `ForeColor` keeps that value as an `UnmodelledProperty` (see [Format](../format/index.md)).
+
 ## CheckBox
 
 [`VBCheckBox`](../api/RDCore.Forms.Avalonia.Controls.VBCheckBox.yml)
