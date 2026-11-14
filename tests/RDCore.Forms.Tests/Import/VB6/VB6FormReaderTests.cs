@@ -81,6 +81,18 @@ public sealed class VB6FormReaderTests
         Assert.IsEmpty(import.Diagnostics);
     }
 
+    // VB6's CommandButton has no ForeColor, and the model's has none: a file that gives it one keeps that line as text.
+    [TestMethod]
+    public void ACommandButtonsForeColor_IsKeptAsText()
+    {
+        var import = VB6FormReader.Read(Form("   Begin VB.CommandButton Command1 ", "      ForeColor       =   &H000000FF&", "   End"));
+        var button = import.Form!.Find("Command1")!;
+
+        Assert.IsFalse(VBClasses.CommandButton.Has(VBProperties.ForeColor));
+        Assert.Contains(new UnmodelledProperty("ForeColor", "&H000000FF&"), button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
     [TestMethod]
     public void TheFileSystemLists_AreRead_AFileListBoxWithItsPatternAndItsAttributes()
     {

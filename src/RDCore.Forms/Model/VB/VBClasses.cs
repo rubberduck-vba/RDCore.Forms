@@ -93,10 +93,11 @@ public static class VBClasses
         [M.Refresh]);
 
     /// <summary>
-    /// <c>VB.CommandButton</c>.
+    /// <c>VB.CommandButton</c>. It has no <c>ForeColor</c>, as VB6's has none: its caption is drawn in the system's <c>ButtonText</c>
+    /// colour.
     /// </summary>
     public static readonly ComponentClass CommandButton = Control("VB.CommandButton", "Command",
-        [P.Caption, P.BackColor, P.ForeColor, P.Appearance, P.Font, P.MousePointer, P.Picture, P.Enabled, P.TabStop, P.TabIndex, P.ToolTipText,
+        [P.Caption, P.BackColor, P.Appearance, P.Font, P.MousePointer, P.Picture, P.Enabled, P.TabStop, P.TabIndex, P.ToolTipText,
          P.Default, P.Cancel, P.ButtonStyle, P.DownPicture, P.DisabledPicture, P.CommandButtonValue],
         [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
