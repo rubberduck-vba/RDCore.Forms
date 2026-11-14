@@ -83,6 +83,33 @@ public sealed class RunTimeControlViewTests
         Expect.Lines(new[] { "cmdNew.GotFocus", "cmdNew.Click" }, raised);
     }
 
+    // VB6 snaps a ListBox added at run time to whole rows at once: 450 twips, 30 pixels at the default font. RDForms snaps it
+    // as its view is made, so one added to a form not shown keeps its 32 pixels until the form is shown.
+    [TestMethod]
+    public void AListBoxAdded_IsSnappedToWholeRows_AsItsViewIsMade()
+    {
+        var (onShown, beforeShown, afterShown) = UI.Run(() =>
+        {
+            var (window, form, _) = Open();
+            var onShown = form.AddControl("VB.ListBox", "lstNew").Get(P.Height);
+            window.Close();
+
+            var hiddenForm = new FormDefinition(new ComponentInstance(VBClasses.Form, "Form2").Set(P.Width, 320d).Set(P.Height, 240d));
+            var list = hiddenForm.AddControl("VB.ListBox", "lstNew");
+            var beforeShown = list.Get(P.Height);
+            var hiddenWindow = new VBFormWindow(hiddenForm);
+            hiddenWindow.Show();
+            Dispatcher.UIThread.RunJobs();
+            var afterShown = list.Get(P.Height);
+            hiddenWindow.Close();
+            return (onShown, beforeShown, afterShown);
+        });
+
+        Assert.AreEqual(30d, onShown);
+        Assert.AreEqual(32d, beforeShown);
+        Assert.AreEqual(30d, afterShown);
+    }
+
     [TestMethod]
     public void AControlRemoved_GoesAtOnce_WithWhatItHolds_AndTheFocusGoesToTheFirstControlOfTheTabOrder()
     {
