@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
@@ -146,19 +147,111 @@ public sealed class MultiSelectListTests
         Expect.Lines(["press 1: Click [1] 1", "Down: Click [2] 2", "Space: Click [2] 2"], log);
     }
 
-    [TestMethod]
-    [DataRow("ListBox", ListBoxMultiSelect.Simple)]
-    [DataRow("ListBox", ListBoxMultiSelect.Extended)]
-    [DataRow("FileListBox", ListBoxMultiSelect.Simple)]
-    [DataRow("FileListBox", ListBoxMultiSelect.Extended)]
-    public void AKeyOtherThanUpDownAndSpace_ChangesNothing_AndRaisesNoClick(string type, ListBoxMultiSelect mode)
-    {
-        var log = Steps(type, mode,
-            ("press 1", (w, l) => Press(w, l, 1)),
-            ("End", (w, _) => Stroke(w, Key.End, PhysicalKey.End, null)),
-            ("Home", (w, _) => Stroke(w, Key.Home, PhysicalKey.Home, null)));
+    private static (string, Action<Window, ListBox>) Keyed(string name, Key key, PhysicalKey physical) =>
+        (name, (w, _) => Stroke(w, key, physical, null));
 
-        Expect.Lines(["press 1: Click [1] 1", "End:  [1] 1", "Home:  [1] 1"], log);
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void ASimpleListsLeftRightHomeAndEnd_MoveOnlyTheFocus_EachWithClick_AtTheEndsToo(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.Simple,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft),
+            Keyed("Home", Key.Home, PhysicalKey.Home),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft),
+            Keyed("End", Key.End, PhysicalKey.End),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            ("Space", (w, _) => Stroke(w, Key.Space, PhysicalKey.Space, " ")));
+
+        Expect.Lines(["press 1: Click [1] 1", "Right: Click [1] 2", "Right: Click [1] 3", "Left: Click [1] 2", "Home: Click [1] 0",
+            "Left: Click [1] 0", "End: Click [1] 4", "Right: Click [1] 4", "Space: Click [1,4] 4"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void AnExtendedListsLeftRightHomeAndEnd_SelectTheItemReachedAlone_EachWithClick_AtTheEndsToo(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.Extended,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft),
+            Keyed("End", Key.End, PhysicalKey.End),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Home", Key.Home, PhysicalKey.Home),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft));
+
+        Expect.Lines(["press 1: Click [1] 1", "Right: Click [2] 2", "Left: Click [1] 1", "End: Click [4] 4", "Right: Click [4] 4",
+            "Home: Click [0] 0", "Left: Click [0] 0"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void ASingleSelectListsLeftRightHomeAndEnd_MoveTheSelection_WithClickOnlyWhereItMoves(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.None,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft),
+            Keyed("Home", Key.Home, PhysicalKey.Home),
+            Keyed("Left", Key.Left, PhysicalKey.ArrowLeft),
+            Keyed("End", Key.End, PhysicalKey.End),
+            Keyed("Right", Key.Right, PhysicalKey.ArrowRight),
+            ("Space", (w, _) => Stroke(w, Key.Space, PhysicalKey.Space, " ")));
+
+        Expect.Lines(["press 1: Click [1] 1", "Right: Click [2] 2", "Right: Click [3] 3", "Left: Click [2] 2", "Home: Click [0] 0",
+            "Left:  [0] 0", "End: Click [4] 4", "Right:  [4] 4", "Space:  [4] 4"], log);
+    }
+
+    [TestMethod]
+    [DataRow(ListBoxMultiSelect.None)]
+    [DataRow(ListBoxMultiSelect.Simple)]
+    [DataRow(ListBoxMultiSelect.Extended)]
+    public void PageDownAndPageUp_MoveAsManyItemsAsTheListShowsWhole_LessOne(ListBoxMultiSelect mode)
+    {
+        var (reached, wholeAtTheBottom, clicks) = UI.Run(() =>
+        {
+            var list = new VBListBox(new ComponentInstance(VBClasses.ListBox, "List1")
+                .Set(P.List, [.. Enumerable.Range(0, 30).Select(i => $"item{i}")]).Set(P.MultiSelect, mode));
+            var (window, sink) = ControlHost.Show((list, new Rect(10, 5, 160, 140)));
+            Press(window, list, 0);
+            sink.Raised.Clear();
+            var reached = new List<int>();
+            bool? wholeAtTheBottom = null;
+            foreach (var (key, physical) in new[] { (Key.PageDown, PhysicalKey.PageDown), (Key.PageDown, PhysicalKey.PageDown),
+                         (Key.PageUp, PhysicalKey.PageUp), (Key.End, PhysicalKey.End), (Key.PageUp, PhysicalKey.PageUp) })
+            {
+                Stroke(window, key, physical, null);
+                reached.Add(list.ListIndex);
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+                Dispatcher.UIThread.RunJobs();
+                // After the first PageDown, the item reached is the last one shown whole.
+                wholeAtTheBottom ??= ShownWhole(list, list.ListIndex) && !ShownWhole(list, list.ListIndex + 1);
+            }
+            var clicks = sink.Raised.Count(e => e.EndsWith(".Click", StringComparison.Ordinal));
+            window.Close();
+            return (reached, wholeAtTheBottom, clicks);
+        });
+
+        var page = reached[0];
+        Assert.IsTrue(page > 1, $"a page of {page}");
+        Assert.IsTrue(wholeAtTheBottom);
+        CollectionAssert.AreEqual(new[] { page, 2 * page, page, 29, 29 - page }, reached);
+        Assert.AreEqual(5, clicks);
+    }
+
+    // Whether the list shows the item at index whole, from its top to its bottom.
+    private static bool ShownWhole(ListBox list, int index)
+    {
+        var viewer = list.GetVisualDescendants().OfType<ScrollViewer>().First();
+        if (list.ContainerFromIndex(index) is not { } item || item.TranslatePoint(default, viewer) is not { } top)
+            return false;
+        return top.Y >= -0.5 && top.Y + item.Bounds.Height <= viewer.Viewport.Height + 0.5;
     }
 
     [TestMethod]

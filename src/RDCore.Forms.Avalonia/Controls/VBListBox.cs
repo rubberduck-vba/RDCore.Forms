@@ -276,9 +276,7 @@ public sealed class VBListBox : ListBox, IRaisesKeyEvents, IMultiSelectList
             return;
         var before = SelectedIndex;
         base.OnKeyDown(e);
-        // An arrow that moves the selection raises Click; one that can go no further does not.
-        if (SelectedIndex != before)
-            VBControl.Raise(this, VBEvents.Click);
+        ListClicks.KeyMoved(this, before);
     }
 
     /// <inheritdoc/>
