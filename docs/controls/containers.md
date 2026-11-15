@@ -98,7 +98,7 @@ A `Picture` holds the bytes of a picture file. A picture from a VB6 form is read
 
 |Format|Drawn|
 |---|---|
-|PNG|Yes, its transparent pixels showing what is behind them.|
+|PNG|Yes, its transparent pixels showing what is behind them, and its half-transparent pixels blended over it, stretched or not.|
 |BMP, JPEG|Yes.|
 |GIF|Yes. Its transparent colour shows what is under the control: the form's `Picture` under an Image or a transparent Label, the `BackColor` of a PictureBox or an opaque Label. An animated GIF is not animated.|
 |ICO, CUR|Yes. VB6 draws a cursor that is a form's `Picture` in black; RDForms draws it in its own colours.|
