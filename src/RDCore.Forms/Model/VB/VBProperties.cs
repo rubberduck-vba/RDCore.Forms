@@ -26,7 +26,7 @@ public static class VBProperties
 {
     /// <summary>
     /// A control's left edge in its container, in pixels whatever the container's scale; a form's client area's left edge on the
-    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned PictureBox keeps the one
+    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned control keeps the one
     /// its <see cref="AlignLayout"/> gives it.
     /// </summary>
     public static readonly PropertyDefinition<double> Left = new("Left", PropertyCategory.Position)
@@ -36,7 +36,7 @@ public static class VBProperties
 
     /// <summary>
     /// A control's top edge in its container, in pixels whatever the container's scale; a form's client area's top edge on the
-    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned PictureBox keeps the one
+    /// screen, in pixels. A program's code reads it in its own unit: see <see cref="CodeUnits"/>. An aligned control keeps the one
     /// its <see cref="AlignLayout"/> gives it.
     /// </summary>
     public static readonly PropertyDefinition<double> Top = new("Top", PropertyCategory.Position)
@@ -199,7 +199,7 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> WordWrap = new("WordWrap", PropertyCategory.Misc);
 
     /// <summary>
-    /// The edge of its form a PictureBox is docked to: see <see cref="AlignLayout"/>. Setting it on a box in another container, or to
+    /// The edge of its form a PictureBox, a Data control or an <c>Alignable</c> UserControl is docked to: see <see cref="AlignLayout"/>. Setting it on a box in another container, or to
     /// <see cref="VB.Align.None"/> on a box of an MDI form, leaves it as it was.
     /// </summary>
     public static readonly PropertyDefinition<Align> Align = new("Align", PropertyCategory.Position)

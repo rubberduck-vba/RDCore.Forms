@@ -50,7 +50,7 @@ A placed control's members are those of the extender VB6 wraps it in. The UserCo
 A placed control has no `Enabled`, `hWnd` or data-binding member (438 in VB6). It is a container when the UserControl's `ControlContainer` is True, and windowless when its `Windowless` is. The properties a form's file sets on it that are the UserControl's own, such as its `_ExtentX` and `_ExtentY`, are kept as text.
 
 > [!NOTE]
-> **Not implemented.** A placed control has no `Move`, `ZOrder`, `Parent`, `Container` or `Object`. An `Alignable` one's `Align` does not dock it to an edge of its form.
+> **Not implemented.** A placed control has no `Move`, `ZOrder`, `Parent`, `Container` or `Object`.
 
 ## Showing a placed UserControl
 
@@ -67,10 +67,12 @@ A placed control has no `Enabled`, `hWnd` or data-binding member (438 in VB6). I
 
 A UserControl placed in another one is shown with its own controls. A UserControl that holds itself, at any depth, is shown once, with a box that names its class, such as `Project1.Gauge`, where it holds itself (RDForms' own).
 
+A placed UserControl that is `Alignable`, on the form itself, is docked to the edge its `Align` names, as an [aligned PictureBox](containers.md#an-aligned-picturebox) is. It raises no Resize when it is.
+
 A placed UserControl takes no focus, and Tab passes over it; a press on one of its controls gives that control the focus, and Tab from there goes to the form's next control. Its root and its controls raise their events to the window's sink, each with its component of the copy as the source.
 
 > [!NOTE]
-> **Not implemented.** An `Alignable` UserControl's `Align` places nothing. A placed UserControl raises none of its own events (Initialize, ReadProperties, Resize, Show, Paint, Hide, Terminate) and none of its focus events, and its access keys do nothing. A program cannot move a control into one (425 in VB6 for one that is not a container).
+> **Not implemented.** A placed UserControl raises none of its own events (Initialize, ReadProperties, Resize, Show, Paint, Hide, Terminate) and none of its focus events, and its access keys do nothing. A program cannot move a control into one (425 in VB6 for one that is not a container).
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

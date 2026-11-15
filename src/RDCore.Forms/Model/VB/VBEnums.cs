@@ -114,7 +114,7 @@ public enum StartUpPosition
 }
 
 /// <summary>
-/// Which edge of its form a VB PictureBox is docked to: its <c>Align</c>.
+/// Which edge of its form a VB PictureBox, Data control or <c>Alignable</c> UserControl is docked to: its <c>Align</c>.
 /// </summary>
 public enum Align
 {
