@@ -199,8 +199,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> WordWrap = new("WordWrap", PropertyCategory.Misc);
 
     /// <summary>
-    /// The edge of its form a PictureBox, a Data control or an <c>Alignable</c> UserControl is docked to: see <see cref="AlignLayout"/>. Setting it on a box in another container, or to
-    /// <see cref="VB.Align.None"/> on a box of an MDI form, leaves it as it was.
+    /// The edge of its form a PictureBox, a Data control or an <c>Alignable</c> UserControl is docked to: see <see cref="AlignLayout"/>.
+    /// Setting it on a box in another container, or to <see cref="VB.Align.None"/> on a box of an MDI form, leaves it as it was.
     /// </summary>
     public static readonly PropertyDefinition<Align> Align = new("Align", PropertyCategory.Position)
     {
