@@ -80,6 +80,8 @@ public static class VBControls
             return new VBShape(instance);
         if (ReferenceEquals(type, VBClasses.Line))
             return new VBLine(instance);
+        if (ReferenceEquals(type, VBClasses.Data))
+            return new VBData(instance);
         if (UserControlClasses.DefinitionOf(type) is not null)
             return type.HasExtent ? new VBUserControl(instance, fileSystem) : null;
         return null;
