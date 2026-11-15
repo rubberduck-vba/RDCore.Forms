@@ -278,8 +278,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<bool> ForwardFocus = new("ForwardFocus", PropertyCategory.Behavior);
 
     /// <summary>
-    /// Whether a placed UserControl is never shown to a running program; False by default. Its extender keeps only its name, its
-    /// index, its parent, its object, and a <c>Left</c> and a <c>Top</c> a program can neither read nor set.
+    /// Whether a placed UserControl is never shown to a running program; False by default. A placed one that is has no extent, and
+    /// its class has only a <c>Left</c> and a <c>Top</c>, which a program can neither read nor set.
     /// </summary>
     public static readonly PropertyDefinition<bool> InvisibleAtRuntime = new("InvisibleAtRuntime", PropertyCategory.Behavior);
 
