@@ -2,6 +2,7 @@
 // Copyright (c) 2024 Bartosz Korczyński. Copyright (c) 2026 The HexIDE Authors. MIT License; see NOTICE.md.
 
 using RDCore.Forms.Menus;
+using RDCore.SDK.Workspace.Pictures;
 
 namespace RDCore.Forms.Model.VB;
 
