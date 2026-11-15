@@ -53,7 +53,7 @@ public readonly record struct FormFont(
     /// <summary>
     /// Makes the <c>stdole.StdFont</c> that holds this font, as a VB6 control gives one for its <c>Font</c>.
     /// </summary>
-    /// <param name="font">The new font, whose name is set; <see langword="null"/> where a value is refused.</param>
+    /// <param name="font">The new font, holding each of this font's values; <see langword="null"/> where a value is refused.</param>
     /// <returns>
     /// <see cref="StdFontFailure.None"/> where every value is taken; otherwise the failure of the first value a <see cref="StdFontObject"/>
     /// refuses, in the order name, size, weight, character set: a name longer than 31 characters, a size of 0 or less or of 24576 points
@@ -81,9 +81,9 @@ public readonly record struct FormFont(
     }
 
     /// <summary>
-    /// The font a <c>stdole.StdFont</c> holds, as a VB6 control takes one for its <c>Font</c>.
+    /// Makes the font a <c>stdole.StdFont</c> holds, as a VB6 control takes one for its <c>Font</c>.
     /// </summary>
-    /// <param name="font">The font. Its <see cref="StdFontObject.Size"/> is read, which keeps the size it reads.</param>
+    /// <param name="font">The <c>stdole.StdFont</c>.</param>
     /// <returns>The font, at the size the <see cref="StdFontObject"/> reads back.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="font"/> is <see langword="null"/>.</exception>
     public static FormFont FromStdFont(StdFontObject font)
