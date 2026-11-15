@@ -16,7 +16,7 @@ namespace RDCore.Forms.Model;
 /// <param name="Strikethrough">Whether the font is struck through.</param>
 /// <param name="Charset">The font's character set, as Windows numbers them: 0 is ANSI, 2 is Symbol.</param>
 /// <param name="IsNamed">
-/// Whether the font was given its name. A <c>stdole.StdFont</c> no program has named reads its default name, <c>MS Sans Serif</c>, and is
+/// Whether the font's name was ever set; True by default. A <c>stdole.StdFont</c> no program has named reads its default name, <c>MS Sans Serif</c>, and is
 /// drawn in the scalable face Windows maps no name to, at that face's sizes (<see cref="StdFontObject.IsNamed"/>). A font a form's file
 /// declares is named.
 /// </param>
