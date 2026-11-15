@@ -17,7 +17,8 @@ public static class VBControls
     /// </summary>
     /// <param name="instance">The component.</param>
     /// <returns>
-    /// The control, or <see langword="null"/> where its class has none: a menu and a form's root.
+    /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, and a class of the project's own, such as
+    /// a placed UserControl's.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> is <see langword="null"/>.</exception>
     /// <remarks>
@@ -32,7 +33,8 @@ public static class VBControls
     /// <param name="instance">The component.</param>
     /// <param name="fileSystem">The file system a DriveListBox, a DirListBox and a FileListBox show, from its current directory.</param>
     /// <returns>
-    /// The control, or <see langword="null"/> where its class has none: a menu and a form's root.
+    /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, and a class of the project's own, such as
+    /// a placed UserControl's.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> or <paramref name="fileSystem"/> is <see langword="null"/>.</exception>
     public static Control? Create(ComponentInstance instance, IFileSystem fileSystem)

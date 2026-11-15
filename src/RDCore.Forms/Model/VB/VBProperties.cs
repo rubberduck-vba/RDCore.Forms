@@ -243,6 +243,118 @@ public static class VBProperties
     public static readonly PropertyDefinition<byte[]?> DragIcon = new("DragIcon", PropertyCategory.Behavior, null);
 
     /// <summary>
+    /// How a placed UserControl is dragged: its extender's <c>DragMode</c>.
+    /// </summary>
+    public static readonly PropertyDefinition<DragMode> DragMode = new("DragMode", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// The letters a UserControl answers to with Alt, as its designer file holds them: <c>AccessKeys = "q"</c>. "" by default.
+    /// </summary>
+    public static readonly PropertyDefinition<string> AccessKeys = new("AccessKeys", PropertyCategory.Behavior, "");
+
+    /// <summary>
+    /// Whether a placed UserControl has an <see cref="Align"/>; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> Alignable = new("Alignable", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a UserControl takes the focus itself; True by default. A placed one that does not has no <c>TabIndex</c>.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> CanGetFocus = new("CanGetFocus", PropertyCategory.Behavior, true);
+
+    /// <summary>
+    /// Whether a placed UserControl holds the controls its form places in it; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> ControlContainer = new("ControlContainer", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a placed UserControl has a <see cref="Default"/> and a <see cref="Cancel"/>; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> DefaultCancel = new("DefaultCancel", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a UserControl gives the focus it is offered to the next control in the tab order; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> ForwardFocus = new("ForwardFocus", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a placed UserControl is never shown to a running program; False by default. Its extender keeps only its name, its
+    /// index, its parent, its object, and a <c>Left</c> and a <c>Top</c> a program can neither read nor set.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> InvisibleAtRuntime = new("InvisibleAtRuntime", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a UserControl is drawn on its container's surface rather than in a window of its own; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> Windowless = new("Windowless", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// A UserControl's <c>EditAtDesignTime</c>; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> EditAtDesignTime = new("EditAtDesignTime", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// A UserControl's <c>Public</c>; False by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> Public = new("Public", PropertyCategory.Misc);
+
+    /// <summary>
+    /// A UserControl's <c>HasDC</c>; True by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> HasDC = new("HasDC", PropertyCategory.Appearance, true);
+
+    /// <summary>
+    /// A UserControl's <c>ClipControls</c>; True by default.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> ClipControls = new("ClipControls", PropertyCategory.Appearance, true);
+
+    /// <summary>
+    /// A UserControl's <c>ClipBehavior</c>; Use Region by default.
+    /// </summary>
+    public static readonly PropertyDefinition<ClipBehavior> ClipBehavior = new("ClipBehavior", PropertyCategory.Appearance, VB.ClipBehavior.UseRegion);
+
+    /// <summary>
+    /// A UserControl's <c>HitBehavior</c>; Use Region by default.
+    /// </summary>
+    public static readonly PropertyDefinition<HitBehavior> HitBehavior = new("HitBehavior", PropertyCategory.Behavior, VB.HitBehavior.UseRegion);
+
+    /// <summary>
+    /// A UserControl's <c>DataBindingBehavior</c>; <c>vbNone</c> by default.
+    /// </summary>
+    public static readonly PropertyDefinition<DataBindingBehavior> DataBindingBehavior = new("DataBindingBehavior", PropertyCategory.Misc);
+
+    /// <summary>
+    /// A UserControl's <c>DataSourceBehavior</c>; <c>vbNone</c> by default.
+    /// </summary>
+    public static readonly PropertyDefinition<DataSourceBehavior> DataSourceBehavior = new("DataSourceBehavior", PropertyCategory.Misc);
+
+    /// <summary>
+    /// A UserControl's or a PropertyPage's <c>PaletteMode</c>. Its default is the class's.
+    /// </summary>
+    public static readonly PropertyDefinition<PaletteMode> PaletteMode = new("PaletteMode", PropertyCategory.Appearance);
+
+    /// <summary>
+    /// The picture whose palette a UserControl or a PropertyPage draws with where its <see cref="PaletteMode"/> is Custom, as the bytes
+    /// of its image file, or <see langword="null"/> for none.
+    /// </summary>
+    public static readonly PropertyDefinition<byte[]?> Palette = new("Palette", PropertyCategory.Appearance, null);
+
+    /// <summary>
+    /// A UserControl's <c>MaskPicture</c>, as the bytes of its image file, or <see langword="null"/> for none.
+    /// </summary>
+    public static readonly PropertyDefinition<byte[]?> MaskPicture = new("MaskPicture", PropertyCategory.Appearance, null);
+
+    /// <summary>
+    /// The picture a designer's toolbox shows for a UserControl, as the bytes of its image file, or <see langword="null"/> for none.
+    /// </summary>
+    public static readonly PropertyDefinition<byte[]?> ToolboxBitmap = new("ToolboxBitmap", PropertyCategory.Misc, null);
+
+    /// <summary>
+    /// A component's <c>OLEDropMode</c>; None by default.
+    /// </summary>
+    public static readonly PropertyDefinition<OLEDropMode> OLEDropMode = new("OLEDropMode", PropertyCategory.Behavior);
+
+    /// <summary>
     /// Whether an Image scales its picture to its size; when not set, the Image takes its picture's size.
     /// </summary>
     public static readonly PropertyDefinition<bool> Stretch = new("Stretch", PropertyCategory.Appearance);
