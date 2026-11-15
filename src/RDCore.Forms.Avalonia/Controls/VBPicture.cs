@@ -77,7 +77,7 @@ public static class VBPicture
         return Premultiplied(decoded);
     }
 
-    // The decoded pixels as a bitmap of a pixel to the form's pixel (96 DPI), premultiplied, as the pictures drawn and masked here are.
+    // The decoded pixels as a bitmap of one pixel per pixel of the form (96 DPI), premultiplied, as the pictures drawn and masked here are.
     private static WriteableBitmap Premultiplied(DecodedPicture picture)
     {
         var bitmap = new WriteableBitmap(new PixelSize(picture.Width, picture.Height), new Vector(96, 96), PixelFormats.Bgra8888, AlphaFormat.Premul);
