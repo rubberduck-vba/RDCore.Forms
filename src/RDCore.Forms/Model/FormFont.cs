@@ -15,9 +15,14 @@ namespace RDCore.Forms.Model;
 /// <param name="Underline">Whether the font is underlined.</param>
 /// <param name="Strikethrough">Whether the font is struck through.</param>
 /// <param name="Charset">The font's character set, as Windows numbers them: 0 is ANSI, 2 is Symbol.</param>
+/// <param name="IsNamed">
+/// Whether the font was given its name. A <c>stdole.StdFont</c> no program has named reads its default name, <c>MS Sans Serif</c>, and is
+/// drawn in the scalable face Windows maps no name to, at that face's sizes (<see cref="StdFontObject.IsNamed"/>). A font a form's file
+/// declares is named.
+/// </param>
 public readonly record struct FormFont(
     string Name, double Size, int Weight = FormFont.NormalWeight, bool Italic = false, bool Underline = false,
-    bool Strikethrough = false, int Charset = 0)
+    bool Strikethrough = false, int Charset = 0, bool IsNamed = true)
 {
     /// <summary>
     /// The weight of a normal font.
@@ -44,11 +49,11 @@ public readonly record struct FormFont(
     /// </summary>
     /// <returns>The font, with the size it is drawn at as its <see cref="Size"/>.</returns>
     /// <remarks>
-    /// The size is the one <see cref="StdFontObject.DrawnSize"/> gives for the font's name: a whole number of pixels, or one of a bitmap
-    /// font's own sizes, so MS Sans Serif asked for 8 points is drawn at 8.25. A size of 0 or less is drawn as the smallest size, and
-    /// one too large to draw as the largest.
+    /// The size is the one <see cref="StdFontObject.DrawnSize"/> gives for the font's name, or for no name where the font is not
+    /// <see cref="IsNamed"/>: a whole number of pixels, or one of a bitmap font's own sizes, so MS Sans Serif asked for 8 points is drawn
+    /// at 8.25. A size of 0 or less is drawn as the smallest size, and one too large to draw as the largest.
     /// </remarks>
-    public FormFont AtDrawnSize() => this with { Size = (double)StdFontObject.DrawnSize(Name ?? "", Drawable(Size)) };
+    public FormFont AtDrawnSize() => this with { Size = (double)StdFontObject.DrawnSize(IsNamed ? Name ?? "" : null, Drawable(Size)) };
 
     /// <summary>
     /// Makes the <c>stdole.StdFont</c> that holds this font, as a VB6 control gives one for its <c>Font</c>.
@@ -59,12 +64,15 @@ public readonly record struct FormFont(
     /// refuses, in the order name, size, weight, character set: a name longer than 31 characters, a size of 0 or less or of 24576 points
     /// or more, a weight outside 0 to 1000, a character set outside 0 to 255.
     /// </returns>
-    /// <remarks>The new font's weight is 400 or 700, as a <see cref="StdFontObject"/> stores one.</remarks>
+    /// <remarks>
+    /// The new font's weight is 400 or 700, as a <see cref="StdFontObject"/> stores one. A font that is not <see cref="IsNamed"/> is
+    /// given no name, so the new font is not named either.
+    /// </remarks>
     public StdFontFailure TryToStdFont(out StdFontObject? font)
     {
         font = null;
         var made = new StdFontObject();
-        var failure = made.TrySetName(Name ?? "");
+        var failure = IsNamed ? made.TrySetName(Name ?? "") : StdFontFailure.None;
         if (failure == StdFontFailure.None)
             failure = Size > 0 ? made.TrySetSize(Drawable(Size)) : StdFontFailure.InvalidPropertyValue;
         if (failure == StdFontFailure.None)
@@ -84,12 +92,13 @@ public readonly record struct FormFont(
     /// Makes the font a <c>stdole.StdFont</c> holds, as a VB6 control takes one for its <c>Font</c>.
     /// </summary>
     /// <param name="font">The <c>stdole.StdFont</c>.</param>
-    /// <returns>The font, at the size the <see cref="StdFontObject"/> reads back.</returns>
+    /// <returns>The font, at the size the <see cref="StdFontObject"/> reads back, and named where it is.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="font"/> is <see langword="null"/>.</exception>
     public static FormFont FromStdFont(StdFontObject font)
     {
         ArgumentNullException.ThrowIfNull(font);
-        return new FormFont(font.Name, (double)font.Size, font.Weight, font.Italic, font.Underline, font.Strikethrough, font.Charset);
+        return new FormFont(font.Name, (double)font.Size, font.Weight, font.Italic, font.Underline, font.Strikethrough, font.Charset,
+            font.IsNamed);
     }
 
     // A size as the SDK takes one: more than 0, and within what a decimal holds; past it, or not a number, the font is drawn at its

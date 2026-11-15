@@ -57,6 +57,36 @@ public sealed class FormFontTests
         Assert.AreEqual(expected, new FormFont(name, asked).AtDrawnSize().Size);
     }
 
+    // A font never named is drawn in a scalable face whatever name it reads: whole pixels, with 2 pixels drawn as 3. Named, MS Sans
+    // Serif is drawn at its own sizes.
+    [TestMethod]
+    [DataRow(0.5, true, 8.25)]
+    [DataRow(0.5, false, 1.5)]
+    [DataRow(1.5, true, 8.25)]
+    [DataRow(1.5, false, 2.25)]
+    [DataRow(8, false, 8.25)]
+    [DataRow(14, true, 13.5)]
+    [DataRow(14, false, 14.25)]
+    public void AtDrawnSize_OfAFontNeverNamed_IsTheScalableFacesSize(double asked, bool named, double expected)
+    {
+        Assert.AreEqual(expected, new FormFont("MS Sans Serif", asked, IsNamed: named).AtDrawnSize().Size);
+    }
+
+    // As VB6 does with a New StdFont whose Size alone is set: it reads MS Sans Serif, and is drawn at 2 pixels' size as 3.
+    [TestMethod]
+    public void AStdFontNeverNamed_IsAFontNeverNamed_AndMakesOneNeverNamed()
+    {
+        var std = new StdFontObject();
+        Assert.AreEqual(StdFontFailure.None, std.TrySetSize(1.5m));
+
+        var font = FormFont.FromStdFont(std);
+        Assert.AreEqual(new FormFont("MS Sans Serif", 2.25, IsNamed: false), font);
+        Assert.AreEqual(StdFontFailure.None, font.TryToStdFont(out var made));
+        Assert.AreEqual("False 2.25", $"{made!.IsNamed} {made.Size.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        Assert.AreEqual(StdFontFailure.None, std.TrySetName("MS Sans Serif"));
+        Assert.AreEqual(new FormFont("MS Sans Serif", 8.25), FormFont.FromStdFont(std));
+    }
+
     [TestMethod]
     public void AFont_MakesTheStdFontThatHoldsIt_AndIsTheFontThatStdFontHolds()
     {
