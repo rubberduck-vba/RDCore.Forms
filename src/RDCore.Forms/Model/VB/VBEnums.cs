@@ -141,6 +141,66 @@ public enum Align
 }
 
 /// <summary>
+/// Where a Label draws its picture against its caption: its <c>PicturePosition</c>, an RD-VBA addition with the values of MSForms'
+/// <c>fmPicturePosition</c>. The first word places the picture, the second aligns the caption with it.
+/// </summary>
+public enum PicturePosition
+{
+    /// <summary>
+    /// The picture left of the caption, their tops aligned.
+    /// </summary>
+    LeftTop = 0,
+    /// <summary>
+    /// The picture left of the caption, their centres aligned.
+    /// </summary>
+    LeftCenter = 1,
+    /// <summary>
+    /// The picture left of the caption, their bottoms aligned.
+    /// </summary>
+    LeftBottom = 2,
+    /// <summary>
+    /// The picture right of the caption, their tops aligned.
+    /// </summary>
+    RightTop = 3,
+    /// <summary>
+    /// The picture right of the caption, their centres aligned.
+    /// </summary>
+    RightCenter = 4,
+    /// <summary>
+    /// The picture right of the caption, their bottoms aligned.
+    /// </summary>
+    RightBottom = 5,
+    /// <summary>
+    /// The picture above the caption, their left edges aligned.
+    /// </summary>
+    AboveLeft = 6,
+    /// <summary>
+    /// The picture above the caption, their centres aligned: the default.
+    /// </summary>
+    AboveCenter = 7,
+    /// <summary>
+    /// The picture above the caption, their right edges aligned.
+    /// </summary>
+    AboveRight = 8,
+    /// <summary>
+    /// The picture below the caption, their left edges aligned.
+    /// </summary>
+    BelowLeft = 9,
+    /// <summary>
+    /// The picture below the caption, their centres aligned.
+    /// </summary>
+    BelowCenter = 10,
+    /// <summary>
+    /// The picture below the caption, their right edges aligned.
+    /// </summary>
+    BelowRight = 11,
+    /// <summary>
+    /// The caption over the picture, both centred.
+    /// </summary>
+    Center = 12,
+}
+
+/// <summary>
 /// The figure a VB Shape draws: its <c>Shape</c>.
 /// </summary>
 public enum ShapeType
@@ -172,6 +232,94 @@ public enum ShapeType
 }
 
 /// <summary>
+/// What a VB Data control does when its user moves before the first record: its <c>BOFAction</c>.
+/// </summary>
+public enum DataBOFAction
+{
+    /// <summary>
+    /// The first record stays current: <c>vbBOFActionMoveFirst</c>, the default.
+    /// </summary>
+    MoveFirst = 0,
+    /// <summary>
+    /// The position before the first record becomes current: <c>vbBOFActionBOF</c>.
+    /// </summary>
+    BOF = 1,
+}
+
+/// <summary>
+/// What a VB Data control does when its user moves past the last record: its <c>EOFAction</c>.
+/// </summary>
+public enum DataEOFAction
+{
+    /// <summary>
+    /// The last record stays current: <c>vbEOFActionMoveLast</c>, the default.
+    /// </summary>
+    MoveLast = 0,
+    /// <summary>
+    /// The position after the last record becomes current: <c>vbEOFActionEOF</c>.
+    /// </summary>
+    EOF = 1,
+    /// <summary>
+    /// A new record is added: <c>vbEOFActionAddNew</c>.
+    /// </summary>
+    AddNew = 2,
+}
+
+/// <summary>
+/// The kind of recordset a VB Data control opens: its <c>RecordsetType</c>.
+/// </summary>
+public enum DataRecordsetType
+{
+    /// <summary>
+    /// A table: <c>vbRSTypeTable</c>.
+    /// </summary>
+    Table = 0,
+    /// <summary>
+    /// A dynaset, the default: <c>vbRSTypeDynaset</c>.
+    /// </summary>
+    Dynaset = 1,
+    /// <summary>
+    /// A snapshot: <c>vbRSTypeSnapShot</c>.
+    /// </summary>
+    Snapshot = 2,
+}
+
+/// <summary>
+/// The database engine a VB Data control opens its database with: its <c>DefaultType</c>.
+/// </summary>
+public enum DataDefaultType
+{
+    /// <summary>
+    /// ODBCDirect: <c>dbUseODBC</c>.
+    /// </summary>
+    UseODBC = 1,
+    /// <summary>
+    /// The Jet engine, the default: <c>dbUseJet</c>.
+    /// </summary>
+    UseJet = 2,
+}
+
+/// <summary>
+/// The cursor an ODBCDirect VB Data control opens: its <c>DefaultCursorType</c>. A program can set a value that names none of these,
+/// as VB6 lets it.
+/// </summary>
+public enum DataDefaultCursorType
+{
+    /// <summary>
+    /// The driver chooses: <c>vbUseDefaultCursor</c>, the default.
+    /// </summary>
+    Default = 0,
+    /// <summary>
+    /// The ODBC cursor library: <c>vbUseODBCCursor</c>.
+    /// </summary>
+    ODBC = 1,
+    /// <summary>
+    /// The server's cursors: <c>vbUseServerSideCursor</c>.
+    /// </summary>
+    ServerSide = 2,
+}
+
+/// <summary>
 /// How a VB ComboBox is drawn and behaves: its <c>Style</c>, set at design time and read-only to a program.
 /// </summary>
 public enum ComboBoxStyle
@@ -191,6 +339,22 @@ public enum ComboBoxStyle
 }
 
 /// <summary>
+/// How a VB CommandButton, CheckBox or OptionButton is drawn: its <c>Style</c>, set at design time and read-only to a program.
+/// </summary>
+public enum ButtonStyle
+{
+    /// <summary>
+    /// The default: the system's control, which shows its caption only.
+    /// </summary>
+    Standard = 0,
+    /// <summary>
+    /// A push button that shows its picture over its caption, in its <c>BackColor</c>. A CheckBox or an OptionButton of this style is
+    /// drawn pushed in while it is checked or selected.
+    /// </summary>
+    Graphical = 1,
+}
+
+/// <summary>
 /// Whether a VB ListBox selects more than one item, and how: its <c>MultiSelect</c>, set at design time and read-only to a program.
 /// </summary>
 public enum ListBoxMultiSelect
@@ -207,6 +371,30 @@ public enum ListBoxMultiSelect
     /// Shift extends the selection, and Ctrl adds an item to it.
     /// </summary>
     Extended = 2,
+}
+
+/// <summary>
+/// The scroll bars of a VB TextBox: its <c>ScrollBars</c>, set at design time and read-only to a program. A box that is not
+/// multi-line has none, whatever it is set to.
+/// </summary>
+public enum ScrollBars
+{
+    /// <summary>
+    /// No scroll bar, the default.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// A horizontal scroll bar. A multi-line box does not wrap its lines.
+    /// </summary>
+    Horizontal = 1,
+    /// <summary>
+    /// A vertical scroll bar.
+    /// </summary>
+    Vertical = 2,
+    /// <summary>
+    /// Both scroll bars. A multi-line box does not wrap its lines.
+    /// </summary>
+    Both = 3,
 }
 
 /// <summary>
@@ -391,4 +579,27 @@ public enum MousePointer
     /// The object's <c>MouseIcon</c>.
     /// </summary>
     Custom = 99,
+}
+
+/// <summary>
+/// Where a top-level menu goes on its form's menu bar while an object of an OLE container is active: its <c>NegotiatePosition</c>.
+/// </summary>
+public enum NegotiatePosition
+{
+    /// <summary>
+    /// Not shown while an object is active, the default.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// On the left.
+    /// </summary>
+    Left = 1,
+    /// <summary>
+    /// In the middle.
+    /// </summary>
+    Middle = 2,
+    /// <summary>
+    /// On the right.
+    /// </summary>
+    Right = 3,
 }

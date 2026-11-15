@@ -41,7 +41,7 @@ A read does not throw on what a file holds. It keeps what the model cannot hold 
 |`UnmatchedEnd`|Warning|An `EndProperty` that closes nothing is left out.|
 |`InvalidValue`|Warning|The property is kept as an `UnmodelledProperty`: a value it cannot hold, a number outside its type's range, or an `Index` that is not a number from 0 to 32767.|
 |`MissingCompanion`, `MissingRecord`|Warning|The property stays at its default, and its citation is kept as an `UnmodelledProperty`.|
-|`MisplacedComponent`|Warning|A component placed in one that cannot hold it is placed in the nearest enclosing container that can, at its written position.|
+|`MisplacedComponent`|Warning|A component placed in one that cannot hold it is placed in the nearest enclosing container that can, at its written position; a control written inside a Timer is placed at the Timer's `Left` and `Top` added to its own instead, as VB6 places it.|
 |`UnmodelledClass`|Information|The component is kept as an `UnmodelledComponent`, with its text.|
 |`UnreadLibraryReference`, `UnmodelledHeaderLine`|Information|The header line is kept in `UnmodelledHeader`.|
 
@@ -49,7 +49,7 @@ A property or a property bag the model does not have is kept as an `UnmodelledPr
 
 ## Positions and fonts
 
-Positions and sizes are read as the file holds them. A control's position and size are in twips, whatever its container's `ScaleMode`. A Line's ends are in its container's scale: twips, unless the container (a form, a UserControl, a PropertyPage or a PictureBox) has a `ScaleMode` of its own. The root's own position and size are its client area's, in twips.
+A file holds a control's position and size in twips, whatever its container's `ScaleMode`, and they are read as pixels, at 15 twips a pixel. The root's own position and size are its client area's, read the same way. A Line's ends are read as the file holds them, in its container's scale: twips, unless the container (a form, a UserControl, a PropertyPage or a PictureBox) has a `ScaleMode` of its own.
 
 A control that writes no `Font`, on a form that writes one, takes a copy of the form's font.
 
@@ -57,13 +57,10 @@ A control that writes no `Font`, on a form that writes one, takes a copy of the 
 
 The fixtures in the tests were built and run under VB6, and the tests assert what VB6 read from them.
 
-> [!NOTE]
-> **Not implemented.** VB6 offsets a control written inside a Timer by the Timer's `Left` and `Top`. The reader places it in the form at its written position.
-
 |Case|VB6 reads|The reader keeps|
 |---|---|---|
 |A user-scale Line's ends, written `0 0 100 50`|`-0.0124842 0 100.0125 50`|The written values.|
-|A form's `ScaleWidth`, written `8000`|`7995`, its window's client width|The written value.|
+|A form's `ScaleWidth`, written `8000`|`7995`, its window's client width|The written value. In the form's window, where its `ScaleMode` is a unit, it reads the client width ([the scale](../controls/drawing.md#the-scale)).|
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](vb6.fr.md) • IMPORT | [CONTROLS](../controls/index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

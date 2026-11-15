@@ -104,13 +104,14 @@ internal sealed class FormXamlReader(FormXamlDiagnosticBag diagnostics)
     // A property's value written as text, in an attribute or a property element.
     private void ReadValue(ComponentInstance instance, string name, string text, XObject at)
     {
+        // A property only a running program sets is not the form's.
         var property = instance.Class.Property(name);
-        if (property is null)
+        if (property is null or { RunTimeOnly: true })
         {
             diagnostics.Add(K.UnknownProperty, LineOf(at), instance.Name, name);
             instance.UnmodelledProperties.Add(new UnmodelledProperty(name, text));
         }
-        else if (!FormXamlValues.TryParse(property.ValueType, text, out var value) || !instance.TrySet(property, value))
+        else if (!FormXamlValues.TryParse(property.ValueType, text, out var value) || !instance.TryRead(property, value))
             Invalid(instance, property.Name, text, at);
     }
 

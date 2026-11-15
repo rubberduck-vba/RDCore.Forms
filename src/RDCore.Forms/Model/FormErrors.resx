@@ -24,8 +24,23 @@
   <data name="Error53" xml:space="preserve">
     <value>File not found</value>
   </data>
+  <data name="Error68" xml:space="preserve">
+    <value>Device unavailable</value>
+  </data>
+  <data name="Error76" xml:space="preserve">
+    <value>Path not found</value>
+  </data>
+  <data name="Error91" xml:space="preserve">
+    <value>Object variable or With block variable not set</value>
+  </data>
   <data name="Error94" xml:space="preserve">
     <value>Invalid use of Null</value>
+  </data>
+  <data name="Error340" xml:space="preserve">
+    <value>Control array element '{0}' doesn't exist</value>
+  </data>
+  <data name="Error341" xml:space="preserve">
+    <value>Invalid object array index</value>
   </data>
   <data name="Error343" xml:space="preserve">
     <value>Object not an array</value>
@@ -80,5 +95,33 @@
   </data>
   <data name="Error481" xml:space="preserve">
     <value>Invalid picture</value>
+  </data>
+  <data name="Error711" xml:space="preserve">
+    <value>Invalid class string.
+Looking for object with ProgID: {0}</value>
+  </data>
+  <data name="Error720" xml:space="preserve">
+    <value>'{0}' is not a valid control type</value>
+  </data>
+  <data name="Error721" xml:space="preserve">
+    <value>'{0}' is not a valid control container</value>
+  </data>
+  <data name="Error727" xml:space="preserve">
+    <value>There is already a control with the name '{0}'</value>
+  </data>
+  <data name="Error728" xml:space="preserve">
+    <value>'{0}' is not a legal control name</value>
+  </data>
+  <data name="Error729" xml:space="preserve">
+    <value>Controls.Remove can only remove controls added with Controls.Add</value>
+  </data>
+  <data name="Error730" xml:space="preserve">
+    <value>Control '{0}' not found</value>
+  </data>
+  <data name="Error735" xml:space="preserve">
+    <value>The control is no longer usable because it has been removed from the controls collection</value>
+  </data>
+  <data name="Error740" xml:space="preserve">
+    <value>Controls.Remove can only remove container controls that contain controls added with Controls.Add.  '{0}' was not added with Controls.Add.</value>
   </data>
 </root>

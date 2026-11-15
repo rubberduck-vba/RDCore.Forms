@@ -2,6 +2,7 @@
 // Copyright (c) 2024 Bartosz Korczyński. Copyright (c) 2026 The HexIDE Authors. MIT License; see NOTICE.md.
 
 using static RDCore.Forms.Model.VB.VBEvents;
+using M = RDCore.Forms.Model.VB.VBMethods;
 using P = RDCore.Forms.Model.VB.VBProperties;
 
 namespace RDCore.Forms.Model.VB;
@@ -13,7 +14,8 @@ namespace RDCore.Forms.Model.VB;
 /// Each class lists the properties of it that the model holds, then the ones every class of its kind has: <c>Left</c> and
 /// <c>Top</c> for a component with a place, <c>Width</c> and <c>Height</c> for one with a size, <c>Visible</c> for a control a
 /// running program shows, and <c>Tag</c>. A property a designer file sets that a class does not list is kept as an
-/// <see cref="UnmodelledProperty"/>.
+/// <see cref="UnmodelledProperty"/>. Its methods are among <see cref="VBMethods"/>: a control's are <c>Move</c>, <c>Refresh</c> and
+/// <c>ZOrder</c>, and <c>SetFocus</c> where it can take the focus.
 /// </remarks>
 public static class VBClasses
 {
@@ -22,13 +24,42 @@ public static class VBClasses
     private static readonly FormColor WindowBackground = FormColor.FromSystem(SystemColor.Window);
     private static readonly FormColor WindowForeground = FormColor.FromSystem(SystemColor.WindowText);
 
+    // The member each class's default member stands for, as measured with VB6: what `x = Text1` reads and `Text1 = x` assigns. A
+    // form's takes an argument, as in `Form1("Command1")`. A UserControl's and a PropertyPage's were not measured.
+    private static readonly Dictionary<string, string> DefaultMembers = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["VB.Form"] = "Controls",
+        ["VB.MDIForm"] = "Controls",
+        ["VB.CommandButton"] = "Value",
+        ["VB.CheckBox"] = "Value",
+        ["VB.OptionButton"] = "Value",
+        ["VB.HScrollBar"] = "Value",
+        ["VB.VScrollBar"] = "Value",
+        ["VB.TextBox"] = "Text",
+        ["VB.ComboBox"] = "Text",
+        ["VB.ListBox"] = "Text",
+        ["VB.Label"] = "Caption",
+        ["VB.Frame"] = "Caption",
+        ["VB.PictureBox"] = "Picture",
+        ["VB.Image"] = "Picture",
+        ["VB.DriveListBox"] = "Drive",
+        ["VB.DirListBox"] = "Path",
+        ["VB.FileListBox"] = "FileName",
+        ["VB.Shape"] = "Shape",
+        ["VB.Line"] = "Visible",
+        ["VB.Timer"] = "Enabled",
+        ["VB.Data"] = "Caption",
+        ["VB.Menu"] = "Enabled",
+    };
+
     /// <summary>
     /// <c>VB.Form</c>: a form's designer root.
     /// </summary>
     public static readonly ComponentClass Form = Root("VB.Form", "Form",
-        [P.Caption, P.BackColor, P.Enabled, P.ForeColor, P.Icon, P.MousePointer, P.ShowInTaskbar, P.Font, P.StartUpPosition, P.KeyPreview,
+        [P.Caption, P.BackColor, P.Enabled, P.ForeColor, P.Icon, P.Picture, P.MousePointer, P.ShowInTaskbar, P.Font, P.FontTransparent, P.StartUpPosition, P.KeyPreview,
          P.MaxButton, P.MinButton, P.Visible, P.AutoRedraw, P.DrawMode, P.DrawStyle, P.DrawWidth, P.FillColor, P.FillStyle, P.ContextMenu],
-        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate]);
+        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate],
+        [M.Move, M.Refresh, M.SetFocus]);
 
     /// <summary>
     /// <c>VB.MDIForm</c>: an MDI form's designer root. Its background defaults to the application workspace's colour. It has no font
@@ -38,7 +69,8 @@ public static class VBClasses
         [P.Caption, P.BackColor, P.Enabled, P.Icon, P.MousePointer, P.MouseIcon, P.Picture, P.StartUpPosition, P.Appearance, P.RightToLeft,
          P.HelpContextID, P.Visible, P.Left, P.Top, P.Width, P.Height, P.Tag],
         [Click, DblClick, MouseDown, MouseMove, MouseUp, Initialize, Load, Resize, Activate, Deactivate, QueryUnload, Unload, Terminate],
-        Defaults((P.BackColor, FormColor.FromSystem(SystemColor.AppWorkspace))), isContainer: true);
+        Defaults((P.BackColor, FormColor.FromSystem(SystemColor.AppWorkspace))), isContainer: true, methods: [M.Move, M.Refresh, M.SetFocus],
+        defaultMember: DefaultMembers["VB.MDIForm"]);
 
     /// <summary>
     /// <c>VB.UserControl</c>: a UserControl's designer root.
@@ -48,7 +80,8 @@ public static class VBClasses
         [AccessKeyPress, AmbientChanged, AsyncReadComplete, AsyncReadProgress, Click, DblClick, DragDrop, DragOver, EnterFocus, ExitFocus,
          GetDataMember, GotFocus, Hide, HitTest, Initialize, InitProperties, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove,
          MouseUp, OLECompleteDrag, OLEDragDrop, OLEDragOver, OLEGiveFeedback, OLESetData, OLEStartDrag, Paint, ReadProperties, Resize,
-         Show, Terminate, WriteProperties]);
+         Show, Terminate, WriteProperties],
+        [M.Refresh]);
 
     /// <summary>
     /// <c>VB.PropertyPage</c>: a PropertyPage's designer root.
@@ -57,14 +90,16 @@ public static class VBClasses
         [P.BackColor, P.Caption, P.Font, P.ForeColor, P.HelpContextID, P.KeyPreview],
         [ApplyChanges, Click, DblClick, DragDrop, DragOver, EditProperty, GotFocus, Initialize, KeyDown, KeyPress, KeyUp, LostFocus,
          MouseDown, MouseMove, MouseUp, OLECompleteDrag, OLEDragDrop, OLEDragOver, OLEGiveFeedback, OLESetData, OLEStartDrag, Paint,
-         SelectionChanged, Terminate]);
+         SelectionChanged, Terminate],
+        [M.Refresh]);
 
     /// <summary>
-    /// <c>VB.CommandButton</c>.
+    /// <c>VB.CommandButton</c>. It has no <c>ForeColor</c>, as VB6's has none: its caption is drawn in the system's <c>ButtonText</c>
+    /// colour.
     /// </summary>
     public static readonly ComponentClass CommandButton = Control("VB.CommandButton", "Command",
-        [P.Caption, P.BackColor, P.ForeColor, P.Appearance, P.Font, P.MousePointer, P.Picture, P.Enabled, P.TabStop, P.TabIndex, P.ToolTipText,
-         P.Default, P.Cancel],
+        [P.Caption, P.BackColor, P.Appearance, P.Font, P.MousePointer, P.Picture, P.Enabled, P.TabStop, P.TabIndex, P.ToolTipText,
+         P.Default, P.Cancel, P.ButtonStyle, P.DownPicture, P.DisabledPicture, P.CommandButtonValue, P.MaskColor, P.UseMaskColor],
         [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
@@ -73,16 +108,18 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass TextBox = Control("VB.TextBox", "Text",
         [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText, P.Locked, P.Alignment,
-         P.Appearance, P.BorderStyle],
+         P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText],
         [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
 
     /// <summary>
-    /// <c>VB.Label</c>, windowless. Its background is opaque by default.
+    /// <c>VB.Label</c>, windowless. Its background is opaque by default. Its <c>Picture</c> and <c>PicturePosition</c> are an RD-VBA
+    /// addition, laid out as MSForms' Label lays them out.
     /// </summary>
     public static readonly ComponentClass Label = Control("VB.Label", "Label",
         [P.Caption, P.Enabled, P.Font, P.BackColor, P.BackStyle, P.Alignment, P.Appearance, P.AutoSize, P.BorderStyle, P.ForeColor,
-         P.MousePointer, P.RightToLeft, P.ToolTipText, P.UseMnemonic, P.WhatsThisHelpID, P.WordWrap, P.TabIndex],
+         P.MousePointer, P.RightToLeft, P.ToolTipText, P.UseMnemonic, P.WhatsThisHelpID, P.WordWrap, P.TabIndex, P.Picture,
+         P.PicturePosition],
         [Click, DblClick, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackStyle, BackStyle.Opaque)), isWindowless: true);
 
@@ -91,7 +128,7 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass CheckBox = Control("VB.CheckBox", "Check",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.CheckBoxValue, P.Appearance,
-         P.TabStop, P.TabIndex],
+         P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
         [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
@@ -99,7 +136,7 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass OptionButton = Control("VB.OptionButton", "Option",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.OptionButtonValue,
-         P.Appearance, P.TabStop, P.TabIndex],
+         P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
@@ -113,8 +150,8 @@ public static class VBClasses
     /// <c>VB.ListBox</c>. Its colours default to the window's.
     /// </summary>
     public static readonly ComponentClass ListBox = Control("VB.ListBox", "List",
-        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.DragIcon, P.MousePointer, P.RightToLeft,
-         P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.IntegralHeight, P.DragIcon, P.MousePointer,
+         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
 
@@ -122,9 +159,37 @@ public static class VBClasses
     /// <c>VB.ComboBox</c>. Its colours default to the window's.
     /// </summary>
     public static readonly ComponentClass ComboBox = Control("VB.ComboBox", "Combo",
-        [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.MousePointer, P.RightToLeft,
-         P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+        [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.IntegralHeight,
+         P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText],
         [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+
+    /// <summary>
+    /// <c>VB.DriveListBox</c>: the drives, one of which is its <c>Drive</c>. It raises no Click and no mouse events. Its colours
+    /// default to the window's.
+    /// </summary>
+    public static readonly ComponentClass DriveListBox = Control("VB.DriveListBox", "Drive",
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+        [Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+
+    /// <summary>
+    /// <c>VB.DirListBox</c>: the directories of its <c>Path</c>, and the directories above it. It raises no DblClick. Its colours
+    /// default to the window's.
+    /// </summary>
+    public static readonly ComponentClass DirListBox = Control("VB.DirListBox", "Dir",
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+        [Change, Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+
+    /// <summary>
+    /// <c>VB.FileListBox</c>: the files of its <c>Path</c> that its <c>Pattern</c> and its attribute properties let through.
+    /// Its colours default to the window's.
+    /// </summary>
+    public static readonly ComponentClass FileListBox = Control("VB.FileListBox", "File",
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.Pattern, P.Archive, P.Hidden, P.Normal, P.ReadOnly, P.SystemFiles, P.MultiSelect,
+         P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, PathChange, PatternChange],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
 
     /// <summary>
@@ -132,9 +197,9 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass PictureBox = Control("VB.PictureBox", "Picture",
         [P.Align, P.Appearance, P.AutoRedraw, P.AutoSize, P.BackColor, P.BorderStyle, P.CausesValidation, P.Enabled, P.FillColor, P.FillStyle,
-         P.Font, P.ForeColor, P.MousePointer, P.TabIndex, P.TabStop, P.ToolTipText, P.Picture, P.DrawMode, P.DrawStyle, P.DrawWidth,
+         P.Font, P.FontTransparent, P.ForeColor, P.MousePointer, P.TabIndex, P.TabStop, P.ToolTipText, P.Picture, P.DrawMode, P.DrawStyle, P.DrawWidth,
          .. ScaleProperties],
-        [Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp, Paint],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Paint, Resize],
         Defaults((P.BorderStyle, BorderStyle.FixedSingle)), isContainer: true);
 
     /// <summary>
@@ -145,10 +210,12 @@ public static class VBClasses
         [Click, DblClick, MouseDown, MouseMove, MouseUp], isWindowless: true);
 
     /// <summary>
-    /// <c>VB.Timer</c>. It has a place in the designer and no size, and a running program does not show it.
+    /// <c>VB.Timer</c>. It has a place in the designer and no size, and a running program does not show it and can neither read
+    /// nor set its <c>Left</c> and <c>Top</c>.
     /// </summary>
     public static readonly ComponentClass Timer = new("VB.Timer", "Timer", ComponentKind.Control,
-        [P.Enabled, P.Interval, P.Left, P.Top, P.Tag], [VBEvents.Timer], hasExtent: false);
+        [P.Enabled, P.Interval, P.Left, P.Top, P.Tag], [VBEvents.Timer], hasExtent: false, notAvailableAtRunTime: [P.Left, P.Top],
+        defaultMember: DefaultMembers["VB.Timer"]);
 
     /// <summary>
     /// <c>VB.HScrollBar</c>.
@@ -173,21 +240,38 @@ public static class VBClasses
     /// </summary>
     public static readonly ComponentClass Line = new("VB.Line", "Line", ComponentKind.Control,
         [P.BorderColor, P.ShapeBorderStyle, P.BorderWidth, P.DrawMode, P.X1, P.X2, P.Y1, P.Y2, P.Visible, P.Tag], [],
-        Defaults((P.BorderColor, WindowForeground)), isWindowless: true);
+        Defaults((P.BorderColor, WindowForeground)), isWindowless: true, methods: [M.Refresh, M.ZOrder],
+        defaultMember: DefaultMembers["VB.Line"]);
+
+    /// <summary>
+    /// <c>VB.Data</c>: the four buttons that move through a database's records, and its caption between them. Its caption's colours
+    /// default to the window's. It takes no focus and has no <c>TabIndex</c>. Its <c>UpdateRecord</c> and <c>UpdateControls</c> act
+    /// on its recordset.
+    /// </summary>
+    public static readonly ComponentClass Data = Control("VB.Data", "Data",
+        [P.Caption, P.Align, P.Appearance, P.BackColor, P.ForeColor, P.Font, P.Enabled, P.MousePointer, P.MouseIcon, P.DragIcon, P.RightToLeft,
+         P.ToolTipText, P.WhatsThisHelpID, P.Connect, P.DatabaseName, P.RecordSource, P.RecordsetType, P.DefaultType, P.DefaultCursorType,
+         P.BOFAction, P.EOFAction, P.Exclusive, P.ReadOnly, P.Options, P.Negotiate],
+        [Validate, Error, Reposition, Resize, DragDrop, DragOver, MouseDown, MouseMove, MouseUp, OLECompleteDrag, OLEDragDrop, OLEDragOver,
+         OLEGiveFeedback, OLESetData, OLEStartDrag],
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.ReadOnly, false)),
+        methods: [M.UpdateRecord, M.UpdateControls]);
 
     /// <summary>
     /// <c>VB.Menu</c>: a menu item. It has no place or size; its submenu's items are its contents. A form's menus, with VB's rules
     /// for them, are its <see cref="Menus.FormMenu"/>.
     /// </summary>
     public static readonly ComponentClass Menu = new("VB.Menu", "mnu", ComponentKind.Menu,
-        [P.Caption, P.Enabled, P.Checked, P.WindowList, P.Visible, P.Shortcut, P.CheckOnClick, P.Picture, P.Tag], [Click], hasExtent: false);
+        [P.Caption, P.Enabled, P.Checked, P.WindowList, P.Visible, P.Shortcut, P.HelpContextID, P.NegotiatePosition, P.CheckOnClick, P.Picture,
+         P.Tag], [Click], hasExtent: false,
+        defaultMember: DefaultMembers["VB.Menu"]);
 
     /// <summary>
     /// Every class of the catalog.
     /// </summary>
     public static IReadOnlyList<ComponentClass> All { get; } =
         [Form, MDIForm, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
-         Timer, HScrollBar, VScrollBar, Shape, Line, Menu];
+         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data];
 
     private static readonly Dictionary<string, ComponentClass> byTypeName =
         All.ToDictionary(c => c.TypeName, StringComparer.OrdinalIgnoreCase);
@@ -202,20 +286,25 @@ public static class VBClasses
     private static PropertyDefinition[] ScrollBarProperties =>
         [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];
 
-    private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, LostFocus];
+    private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll];
 
     private static PropertyDefinition[] ScaleProperties => [P.ScaleMode, P.ScaleLeft, P.ScaleTop, P.ScaleWidth, P.ScaleHeight];
 
-    private static ComponentClass Root(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events) =>
+    private static ComponentClass Root(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events,
+        MethodDefinition[] methods) =>
         new(typeName, defaultName, ComponentKind.Root, [.. properties, P.Left, P.Top, P.Width, P.Height, .. ScaleProperties, P.Tag], events,
-            isContainer: true);
+            isContainer: true, methods: methods, defaultMember: DefaultMembers.GetValueOrDefault(typeName));
 
-    // A control that takes the mouse also has the ContextMenu of RD-VBA.
+    // A control that takes the mouse also has the ContextMenu of RD-VBA. One that can take the focus has SetFocus. A class's own
+    // methods follow the ones every control has.
     private static ComponentClass Control(string typeName, string defaultName, PropertyDefinition[] properties, EventDefinition[] events,
-        IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false) =>
+        IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false,
+        MethodDefinition[]? methods = null) =>
         new(typeName, defaultName, ComponentKind.Control,
             [.. properties, P.Left, P.Top, P.Width, P.Height, P.Visible, P.Tag, .. events.Contains(MouseUp) ? [P.ContextMenu] : Array.Empty<PropertyDefinition>()],
-            events, defaults, isContainer, isWindowless);
+            events, defaults, isContainer, isWindowless,
+            methods: [M.Move, M.Refresh, .. events.Contains(GotFocus) ? [M.SetFocus] : Array.Empty<MethodDefinition>(), M.ZOrder, .. methods ?? []],
+            defaultMember: DefaultMembers.GetValueOrDefault(typeName));
 
     private static Dictionary<PropertyDefinition, object?> Defaults(params (PropertyDefinition Property, object? Value)[] defaults) =>
         defaults.ToDictionary(d => d.Property, d => d.Value);

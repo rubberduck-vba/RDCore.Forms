@@ -43,9 +43,37 @@ public readonly record struct FormError(int Number, string Description)
     public static FormError FileNotFound => Standard(53);
 
     /// <summary>
+    /// Error 68, "Device unavailable".
+    /// </summary>
+    public static FormError DeviceUnavailable => Standard(68);
+
+    /// <summary>
+    /// Error 76, "Path not found".
+    /// </summary>
+    public static FormError PathNotFound => Standard(76);
+
+    /// <summary>
+    /// Error 91, "Object variable or With block variable not set": such as a Data control's <c>UpdateRecord</c> with no recordset.
+    /// </summary>
+    public static FormError ObjectVariableNotSet => Standard(91);
+
+    /// <summary>
     /// Error 94, "Invalid use of Null".
     /// </summary>
     public static FormError InvalidUseOfNull => Standard(94);
+
+    /// <summary>
+    /// Error 340, "Control array element '<paramref name="index"/>' doesn't exist": an element of a control array that is not
+    /// loaded.
+    /// </summary>
+    /// <param name="index">The element's index.</param>
+    /// <returns>The error.</returns>
+    public static FormError ControlArrayElementDoesntExist(int index) => Formatted(340, index.ToString(CultureInfo.InvariantCulture));
+
+    /// <summary>
+    /// Error 341, "Invalid object array index": a negative index given to <c>Load</c>.
+    /// </summary>
+    public static FormError InvalidObjectArrayIndex => Standard(341);
 
     /// <summary>
     /// Error 343, "Object not an array".
@@ -145,6 +173,69 @@ public readonly record struct FormError(int Number, string Description)
     public static FormError InvalidPicture => Standard(481);
 
     /// <summary>
+    /// Error 711, "Invalid class string. Looking for object with ProgID: <paramref name="progId"/>": a class that
+    /// <c>Controls.Add</c> does not know.
+    /// </summary>
+    /// <param name="progId">The class's name, as the program gave it.</param>
+    /// <returns>The error.</returns>
+    public static FormError InvalidClassString(string progId) => Formatted(711, progId);
+
+    /// <summary>
+    /// Error 720, "'<paramref name="className"/>' is not a valid control type": a class <c>Controls.Add</c> makes no control of,
+    /// such as a menu or a form.
+    /// </summary>
+    /// <param name="className">The class's name, such as <c>Menu</c>.</param>
+    /// <returns>The error.</returns>
+    public static FormError NotAValidControlType(string className) => Formatted(720, className);
+
+    /// <summary>
+    /// Error 721, "'<paramref name="className"/>' is not a valid control container": a control that holds no controls, given to
+    /// <c>Controls.Add</c> as a container.
+    /// </summary>
+    /// <param name="className">The would-be container's class name, such as <c>CommandButton</c>.</param>
+    /// <returns>The error.</returns>
+    public static FormError NotAValidControlContainer(string className) => Formatted(721, className);
+
+    /// <summary>
+    /// Error 727, "There is already a control with the name '<paramref name="name"/>'".
+    /// </summary>
+    /// <param name="name">The name, as the program gave it.</param>
+    /// <returns>The error.</returns>
+    public static FormError ControlNameTaken(string name) => Formatted(727, name);
+
+    /// <summary>
+    /// Error 728, "'<paramref name="name"/>' is not a legal control name".
+    /// </summary>
+    /// <param name="name">The name, as the program gave it.</param>
+    /// <returns>The error.</returns>
+    public static FormError NotALegalControlName(string name) => Formatted(728, name);
+
+    /// <summary>
+    /// Error 729, "Controls.Remove can only remove controls added with Controls.Add".
+    /// </summary>
+    public static FormError CanOnlyRemoveAddedControls => Standard(729);
+
+    /// <summary>
+    /// Error 730, "Control '<paramref name="name"/>' not found".
+    /// </summary>
+    /// <param name="name">The name, as the program gave it.</param>
+    /// <returns>The error.</returns>
+    public static FormError ControlNotFound(string name) => Formatted(730, name);
+
+    /// <summary>
+    /// Error 735, "The control is no longer usable because it has been removed from the controls collection".
+    /// </summary>
+    public static FormError ControlRemoved => Standard(735);
+
+    /// <summary>
+    /// Error 740, "Controls.Remove can only remove container controls that contain controls added with Controls.Add. '<paramref
+    /// name="name"/>' was not added with Controls.Add.": a container that holds a control placed at design time.
+    /// </summary>
+    /// <param name="name">The name of the control placed at design time.</param>
+    /// <returns>The error.</returns>
+    public static FormError ContainerHoldsADesignTimeControl(string name) => Formatted(740, name);
+
+    /// <summary>
     /// The error's number and description, such as <c>380: Invalid property value</c>.
     /// </summary>
     /// <returns>The error's number and description.</returns>
@@ -152,6 +243,12 @@ public readonly record struct FormError(int Number, string Description)
 
     private static FormError Standard(int number) =>
         new(number, Descriptions.GetString($"Error{number}", CultureInfo.CurrentUICulture) ?? $"Error {number}");
+
+    private static FormError Formatted(int number, string argument)
+    {
+        var error = Standard(number);
+        return error with { Description = string.Format(CultureInfo.CurrentUICulture, error.Description, argument) };
+    }
 }
 
 /// <summary>

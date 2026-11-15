@@ -55,6 +55,84 @@ public sealed class VB6FormReaderTests
     }
 
     [TestMethod]
+    public void AButtonsStyleAndItsDownAndDisabledPictures_AreRead()
+    {
+        // One picture record: its length, the picture signature, the image's length, then the image.
+        var companion = Bytes(10, 0, 0, 0, 0x6C, 0x74, 0, 0, 2, 0, 0, 0, 0x42, 0x4D);
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.CommandButton Command1 ",
+            "      DisabledPicture =   \"Form1.frx\":0000",
+            "      DownPicture     =   \"Form1.frx\":0000",
+            "      Style           =   1  'Graphical",
+            "   End",
+            "   Begin VB.CheckBox Check1 ",
+            "      Style           =   1  'Graphical",
+            "   End",
+            "   Begin VB.OptionButton Option1 ",
+            "      Style           =   1  'Graphical",
+            "   End"), companion);
+        var button = import.Form!.Find("Command1")!;
+
+        Assert.AreEqual(ButtonStyle.Graphical, button.Get(VBProperties.ButtonStyle));
+        CollectionAssert.AreEqual(Bytes(0x42, 0x4D), button.Get(VBProperties.DownPicture));
+        CollectionAssert.AreEqual(Bytes(0x42, 0x4D), button.Get(VBProperties.DisabledPicture));
+        Assert.AreEqual(ButtonStyle.Graphical, import.Form.Find("Check1")!.Get(VBProperties.ButtonStyle));
+        Assert.AreEqual(ButtonStyle.Graphical, import.Form.Find("Option1")!.Get(VBProperties.ButtonStyle));
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
+    // VB6's CommandButton has no ForeColor, and the model's has none: a file that gives it one keeps that line as text.
+    [TestMethod]
+    public void ACommandButtonsForeColor_IsKeptAsText()
+    {
+        var import = VB6FormReader.Read(Form("   Begin VB.CommandButton Command1 ", "      ForeColor       =   &H000000FF&", "   End"));
+        var button = import.Form!.Find("Command1")!;
+
+        Assert.IsFalse(VBClasses.CommandButton.Has(VBProperties.ForeColor));
+        Assert.Contains(new UnmodelledProperty("ForeColor", "&H000000FF&"), button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
+    [TestMethod]
+    [DataRow("CommandButton")]
+    [DataRow("CheckBox")]
+    [DataRow("OptionButton")]
+    public void AButtonsMaskColorAndUseMaskColor_AreRead(string type)
+    {
+        var import = VB6FormReader.Read(Form(
+            $"   Begin VB.{type} Button1 ",
+            "      MaskColor       =   &H00FF00FF&",
+            "      Style           =   1  'Graphical",
+            "      UseMaskColor    =   -1  'True",
+            "   End"));
+        var button = import.Form!.Find("Button1")!;
+
+        Assert.AreEqual((FormColor.FromRgb(255, 0, 255), true), (button.Get(VBProperties.MaskColor), button.Get(VBProperties.UseMaskColor)));
+        Assert.IsEmpty(button.UnmodelledProperties);
+        Assert.IsEmpty(import.Diagnostics);
+    }
+
+    [TestMethod]
+    public void TheFileSystemLists_AreRead_AFileListBoxWithItsPatternAndItsAttributes()
+    {
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.DriveListBox Drive1 ", "      Height          =   315", "      TabIndex        =   0", "      Width           =   2000", "   End",
+            "   Begin VB.DirListBox Dir1 ", "      Height          =   1500", "      TabIndex        =   1", "      Width           =   2000", "   End",
+            "   Begin VB.FileListBox File1 ", "      Height          =   1500", "      Hidden          =   -1  'True",
+            "      Pattern         =   \"*.txt;*.bas\"", "      ReadOnly        =   0   'False", "      System          =   -1  'True",
+            "      TabIndex        =   2", "      Width           =   2000", "   End"));
+        var form = import.Form!;
+        var file = form.Find("File1")!;
+
+        Assert.IsEmpty(import.Diagnostics);
+        Assert.AreSame(VBClasses.DriveListBox, form.Find("Drive1")!.Class);
+        Assert.AreSame(VBClasses.DirListBox, form.Find("Dir1")!.Class);
+        Assert.AreSame(VBClasses.FileListBox, file.Class);
+        Assert.AreEqual(("*.txt;*.bas", true, false, true, true, true), (file.Get(VBProperties.Pattern), file.Get(VBProperties.Hidden),
+            file.Get(VBProperties.ReadOnly), file.Get(VBProperties.SystemFiles), file.Get(VBProperties.Archive), file.Get(VBProperties.Normal)));
+    }
+
+    [TestMethod]
     public void AValueThePropertyCannotHold_IsKeptAsText_AndReported()
     {
         var import = VB6FormReader.Read(Form(Label("Alignment       =   7")));
@@ -150,6 +228,18 @@ public sealed class VB6FormReaderTests
         Assert.AreEqual(FormFont.Default with { Name = "Arial", Size = 12 }, import.Form!.Find("Label1")!.Get(VBProperties.Font));
     }
 
+    // As measured with VB6: a font of the form's file holds the size VB6 draws it at, which is the size it reads back at Load.
+    [TestMethod]
+    [DataRow("MS Sans Serif", "8", 8.25)]
+    [DataRow("MS Sans Serif", "10", 9.75)]
+    [DataRow("Arial", "8", 8.25)]
+    public void AFontBagsSize_IsHeldAtTheSizeItIsDrawnAt(string name, string size, double expected)
+    {
+        var import = VB6FormReader.Read(Form(Label("BeginProperty Font ", $"   name = \"{name}\"", $"   size = {size}", "EndProperty")));
+
+        Assert.AreEqual(expected, import.Form!.Find("Label1")!.Get(VBProperties.Font).Size);
+    }
+
     [TestMethod]
     public void AFontBagWithAFieldItCannotRead_IsKeptAsText_AndTheFormsFontIsNotTakenAsWell()
     {
@@ -240,6 +330,64 @@ public sealed class VB6FormReaderTests
         Assert.IsNull(label.Index);
         Assert.Contains(new UnmodelledProperty("Index", "\"a\""), label.UnmodelledProperties);
         Assert.AreEqual(VB6ImportDiagnosticKind.InvalidValue, import.Diagnostics.Single().Kind);
+    }
+
+    // VB6 loads a file's text whole where it is longer than the box's MaxLength, native and p-code agreeing.
+    [TestMethod]
+    public void ATextBoxsLines_Mask_AndLimit_AreRead_AndATextLongerThanTheLimitIsReadWhole()
+    {
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.TextBox Text1 ",
+            "      MaxLength       =   3",
+            "      MultiLine       =   -1  'True",
+            "      PasswordChar    =   \"*\"",
+            "      ScrollBars      =   2  'Vertical",
+            "      Text            =   \"abcdef\"",
+            "   End",
+            "   Begin VB.TextBox Text2 ",
+            "      MaxLength       =   70000",
+            "   End"));
+        var text1 = import.Form!.Find("Text1")!;
+        var text2 = import.Form!.Find("Text2")!;
+
+        Assert.AreEqual(3, text1.Get(VBProperties.MaxLength));
+        Assert.IsTrue(text1.Get(VBProperties.MultiLine));
+        Assert.AreEqual("*", text1.Get(VBProperties.PasswordChar));
+        Assert.AreEqual(ScrollBars.Vertical, text1.Get(VBProperties.ScrollBars));
+        Assert.AreEqual("abcdef", text1.Get(VBProperties.Text));
+        Assert.IsEmpty(text1.UnmodelledProperties);
+        Assert.AreEqual(VB6ImportDiagnosticKind.InvalidValue, import.Diagnostics.Single().Kind);
+        Assert.AreEqual(new UnmodelledProperty("MaxLength", "70000"), text2.UnmodelledProperties.Single());
+    }
+
+    [TestMethod]
+    public void APictureBoxsFontTransparent_IsRead()
+    {
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.PictureBox Picture1 ",
+            "      FontTransparent =   0   'False",
+            "   End"));
+        var picture = import.Form!.Find("Picture1")!;
+
+        Assert.IsFalse(picture.Get(VBProperties.FontTransparent));
+        Assert.IsEmpty(picture.UnmodelledProperties);
+    }
+
+    [TestMethod]
+    public void AComboBoxsIntegralHeight_IsRead_AndIsTrueWhereTheFileLeavesItOut()
+    {
+        var import = VB6FormReader.Read(Form(
+            "   Begin VB.ComboBox Combo1 ",
+            "      IntegralHeight  =   0   'False",
+            "      Style           =   1  'Simple Combo",
+            "   End",
+            "   Begin VB.ComboBox Combo2 ",
+            "      Style           =   1  'Simple Combo",
+            "   End"));
+
+        Assert.IsFalse(import.Form!.Find("Combo1")!.Get(VBProperties.IntegralHeight));
+        Assert.IsTrue(import.Form.Find("Combo2")!.Get(VBProperties.IntegralHeight));
+        Assert.IsEmpty(import.Diagnostics);
     }
 
     [TestMethod]

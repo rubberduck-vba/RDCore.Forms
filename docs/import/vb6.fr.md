@@ -41,7 +41,7 @@ Une lecture ne lève pas d'exception à cause du contenu d'un fichier. Elle cons
 |`UnmatchedEnd`|Avertissement|Un `EndProperty` qui ne ferme rien est omis.|
 |`InvalidValue`|Avertissement|La propriété est conservée sous forme d'`UnmodelledProperty` : une valeur qu'elle ne peut pas contenir, un nombre hors de la plage de son type, ou un `Index` qui n'est pas un nombre de 0 à 32767.|
 |`MissingCompanion`, `MissingRecord`|Avertissement|La propriété garde sa valeur par défaut, et sa citation est conservée sous forme d'`UnmodelledProperty`.|
-|`MisplacedComponent`|Avertissement|Un composant placé dans un autre qui ne peut pas le contenir est placé dans le conteneur englobant le plus proche qui le peut, à sa position écrite.|
+|`MisplacedComponent`|Avertissement|Un composant placé dans un autre qui ne peut pas le contenir est placé dans le conteneur englobant le plus proche qui le peut, à sa position écrite; un contrôle écrit à l'intérieur d'un Timer est plutôt placé au `Left` et au `Top` du Timer ajoutés aux siens, comme VB6 le place.|
 |`UnmodelledClass`|Information|Le composant est conservé sous forme d'`UnmodelledComponent`, avec son texte.|
 |`UnreadLibraryReference`, `UnmodelledHeaderLine`|Information|La ligne d'en-tête est conservée dans `UnmodelledHeader`.|
 
@@ -49,7 +49,7 @@ Une propriété ou un sac de propriétés que le modèle n'a pas est conservé s
 
 ## Positions et polices
 
-Les positions et les tailles sont lues telles que le fichier les contient. La position et la taille d'un contrôle sont en twips, quel que soit le `ScaleMode` de son conteneur. Les extrémités d'un Line sont dans l'échelle de son conteneur : en twips, sauf si le conteneur (un formulaire, un UserControl, une PropertyPage ou une PictureBox) a son propre `ScaleMode`. La position et la taille de la racine sont celles de sa zone cliente, en twips.
+Le fichier contient la position et la taille d'un contrôle en twips, quel que soit le `ScaleMode` de son conteneur, et elles sont lues en pixels, à 15 twips le pixel. La position et la taille de la racine sont celles de sa zone cliente, lues de la même façon. Les extrémités d'un Line sont lues telles que le fichier les contient, dans l'échelle de son conteneur : en twips, sauf si le conteneur (un formulaire, un UserControl, une PropertyPage ou une PictureBox) a son propre `ScaleMode`.
 
 Un contrôle qui n'écrit aucune `Font`, sur un formulaire qui en écrit une, reçoit une copie de la police du formulaire.
 
@@ -57,13 +57,10 @@ Un contrôle qui n'écrit aucune `Font`, sur un formulaire qui en écrit une, re
 
 Les fichiers de test ont été compilés et exécutés sous VB6, et les tests vérifient ce que VB6 en a lu.
 
-> [!NOTE]
-> **Non implémenté.** VB6 décale un contrôle écrit à l'intérieur d'un Timer selon le `Left` et le `Top` du Timer. Le lecteur le place dans le formulaire à sa position écrite.
-
 |Cas|VB6 lit|Le lecteur conserve|
 |---|---|---|
 |Les extrémités d'une Line en échelle utilisateur, écrites `0 0 100 50`|`-0.0124842 0 100.0125 50`|Les valeurs écrites.|
-|Le `ScaleWidth` d'un formulaire, écrit `8000`|`7995`, la largeur cliente de sa fenêtre|La valeur écrite.|
+|Le `ScaleWidth` d'un formulaire, écrit `8000`|`7995`, la largeur cliente de sa fenêtre|La valeur écrite. Dans la fenêtre du formulaire, là où son `ScaleMode` est une unité, il vaut la largeur cliente ([l'échelle](../controls/drawing.md#the-scale)).|
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | IMPORTER • [IMPORT](vb6.md) | [CONTROLS](../controls/index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

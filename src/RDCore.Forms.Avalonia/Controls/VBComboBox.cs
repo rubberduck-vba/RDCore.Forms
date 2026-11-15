@@ -9,8 +9,11 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Controls.Presenters;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
 using P = RDCore.Forms.Model.VB.VBProperties;
@@ -54,7 +57,17 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// item matches.
 /// </para>
 /// <para>
-/// A <c>Style</c> of Simple Combo is shown as a Dropdown Combo, and <c>Locked</c> is not applied.
+/// A Simple Combo shows its edit box with its list always shown under it and no button; the list takes the rest of its height, and
+/// scrolls where its items do not fit. Its rows are a line of its font high, and its edit box a row and 8 pixels: 13 and 21 at the
+/// default font. Where <c>IntegralHeight</c> is True, its height is snapped to whole rows of its list, or to the edit box alone where
+/// no row fits; a height from code of the edit box's or less is ignored. A press on the list picks the item under it, or the last
+/// item when the press is below the items, even the item already selected; a pick raises Click and no Change, and leaves the focus in
+/// the edit box. A press that moves the focus selects the item before the focus moves, and the text follows before the Click. A double
+/// click is one Click, then DblClick. Its list never drops, and it raises no DropDown. Typing does not complete or filter.
+/// </para>
+/// <para>
+/// A <c>Locked</c> combo keeps out the user, not code: its edit box takes no typing, its list does not drop, and neither the keys nor
+/// the pointer pick an item. Its key events are raised. Code's <c>Text</c> and <see cref="ListIndex"/> still set it.
 /// </para>
 /// </remarks>
 public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
@@ -80,7 +93,11 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
     private CompletionPanel? panel;
     private bool writingList;
     private TextBox? editBox;
+    private Border? listBorder;
+    private bool locked;
     private readonly ItemIcons icons = new();
+    // Set while the component's selection goes to the edit box, and the edit box's to the component.
+    private bool selecting;
 
     static VBComboBox()
     {
@@ -102,14 +119,25 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
         this.instance = instance;
         style = instance?.Get(P.ComboBoxStyle) ?? ComboBoxStyle.DropdownCombo;
         IsEditable = style != ComboBoxStyle.DropdownList;
+        if (style == ComboBoxStyle.SimpleCombo)
+        {
+            Template = SimpleTemplate;
+            // VB6's rows are a line of text high.
+            Styles.Add(new Style(x => x.OfType<ComboBoxItem>())
+            {
+                Setters = { new Setter(TemplatedControl.PaddingProperty, new Thickness(2, 0)), new Setter(MinHeightProperty, 0d) },
+            });
+            // On the way down, so that the press is the list's before an item takes it.
+            AddHandler(PointerPressedEvent, PressList, RoutingStrategies.Tunnel);
+            AddHandler(PointerReleasedEvent, ReleaseList, RoutingStrategies.Tunnel);
+        }
         // A Dropdown List shows its item in the combo's own padding, too deep for a combo's height.
         Padding = new Thickness(2, 0);
         VerticalContentAlignment = VerticalAlignment.Center;
         if (IsEditable)
-        {
             TextSearch.SetTextBinding(this, noItemMatches);
+        if (style == ComboBoxStyle.DropdownCombo)
             ItemsPanel = new FuncTemplate<Panel?>(() => panel = new CompletionPanel(this));
-        }
         // On the way down, so that the edit box does not take them first.
         AddHandler(KeyDownEvent, TakeKey, RoutingStrategies.Tunnel);
         ComponentBinding.Bind(this, instance!, VBClasses.ComboBox, Apply);
@@ -117,6 +145,102 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
 
     /// <inheritdoc/>
     protected override Type StyleKeyOverride => typeof(ComboBox);
+
+    // A Simple Combo's shape, as measured with VB6: its edit box is a row and 8 pixels high, 21 at the default font, and its list's
+    // border takes 2 pixels on each side.
+    private const double EditBeyondRow = 8;
+    private const double ListBorder = 4;
+
+    private double Row => FormFonts.LineHeight(instance.Get(P.Font));
+
+    private double EditHeight => Row + EditBeyondRow;
+
+    // A Simple Combo: its edit box, with its list under it, always shown, and no button. The list scrolls when its items do not fit.
+    // Avalonia's ComboBox requires a popup, which is there and never opens. The list's border and padding are VB6's border, so that
+    // whole rows fill it.
+    private static readonly FuncControlTemplate<VBComboBox> SimpleTemplate = new((combo, scope) =>
+    {
+        var edit = new TextBox
+        {
+            Name = "PART_EditableTextBox",
+            Height = combo.EditHeight,
+            [DockPanel.DockProperty] = Dock.Top,
+            [!!TextBox.TextProperty] = combo[!!TextProperty],
+            [!TextBox.BackgroundProperty] = combo[!BackgroundProperty],
+            [!TextBox.ForegroundProperty] = combo[!ForegroundProperty],
+        }.RegisterInNameScope(scope);
+        var items = new ItemsPresenter
+        {
+            Name = "PART_ItemsPresenter",
+            [!ItemsPresenter.ItemsPanelProperty] = combo[!ItemsPanelProperty],
+        }.RegisterInNameScope(scope);
+        var popup = new Popup { Name = "PART_Popup", [DockPanel.DockProperty] = Dock.Top }.RegisterInNameScope(scope);
+        var list = new Border
+        {
+            Name = "PART_List",
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(1),
+            [!Border.BorderBrushProperty] = combo[!BorderBrushProperty],
+            [!Border.BackgroundProperty] = combo[!BackgroundProperty],
+            Child = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = items,
+            },
+        }.RegisterInNameScope(scope);
+        return new DockPanel { LastChildFill = true, Children = { edit, popup, list } };
+    });
+
+    // A press on a Simple Combo's list picks the item under it, or the last item when the press is below the items, even the item
+    // already selected, with Click. A double click's second press raises DblClick and picks nothing more. A Locked combo's list picks nothing.
+    private void PressList(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed || e.Source is not Visual source || !IsInList(source))
+            return;
+        e.Handled = true;
+        if (locked || ItemCount == 0)
+        {
+            editBox?.Focus(NavigationMethod.Pointer);
+            return;
+        }
+        var item = source as ComboBoxItem ?? source.FindAncestorOfType<ComboBoxItem>();
+        if (item is not null && e.ClickCount == 2)
+        {
+            VBControl.Raise(this, VBEvents.DblClick);
+            return;
+        }
+        var index = item is null ? ItemCount - 1 : IndexFromContainer(item);
+        // A press that takes the focus selects the item first, as VB6's does: the LostFocus and the GotFocus read its ListIndex, and
+        // the text from before the pick.
+        if (editBox is { IsKeyboardFocusWithin: false } box)
+        {
+            pressed = index;
+            try
+            {
+                box.Focus(NavigationMethod.Pointer);
+            }
+            finally
+            {
+                pressed = null;
+            }
+        }
+        SelectedIndex = index;
+        Picked();
+    }
+
+    // The item a press on a Simple Combo's list selects, while the press moves the focus to it.
+    private int? pressed;
+
+    // Its release is the press's: the list's own release would pick the item a second time.
+    private void ReleaseList(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.Source is Visual source && IsInList(source))
+            e.Handled = true;
+    }
+
+    private bool IsInList(Visual source) =>
+        listBorder is { } list && (ReferenceEquals(source, list) || list.IsVisualAncestorOf(source));
 
     /// <summary>
     /// The number of items.
@@ -132,7 +256,7 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
     /// </remarks>
     public int ListIndex
     {
-        get => SelectedIndex;
+        get => pressed ?? SelectedIndex;
         set
         {
             if (value < -1 || value >= ItemCount)
@@ -182,6 +306,110 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
             return;
         SelectedIndex = -1;
         instance.Set(P.Text, text);
+    }
+
+    /// <summary>
+    /// The component's <c>SelStart</c>: where the edit box's selection starts, or its caret's place where nothing is selected; 0 is
+    /// before the first character.
+    /// </summary>
+    /// <exception cref="FormErrorException">
+    /// Set below 0 or above 65535, or read or set on a Dropdown List, which has no edit box: 380, Invalid property value.
+    /// </exception>
+    /// <remarks>
+    /// As a single-line TextBox's <c>SelStart</c>. A text from code, or an item chosen with <see cref="ListIndex"/>, leaves nothing
+    /// selected, the caret before the first character.
+    /// </remarks>
+    public int SelStart
+    {
+        get => (int)EditSelection(P.SelStart);
+        set => SetEditSelection(P.SelStart, value);
+    }
+
+    /// <summary>
+    /// The component's <c>SelLength</c>: the number of characters selected in the edit box, from <see cref="SelStart"/>.
+    /// </summary>
+    /// <exception cref="FormErrorException">
+    /// Set below 0 or above 65535, or read or set on a Dropdown List: 380, Invalid property value.
+    /// </exception>
+    /// <remarks>
+    /// As a single-line TextBox's <c>SelLength</c>.
+    /// </remarks>
+    public int SelLength
+    {
+        get => (int)EditSelection(P.SelLength);
+        set => SetEditSelection(P.SelLength, value);
+    }
+
+    /// <summary>
+    /// The component's <c>SelText</c>: the text selected in the edit box; "" where nothing is selected.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    /// <exception cref="FormErrorException">Read or set on a Dropdown List: 380, Invalid property value.</exception>
+    /// <remarks>
+    /// As a single-line TextBox's <c>SelText</c>: setting it puts the text in place of the selection, the caret after it, and raises
+    /// Change once, even where the text does not change. Where an item is selected, it selects none, <see cref="ListIndex"/> -1.
+    /// </remarks>
+    public string SelText
+    {
+        get => (string)EditSelection(P.SelText);
+        set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            SetEditSelection(P.SelText, value);
+        }
+    }
+
+    private object EditSelection(PropertyDefinition property) =>
+        instance.TryGet(property, out var value) ? value! : throw new FormErrorException(FormError.InvalidPropertyValue);
+
+    private void SetEditSelection(PropertyDefinition property, object value)
+    {
+        if (!instance.TrySet(property, value))
+            throw new FormErrorException(FormError.InvalidPropertyValue);
+    }
+
+    // The component's selection, in the edit box. The caret goes to the selection's end first: setting it empties the selection. A
+    // combo whose template is not applied yet has no edit box: the selection goes to it when it has one.
+    private void ShowSelection()
+    {
+        if (!IsEditable || editBox is not { } box)
+            return;
+        var length = (box.Text ?? "").Length;
+        var start = Math.Min(instance.Get(P.SelStart), length);
+        var end = Math.Min(start + instance.Get(P.SelLength), length);
+        selecting = true;
+        try
+        {
+            box.CaretIndex = end;
+            box.SelectionStart = start;
+            box.SelectionEnd = end;
+        }
+        finally
+        {
+            selecting = false;
+        }
+    }
+
+    // The user's selection in the edit box, from its anchor to its caret, goes to the component.
+    private void TakeSelection(TextBox box)
+    {
+        selecting = true;
+        try
+        {
+            instance.Set(P.SelStart, Math.Min(box.SelectionStart, box.SelectionEnd));
+            instance.Set(P.SelLength, Math.Abs(box.SelectionEnd - box.SelectionStart));
+        }
+        finally
+        {
+            selecting = false;
+        }
+    }
+
+    private void TakeSelection(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (!selecting && !textFromComponent && !textFromSelection && sender is TextBox box
+            && (e.Property == TextBox.SelectionStartProperty || e.Property == TextBox.SelectionEndProperty || e.Property == TextBox.CaretIndexProperty))
+            TakeSelection(box);
     }
 
     /// <summary>
@@ -264,10 +492,16 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        if (editBox is { } old)
+            old.PropertyChanged -= TakeSelection;
         // The edit box is one line, at a combo's height, too short for a TextBox's own padding.
         editBox = e.NameScope.Find<TextBox>("PART_EditableTextBox");
+        listBorder = e.NameScope.Find<Border>("PART_List");
         if (editBox is not { } box)
             return;
+        box.PropertyChanged += TakeSelection;
+        ShowSelection();
+        box.IsReadOnly = locked;
         box.MinHeight = 0;
         box.Padding = new Thickness(2, 0);
         box.VerticalContentAlignment = VerticalAlignment.Center;
@@ -292,8 +526,10 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
                 // whose text another shares, the wrong one.
                 if (SelectedIndex != chosen)
                     SelectedIndex = chosen;
-                // A choice is no Change: the component takes the item's text quietly.
+                // A choice is no Change: the component takes the item's text quietly. It selects nothing, the caret before the first
+                // character, even where the text is the same; a user's pick then selects the whole text.
                 instance.Set(P.Text, base.Text ?? "");
+                instance.Set(P.SelStart, 0);
             }
             finally
             {
@@ -313,15 +549,30 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
             {
                 textFromTyping = false;
             }
-            instance.Set(P.Text, base.Text ?? "");
-            if (editBox?.IsKeyboardFocusWithin == true)
+            // The text the user changes selects nothing in the component: the edit box's caret, which a deletion leaves in place, is
+            // put back.
+            selecting = true;
+            try
+            {
+                instance.Set(P.Text, base.Text ?? "");
+            }
+            finally
+            {
+                selecting = false;
+            }
+            if (editBox is { } box)
+                TakeSelection(box);
+            if (style == ComboBoxStyle.DropdownCombo && editBox?.IsKeyboardFocusWithin == true)
                 Narrow(base.Text ?? "");
             return;
         }
         base.OnPropertyChanged(change);
         if (change.Property == IsDropDownOpenProperty)
         {
-            if (change.GetNewValue<bool>())
+            // A Simple Combo's list is always shown: it has nothing to drop, and raises no DropDown. A Locked combo's list does not drop.
+            if (change.GetNewValue<bool>() && (style == ComboBoxStyle.SimpleCombo || locked))
+                SetCurrentValue(IsDropDownOpenProperty, false);
+            else if (change.GetNewValue<bool>())
                 VBControl.Raise(this, VBEvents.DropDown);
             else
                 EndNarrowing();
@@ -339,6 +590,8 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
     protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
     {
         base.PrepareContainerForItemOverride(container, item, index);
+        if (style == ComboBoxStyle.SimpleCombo)
+            container.Height = Row;
         icons.Show(container, item, index);
         ShowNarrowing(container, index);
     }
@@ -373,6 +626,8 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
         if (e.Handled || string.IsNullOrEmpty(e.Text) || ItemCount == 0)
             return;
         e.Handled = true;
+        if (locked)
+            return;
         foreach (var character in e.Text)
             Search(character);
     }
@@ -533,6 +788,8 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
         if (e.Key is not (Key.Up or Key.Down))
             return;
         e.Handled = true;
+        if (locked)
+            return;
         var index = SelectedIndex < 0 ? 0 : Math.Clamp(SelectedIndex + (e.Key == Key.Down ? 1 : -1), 0, ItemCount - 1);
         if (index == SelectedIndex)
             return;
@@ -542,9 +799,12 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
         Picked();
     }
 
-    // A choice puts the item's text in the edit box selected, so that a key typed next replaces it.
+    // A choice puts the item's text in the edit box selected, so that a key typed next replaces it. A Simple Combo's pick leaves the
+    // focus in its edit box: what is typed next goes there.
     private void Picked()
     {
+        if (style == ComboBoxStyle.SimpleCombo && editBox is { IsFocused: false } box)
+            box.Focus(NavigationMethod.Pointer);
         if (IsEditable)
             editBox?.SelectAll();
         VBControl.Raise(this, VBEvents.Click);
@@ -555,20 +815,34 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
         if (ReferenceEquals(e.Property, P.Text))
         {
             var text = (string)e.After!;
-            if (IsEditable && !textFromSelection && (base.Text ?? "") != text)
+            var replaced = ReferenceEquals(e.AssignedProperty, P.SelText);
+            if (IsEditable && !textFromSelection && (replaced && SelectedIndex >= 0 || (base.Text ?? "") != text))
             {
-                textFromComponent = true;
+                // SelText selects no item; the item's text is not the component's.
+                textFromComponent = textFromTyping = true;
                 try
                 {
+                    if (replaced)
+                        SelectedIndex = -1;
                     base.Text = text;
                 }
                 finally
                 {
-                    textFromComponent = false;
+                    textFromComponent = textFromTyping = false;
                 }
             }
-            if (IsEditable && !textFromSelection && !Equals(e.Before, e.After))
+            // SelText raises a Change for each step, whether or not the text changed.
+            if (IsEditable && !textFromSelection && (replaced || !Equals(e.Before, e.After)))
                 VBControl.Raise(this, VBEvents.Change);
+        }
+        else if (ReferenceEquals(e.Property, P.SelStart) || ReferenceEquals(e.Property, P.SelLength))
+        {
+            if (!selecting)
+                ShowSelection();
+        }
+        else if (ReferenceEquals(e.Property, P.SelText))
+        {
+            // Made from the text and the selection, which show it.
         }
         else if (ReferenceEquals(e.Property, P.List))
         {
@@ -578,14 +852,80 @@ public sealed class VBComboBox : ComboBox, IRaisesKeyEvents
             foreach (var item in (IReadOnlyList<string>)e.After!)
                 Items.Add(item);
         }
+        else if (ReferenceEquals(e.Property, P.Locked))
+        {
+            locked = (bool)e.After!;
+            if (editBox is { } box)
+                box.IsReadOnly = locked;
+            if (locked && IsDropDownOpen)
+                SetCurrentValue(IsDropDownOpenProperty, false);
+        }
         else if (ReferenceEquals(e.Property, P.ItemIcon))
         {
             icons.Take((IReadOnlyList<byte[]?>)e.After!);
             icons.ShowAll(this);
             ShowSelectedIcon();
         }
+        else if (style == ComboBoxStyle.SimpleCombo && ReferenceEquals(e.Property, P.Height))
+        {
+            if (!snapping)
+                Snap((double)e.After!, Equals(e.Before, e.After) ? null : (double)e.Before!);
+        }
+        else if (style == ComboBoxStyle.SimpleCombo && ReferenceEquals(e.Property, P.IntegralHeight) && !Equals(e.Before, e.After))
+            Snap(instance.Get(P.Height), null);
+        else if (style == ComboBoxStyle.SimpleCombo && ReferenceEquals(e.Property, P.Font) && !Equals(e.Before, e.After))
+        {
+            ComponentBinding.ApplyCommon(this, e.Property, e.After);
+            Refont((FormFont)e.Before!);
+        }
         else
             ComponentBinding.ApplyCommon(this, e.Property, e.After);
+    }
+
+    // Set while a Simple Combo writes back the height it takes.
+    private bool snapping;
+
+    // A Simple Combo's height, as measured with VB6, from the form or, with the height it had, from code. The height asked is whole
+    // pixels first. Where it is no more than the edit box's, the edit box alone, from the form; from code, it is ignored, and the
+    // combo keeps the pixels it has. Where IntegralHeight is True, the list is whole rows, and the edit box alone where not one fits;
+    // otherwise the list takes the rest, and the edit box is alone where its list would be its border or less. The height asked is
+    // kept where it rounds to the pixels taken; otherwise the component's Height takes them.
+    private void Snap(double asked, double? before)
+    {
+        var pixels = Math.Round(asked, MidpointRounding.AwayFromZero);
+        var (edit, row) = (EditHeight, Row);
+        double taken;
+        if (pixels <= edit)
+            taken = before is { } kept ? Math.Round(kept, MidpointRounding.AwayFromZero) : edit;
+        else if (instance.Get(P.IntegralHeight))
+            taken = Math.Floor((pixels - edit - ListBorder) / row) is var rows and >= 1 ? edit + ListBorder + rows * row : edit;
+        else
+            taken = pixels - edit <= ListBorder ? edit : pixels;
+        Height = taken;
+        var stored = taken == pixels ? asked : taken;
+        if (instance.Get(P.Height) == stored)
+            return;
+        snapping = true;
+        try
+        {
+            instance.Set(P.Height, stored);
+        }
+        finally
+        {
+            snapping = false;
+        }
+    }
+
+    // A font from code sizes the edit box and the rows to it, and keeps the list's pixels, as VB6 does; where IntegralHeight is True,
+    // the height then snaps to the new rows.
+    private void Refont(FormFont before)
+    {
+        var list = Math.Max(0, instance.Get(P.Height) - (FormFonts.LineHeight(before) + EditBeyondRow));
+        if (editBox is { } box)
+            box.Height = EditHeight;
+        foreach (var container in GetRealizedContainers())
+            container.Height = Row;
+        Snap(EditHeight + list, null);
     }
 
     private void WriteList()

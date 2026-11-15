@@ -1,6 +1,7 @@
 ﻿// Derived from HexIDE (https://github.com/hexide-io/HexIDE), commit ae17f1db.
 // Copyright (c) 2024 Bartosz Korczyński. Copyright (c) 2026 The HexIDE Authors. MIT License; see NOTICE.md.
 
+using System.IO.Abstractions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,7 +9,8 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using RDCore.Forms.Model.VB;
+using P =RDCore.Forms.Model.VB.VBProperties;
 
 namespace RDCore.Forms.Avalonia.Rendering;
 
@@ -18,14 +20,14 @@ namespace RDCore.Forms.Avalonia.Rendering;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Every component of the form that <see cref="VBControls.Create"/> makes a control for is shown, in its container's canvas. A
+/// Every component of the form that <see cref="VBControls.Create(ComponentInstance, IFileSystem)"/> makes a control for is shown, in its container's canvas. A
 /// component it makes no control for, such as a menu item, is not shown here, and neither is anything placed in one: a form's window shows its menus
 /// on its <see cref="VBFormWindow.MenuBar"/>. A Timer's control is on the form and draws nothing.
 /// </para>
 /// <para>
-/// A control's <c>Left</c>, <c>Top</c>, <c>Width</c> and <c>Height</c> are twips whatever its container's <c>ScaleMode</c>, as a
-/// designer file holds them: a control is placed at 15 twips a pixel. In each container the first control the form holds is on
-/// top, and a windowless control (a Label or an Image) is under every windowed one, whatever their order.
+/// A control's <c>Left</c>, <c>Top</c>, <c>Width</c> and <c>Height</c> are pixels whatever its container's <c>ScaleMode</c>, and
+/// place it as they are. In each container the first control the form holds is on top until a <c>ZOrder</c> call moves one, and a
+/// windowless control (a Label or an Image) is under every windowed one, whatever their order.
 /// </para>
 /// <para>
 /// Tab and Shift+Tab move the focus through one order across the whole form, a control in a Frame or a PictureBox included: by
@@ -38,7 +40,14 @@ namespace RDCore.Forms.Avalonia.Rendering;
 /// <c>MousePointer</c>. A disabled root takes no input in any of its controls.
 /// </para>
 /// <para>
-/// The root's drawing statements draw on its <see cref="Drawing"/>, under every control.
+/// A control the form's <see cref="FormDefinition.AddControl(ComponentClass, string, ComponentInstance?)"/> adds is shown at once,
+/// under the controls of its plane already in its container, and last in the form's order. One that
+/// <see cref="FormDefinition.RemoveControl(ComponentInstance)"/> removes goes at once, with what it holds; where the focus was in it,
+/// the focus goes to the first control of the tab order that can take it.
+/// </para>
+/// <para>
+/// The root's drawing statements draw on its <see cref="Drawing"/>, under every control. The root's <c>Picture</c> is under its
+/// drawing, at its size in pixels from the top left corner, and a picture that is refused is not drawn (see <see cref="PictureError"/>).
 /// </para>
 /// <para>
 /// A press on no control is the root's: it raises MouseDown, MouseMove and MouseUp with <c>X</c> and <c>Y</c> in the root's scale, and
@@ -57,23 +66,47 @@ public sealed class VBFormView : Canvas
         ControlEvents.AttachClick<VBFormView>(ClickRelease.OverTheControl);
     }
 
+    private readonly IFileSystem fileSystem;
     private readonly Dictionary<ComponentInstance, Control> controls = new(ReferenceEqualityComparer.Instance);
     // The shown components, in the order the form holds them.
     private readonly List<ComponentInstance> shown = [];
+    private readonly VBPicture.Holder picture = new();
+    private readonly PictureLayer pictureLayer = new() { ZIndex = int.MinValue };
 
     /// <summary>
     /// Creates the client area of a form.
     /// </summary>
     /// <param name="form">The form.</param>
     /// <exception cref="ArgumentNullException"><paramref name="form"/> is <see langword="null"/>.</exception>
+    /// <remarks>
+    /// Its file lists show the machine's file system, from the process's current directory.
+    /// </remarks>
     public VBFormView(FormDefinition form)
+        : this(form, new FileSystem())
+    {
+    }
+
+    /// <summary>
+    /// Creates the client area of a form, with the file system its file lists show.
+    /// </summary>
+    /// <param name="form">The form.</param>
+    /// <param name="fileSystem">The file system the form's file lists show, from its current directory.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="form"/> or <paramref name="fileSystem"/> is <see langword="null"/>.</exception>
+    public VBFormView(FormDefinition form, IFileSystem fileSystem)
     {
         ArgumentNullException.ThrowIfNull(form);
+        ArgumentNullException.ThrowIfNull(fileSystem);
+        this.fileSystem = fileSystem;
         Form = form;
-        // What the form's drawing statements draw is under every control, the windowless ones included.
+        // The aligned boxes are laid out before their controls follow them, so a box's own Resize comes after the ones it causes.
+        AlignLayout.Of(form);
+        // What the form's drawing statements draw is under every control, the windowless ones included, and its picture is under that.
+        Children.Add(pictureLayer);
         Drawing = new VBDrawingLayer(form.Root) { ZIndex = int.MinValue };
         Children.Add(Drawing);
         Place(form.Root, this);
+        form.ControlAdded += (_, e) => Added(e);
+        form.ControlRemoved += (_, e) => Removed(e);
         ComponentBinding.Bind(this, form.Root, form.Root.Class, Apply);
         AddHandler(KeyDownEvent, OnKeyDown);
     }
@@ -87,6 +120,21 @@ public sealed class VBFormView : Canvas
     /// The surface the form's drawing statements draw on, under its controls.
     /// </summary>
     public VBDrawingLayer Drawing { get; }
+
+    /// <summary>
+    /// The error the root's <c>Picture</c> was refused with, <see cref="FormError.InvalidPicture"/>, or <see langword="null"/> where
+    /// it is drawn or there is none.
+    /// </summary>
+    public FormError? PictureError => picture.Error;
+
+    /// <inheritdoc/>
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        var size = base.ArrangeOverride(finalSize);
+        // The picture's layer is the whole client area, which clips it.
+        pictureLayer.Arrange(new Rect(size));
+        return size;
+    }
 
     /// <summary>
     /// The controls that take part in the form's tab order, in it: every shown control whose class has a <c>TabIndex</c>, whether
@@ -106,7 +154,7 @@ public sealed class VBFormView : Canvas
         int windowed = 0, windowless = WindowlessTop;
         foreach (var component in container.Contents)
         {
-            if (VBControls.Create(component) is not { } control)
+            if (VBControls.Create(component, fileSystem) is not { } control)
                 continue;
             // Each control goes under the ones of its plane placed before it.
             control.ZIndex = component.Class.IsWindowless ? windowless-- : windowed--;
@@ -118,6 +166,40 @@ public sealed class VBFormView : Canvas
         }
     }
 
+    // A control added at run time: last in its container, so under the controls of its plane already there, and last in the form's
+    // order, which breaks a tie of TabIndex.
+    private void Added(FormControlEventArgs e)
+    {
+        var host = ReferenceEquals(e.Container, Form.Root) ? this : (controls.GetValueOrDefault(e.Container) as IVBContainer)?.ChildHost;
+        if (host is null || VBControls.Create(e.Control, fileSystem) is not { } control)
+            return;
+        var windowless = e.Control.Class.IsWindowless;
+        var plane = host.Children.Where(child => VBControl.GetInstance(child) is { } other && controls.ContainsKey(other)
+                                                 && other.Class.IsWindowless == windowless).Select(child => child.ZIndex).ToList();
+        control.ZIndex = plane.Count == 0 ? (windowless ? WindowlessTop : 0) : plane.Min() - 1;
+        host.Children.Add(control);
+        controls.Add(e.Control, control);
+        shown.Add(e.Control);
+    }
+
+    // A control removed at run time, with what it holds. Where the focus was in it, it goes to the first control of the tab order that
+    // can take it.
+    private void Removed(FormControlEventArgs e)
+    {
+        if (!controls.TryGetValue(e.Control, out var control))
+            return;
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Visual;
+        var hadTheFocus = focused is not null && (ReferenceEquals(focused, control) || control.IsVisualAncestorOf(focused));
+        (control.Parent as Panel)?.Children.Remove(control);
+        foreach (var component in e.Control.Descendants().Prepend(e.Control))
+        {
+            controls.Remove(component);
+            shown.Remove(component);
+        }
+        if (hadTheFocus)
+            FirstToTakeTheFocus()?.Focus(NavigationMethod.Tab);
+    }
+
     private void Apply(ComponentPropertyChangedEventArgs e)
     {
         switch (e.Property.Name)
@@ -127,6 +209,10 @@ public sealed class VBFormView : Canvas
                 break;
             case nameof(P.BackColor):
                 Background = ComponentBinding.Brush(e.After);
+                break;
+            case nameof(P.Picture):
+                if (picture.Take((byte[]?)e.After))
+                    pictureLayer.Picture = Drawing.Picture = picture.Picture;
                 break;
             default:
                 ComponentBinding.ApplyCommon(this, e.Property, e.After);
@@ -180,6 +266,23 @@ public sealed class VBFormView : Canvas
             if (visual is Control control && order.Contains(control))
                 return control;
         return null;
+    }
+
+    // ZOrder: the control goes to the front or the back of its plane in its container, and what it holds goes with it.
+    internal void ZOrder(Control control, bool toFront)
+    {
+        if (control.Parent is not Panel host || VBControl.GetInstance(control) is not { } component)
+            return;
+        var windowless = component.Class.IsWindowless;
+        var plane = host.Children
+            .Where(child => !ReferenceEquals(child, control) && VBControl.GetInstance(child) is { } other
+                            && controls.TryGetValue(other, out var shownAs) && ReferenceEquals(shownAs, child) && other.Class.IsWindowless == windowless)
+            .OrderByDescending(child => child.ZIndex)
+            .ToList();
+        plane.Insert(toFront ? 0 : plane.Count, control);
+        var top = windowless ? WindowlessTop : 0;
+        for (var place = 0; place < plane.Count; place++)
+            plane[place].ZIndex = top - place;
     }
 
     // The first control of the tab order that Tab could give the focus to, or none.

@@ -66,9 +66,25 @@ public static class VBEvents
     public static readonly EventDefinition MouseUp = new("MouseUp", Button, Shift, X, Y);
 
     /// <summary>
-    /// A TextBox's or ComboBox's text, or a scroll bar's value, changed.
+    /// A TextBox's or ComboBox's text, a scroll bar's value, a DirListBox's <c>Path</c> or a DriveListBox's <c>Drive</c> changed.
     /// </summary>
     public static readonly EventDefinition Change = new("Change");
+
+    /// <summary>
+    /// A FileListBox's <c>Path</c> changed.
+    /// </summary>
+    public static readonly EventDefinition PathChange = new("PathChange");
+
+    /// <summary>
+    /// A FileListBox's <c>Pattern</c> changed.
+    /// </summary>
+    public static readonly EventDefinition PatternChange = new("PatternChange");
+
+    /// <summary>
+    /// A scroll bar's thumb was dragged to a new value. The Change comes once the thumb is released, where the value is not the one
+    /// the drag started at.
+    /// </summary>
+    public static readonly EventDefinition Scroll = new("Scroll");
 
     /// <summary>
     /// A ComboBox's list is about to drop down.
@@ -247,4 +263,21 @@ public static class VBEvents
     /// The controls a PropertyPage edits changed.
     /// </summary>
     public static readonly EventDefinition SelectionChanged = new("SelectionChanged");
+
+    /// <summary>
+    /// A Data control is about to leave its current record, for the reason <c>Action</c> gives; <c>Save</c> says whether a bound
+    /// control's data changed.
+    /// </summary>
+    public static readonly EventDefinition Validate = new("Validate", new EventParameter("Action", "Integer"), new EventParameter("Save", "Integer"));
+
+    /// <summary>
+    /// A Data control met a data access error while no code of the program was running. The handler's <c>Response</c> says whether
+    /// the error's message is shown.
+    /// </summary>
+    public static readonly EventDefinition Error = new("Error", new EventParameter("DataErr", "Integer"), new EventParameter("Response", "Integer"));
+
+    /// <summary>
+    /// Another of a Data control's records became current.
+    /// </summary>
+    public static readonly EventDefinition Reposition = new("Reposition");
 }

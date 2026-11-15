@@ -3,6 +3,7 @@ using RDCore.Forms.Menus;
 using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
 using RDCore.Forms.Xaml;
+using RDCore.SDK.Workspace.Pictures;
 using static RDCore.Forms.Tests.Model.TestPictures;
 using K = RDCore.Forms.Xaml.FormXamlDiagnosticKind;
 using P = RDCore.Forms.Model.VB.VBProperties;
@@ -90,9 +91,23 @@ public sealed class FormXamlTests
     }
 
     [TestMethod]
+    public void ATextLongerThanItsBoxsMaxLength_IsWrittenAndReadBackWhole()
+    {
+        var read = Read("<TextBox Name=\"Text1\" MaxLength=\"3\" Text=\"abcdef\" />");
+        var box = read.Form!.Components.Single(c => c.Name == "Text1");
+
+        var again = FormXaml.Read(FormXaml.Write(read.Form!)).Form!.Components.Single(c => c.Name == "Text1");
+
+        Assert.IsEmpty(read.Diagnostics, string.Join(Environment.NewLine, read.Diagnostics));
+        Assert.AreEqual("abcdef", box.Get(P.Text));
+        Assert.AreEqual("abcdef", again.Get(P.Text));
+        Assert.AreEqual(3, again.Get(P.MaxLength));
+    }
+
+    [TestMethod]
     public void AForm_IsWrittenAsTheFormatHasIt()
     {
-        var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Caption, "Hello").Set(P.Width, 4800.0)
+        var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Caption, "Hello").Set(P.Width, 320.0)
             .Set(P.BackColor, FormColor.FromSystem(SystemColor.ButtonFace)).Set(P.ForeColor, FormColor.FromRgb(0x12, 0x34, 0xAB));
         var form = new FormDefinition(root);
         var button = new ComponentInstance(VBClasses.CommandButton, "Command1").Set(P.Caption, "&OK").Set(P.Font, new FormFont("Tahoma", 9, FormFont.BoldWeight));
@@ -108,7 +123,7 @@ public sealed class FormXamlTests
 
         Assert.AreEqual(
             $"""
-            <Form FormatVersion="1" Name="Form1" Caption="Hello" BackColor="ButtonFace" ForeColor="#1234AB" Width="4800" xmlns="{Ns}">
+            <Form FormatVersion="1" Name="Form1" Caption="Hello" BackColor="ButtonFace" ForeColor="#1234AB" Width="320" xmlns="{Ns}">
               <CommandButton Name="Command1" Caption="&amp;OK">
                 <CommandButton.Font>
                   <Font Name="Tahoma" Size="9" Weight="700" />
@@ -221,6 +236,17 @@ public sealed class FormXamlTests
         CollectionAssert.AreEqual(new[] { "InvalidValue Warning" }, Kinds(none));
     }
 
+    // VB6's CommandButton has no ForeColor, and the model's has none.
+    [TestMethod]
+    public void ACommandButtonsForeColor_IsKeptAsText_AndReported()
+    {
+        var read = Read("""<CommandButton Name="Command1" ForeColor="#FF0000" />""");
+        var button = read.Form!.Find("Command1")!;
+
+        CollectionAssert.AreEqual(new[] { "UnknownProperty Warning" }, Kinds(read));
+        CollectionAssert.AreEqual(new[] { new UnmodelledProperty("ForeColor", "#FF0000") }, button.UnmodelledProperties);
+    }
+
     [TestMethod]
     public void WhatTheModelCannotHold_IsKeptAsText_AndReported()
     {
@@ -317,6 +343,15 @@ public sealed class FormXamlTests
     }
 
     [TestMethod]
+    public void APictureLargerThanAPictureCanBe_IsNotDecoded_AndIsAnInvalidValue()
+    {
+        var read = Read($"""<Image Name="Image1" Picture="{new string('A', (PictureHeader.MaxBytes + 8) / 3 * 4 + 4)}" />""");
+
+        Assert.IsNull(read.Form!.Find("Image1")!.Get(P.Picture));
+        CollectionAssert.AreEqual(new[] { "InvalidValue Warning" }, Kinds(read));
+    }
+
+    [TestMethod]
     public void AListsItems_HoldTheirDataAndIcons_TheOnesLeftOutAre0AndNone()
     {
         var read = Read(
@@ -360,21 +395,21 @@ public sealed class FormXamlTests
     {
         var read = FormXaml.Read(
             """
-            <Form FormatVersion="1" Name="Form1" Caption="Orders" Width="4800" Height="3600" xmlns="https://rubberduckvba.ca/schemas/rdforms">
+            <Form FormatVersion="1" Name="Form1" Caption="Orders" Width="320" Height="240" xmlns="https://rubberduckvba.ca/schemas/rdforms">
               <Form.Font>
                 <Font Name="Tahoma" Size="8.25" />
               </Form.Font>
-              <Frame Name="Frame1" Caption="Ship by" Left="120" Top="120" Width="2400" Height="1200">
-                <OptionButton Name="optShip" Index="0" Caption="&amp;Air" Value="True" Left="120" Top="240" Width="1800" Height="300" />
-                <OptionButton Name="optShip" Index="1" Caption="&amp;Sea" Left="120" Top="600" Width="1800" Height="300" />
+              <Frame Name="Frame1" Caption="Ship by" Left="8" Top="8" Width="160" Height="80">
+                <OptionButton Name="optShip" Index="0" Caption="&amp;Air" Value="True" Left="8" Top="16" Width="120" Height="20" />
+                <OptionButton Name="optShip" Index="1" Caption="&amp;Sea" Left="8" Top="40" Width="120" Height="20" />
               </Frame>
-              <ListBox Name="lstItems" Left="2640" Top="120" Width="2000" Height="1200">
+              <ListBox Name="lstItems" Left="176" Top="8" Width="134" Height="80">
                 <ListBox.List>
                   <Item Text="Alpha" ItemData="1" />
                   <Item Text="Beta" ItemData="20" ItemIcon="R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" />
                 </ListBox.List>
               </ListBox>
-              <CommandButton Name="cmdOK" Caption="OK" Left="3480" Top="2880" Width="1215" Height="495" />
+              <CommandButton Name="cmdOK" Caption="OK" Left="232" Top="192" Width="81" Height="33" />
             </Form>
             """);
         var form = read.Form!;

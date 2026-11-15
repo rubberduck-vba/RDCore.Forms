@@ -31,7 +31,7 @@ public sealed class MenuBarTests
     // is a top-level menu with no items.
     private static ComponentInstance Probe()
     {
-        var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 4500d).Set(P.Height, 3000d);
+        var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 300d).Set(P.Height, 200d);
         var top = Menu(root, "mnuTop", "&Top");
         Menu(top, "mnuA", "&Alpha", "^Q");
         var sub = Menu(top, "mnuSub", "&Sub");
@@ -266,7 +266,7 @@ public sealed class MenuBarTests
         var raised = UI.Run(() =>
         {
             var root = Probe();
-            var text = new ComponentInstance(VBClasses.TextBox, "Text1").Set(P.Width, 1800d).Set(P.Height, 315d);
+            var text = new ComponentInstance(VBClasses.TextBox, "Text1").Set(P.Width, 120d).Set(P.Height, 21d);
             text.SetContainer(root);
             var sink = new RecordingSink();
             var window = Open(root, sink);
@@ -317,5 +317,68 @@ public sealed class MenuBarTests
         });
 
         Expect.Lines(["mnuTop.Click", "mnuA.Click"], raised);
+    }
+
+    // mnuTop holds Alpha, Sub and Dis, then mnuArr(1) and mnuArr(3); the bar ends with mnuBar(0).
+    [TestMethod]
+    public void ALoadedElement_IsShownInItsPlace_ChosenAsItself_AndAnUnloadedOne_IsTakenAway()
+    {
+        var (loaded, bar, clicked, unloaded) = UI.Run(() =>
+        {
+            var sink = new RecordingSink();
+            var root = Probe();
+            var top = root.Contents[0];
+            Menu(top, "mnuArr", "A1").Index = 1;
+            Menu(top, "mnuArr", "A3").Index = 3;
+            Menu(root, "mnuBar", "B0").Index = 0;
+            var window = Open(root, sink);
+            int? source = null;
+            sink.Handler = (component, _, _) => source = component.Index;
+            var menu = window.MenuBar.Menu;
+            menu.ArrayOf("mnuArr")!.Load(2).Caption = "A2";
+            menu.ArrayOf("mnuBar")!.Load(1).Caption = "B1";
+            Dispatcher.UIThread.RunJobs();
+            var inTop = Headers(Item(window, "mnuTop"));
+            var onBar = Headers(window.MenuBar);
+            window.MenuBar.GetLogicalDescendants().OfType<MenuItem>().Single(m => VBControl.GetInstance(m) is { Index: 2 })
+                .RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            menu.ArrayOf("mnuArr")!.Unload(2);
+            menu.ArrayOf("mnuBar")!.Unload(1);
+            Dispatcher.UIThread.RunJobs();
+            var result = (inTop, onBar, source, Headers(Item(window, "mnuTop")).Concat(Headers(window.MenuBar)).ToArray());
+            window.Close();
+            return result;
+        });
+
+        CollectionAssert.AreEqual(new[] { "_Alpha", "_Sub", "_Dis", "A1", "A2", "A3" }, loaded);
+        CollectionAssert.AreEqual(new[] { "_Top", "S_olo", "B0", "B1" }, bar);
+        Assert.AreEqual(2, clicked);
+        CollectionAssert.AreEqual(new[] { "_Alpha", "_Sub", "_Dis", "A1", "A3", "_Top", "S_olo", "B0" }, unloaded);
+
+        static string[] Headers(ItemsControl items) => [.. items.Items.OfType<MenuItem>().Select(m => (string)m.Header!)];
+    }
+
+    [TestMethod]
+    public void UnloadingTheLastVisibleMenuOfTheBar_TakesTheBarAway()
+    {
+        var (before, after) = UI.Run(() =>
+        {
+            var root = new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 300d).Set(P.Height, 200d);
+            Menu(root, "mnuBar", "B0").Index = 0;
+            var window = Open(root, new RecordingSink());
+            var bar = window.MenuBar.Menu.ArrayOf("mnuBar")!;
+            bar.Load(1);
+            bar[0].Visible = false;
+            Dispatcher.UIThread.RunJobs();
+            var shown = window.MenuBar.IsVisible;
+            bar.Unload(1);
+            Dispatcher.UIThread.RunJobs();
+            var result = (shown, window.MenuBar.IsVisible);
+            window.Close();
+            return result;
+        });
+
+        Assert.IsTrue(before);
+        Assert.IsFalse(after);
     }
 }

@@ -10,7 +10,7 @@ Initialize, Load and Terminate are the program's: the window raises none of them
 |---|---|
 |The window is shown for the first time|Resize, inside `Show`, then Activate.|
 |The root's `Width` or `Height` changes|One Resize for each change, inside the assignment. A size the root already has raises nothing.|
-|The user resizes the window|The root's `Width` and `Height` take the client area's size, in twips, and one Resize is raised for both.|
+|The user resizes the window|The root's `Width` and `Height` take the client area's size, in whole pixels, and one Resize is raised for both.|
 |The window is shown again after `Hide`|No Resize.|
 
 Once its window has been shown, the root raises Resize for a change of size whether the window is hidden or not. With `AutoRedraw` False, Paint follows Resize as the window is shown and as its client area grows: see [Drawing](drawing.md).
@@ -58,7 +58,7 @@ A press on none of the form's controls is the root's.
 
 With `KeyPreview` True, the root's handlers decide what the control raises:
 
-- A `KeyCode` the root's KeyDown sets to 0 raises no KeyDown on the control, and the key still does what it does. Another code is not passed on: the control's KeyDown has the key's own code.
+- A `KeyCode` the root's KeyDown sets to 0 raises no KeyDown on the control, and the key still does what it does, except on a scroll bar, which it does not move. Another code is not passed on: the control's KeyDown has the key's own code.
 - The control's KeyPress has the `KeyAscii` the root's KeyPress left, and 0 raises none and types nothing.
 - The control's KeyUp has the key's own code.
 
@@ -66,7 +66,7 @@ The root's KeyPress follows the TextBox's rules: a character outside ASCII raise
 
 ## A control's key events
 
-The TextBox, CommandButton, CheckBox, OptionButton, ListBox and ComboBox raise their own KeyDown, KeyPress and KeyUp, in the order measured with VB6: KeyDown, KeyPress for a key that types a character, then what the key does, then KeyUp. With `KeyPreview` True, each of the root's events comes just before the control's.
+The TextBox, CommandButton, CheckBox, OptionButton, ListBox, ComboBox, HScrollBar and VScrollBar raise their own KeyDown, KeyPress and KeyUp, in the order measured with VB6: KeyDown, KeyPress for a key that types a character, then what the key does, then KeyUp. With `KeyPreview` True, each of the root's events comes just before the control's.
 
 |Key|Raised|
 |---|---|
@@ -75,10 +75,13 @@ The TextBox, CommandButton, CheckBox, OptionButton, ListBox and ComboBox raise t
 |An arrow on a CommandButton, a CheckBox or an OptionButton|No key event, not even the root's: the focus moves. The control that takes the focus raises its KeyUp alone, except a CommandButton, a CheckBox or an OptionButton, which raises none.|
 |An arrow in a ListBox or a ComboBox|KeyDown, the Click of the selection, then KeyUp.|
 |A character in a ListBox or a ComboBox|KeyDown, KeyPress, the Click of the selection or the Change of the text, then KeyUp.|
+|An arrow, Page Up, Page Down, Home or End on a scroll bar|KeyDown, the Change where the value moves, then KeyUp. A `KeyCode` of 0 left by its KeyDown moves nothing.|
 |Enter or Esc that no button takes|KeyDown, KeyPress 13 or 27, then KeyUp. Enter on a CheckBox or an OptionButton changes no `Value`.|
 |Ctrl+Enter|KeyDown, KeyPress 10, then KeyUp. No button takes it.|
 
 A control's KeyPress follows the TextBox's rules: a `KeyAscii` of 0 types nothing, and another code is taken in place of the character.
+
+A PictureBox raises its own key events too, by rules that are RDForms' own: see [PictureBox](containers.md#picturebox).
 
 ## Enter and Esc
 
@@ -95,9 +98,6 @@ A CommandButton whose `Default` is True is the form's default button, and one wh
 Where more than one CommandButton has `Default` or `Cancel` True, the first the form holds takes the key. A default or cancel button that is hidden or disabled takes no key: Enter and Esc go to the focused control as other keys do. Neither case was measured with VB6: these two rules are RDForms' own.
 
 What a character typed in a ListBox selects is on the [Lists](lists.md) page.
-
-> [!NOTE]
-> **Not implemented.** A scroll bar and a PictureBox raise no key events of their own: with `KeyPreview` True, a key on one of them raises the root's events alone.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

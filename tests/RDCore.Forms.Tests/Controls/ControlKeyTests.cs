@@ -16,11 +16,11 @@ namespace RDCore.Forms.Tests.Controls;
 public sealed class ControlKeyTests
 {
     private static ComponentInstance Root() =>
-        new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 4800d).Set(P.Height, 3600d);
+        new ComponentInstance(VBClasses.Form, "Form1").Set(P.Width, 320d).Set(P.Height, 240d);
 
-    private static ComponentInstance Add(ComponentInstance container, ComponentClass type, string name, double top = 120)
+    private static ComponentInstance Add(ComponentInstance container, ComponentClass type, string name, double top = 8)
     {
-        var component = new ComponentInstance(type, name).Set(P.Left, 120d).Set(P.Top, top).Set(P.Width, 1800d).Set(P.Height, 1200d);
+        var component = new ComponentInstance(type, name).Set(P.Left, 8d).Set(P.Top, top).Set(P.Width, 120d).Set(P.Height, 80d);
         component.SetContainer(container);
         return component;
     }
@@ -110,6 +110,48 @@ public sealed class ControlKeyTests
         Expect.Lines(["Button1.KeyDown(Integer 75, Integer 0)", "Button1.KeyPress(Integer 107)", "Button1.KeyUp(Integer 75, Integer 0)"], raised);
     }
 
+    // RDForms' own: unmeasured with VB6.
+    [TestMethod]
+    public void APictureBox_RaisesItsKeyEvents_AnArrowsIncluded_WhichKeepsTheFocus()
+    {
+        var (raised, focused) = UI.Run(() =>
+        {
+            var root = Root();
+            var picture = Add(root, VBClasses.PictureBox, "Picture1");
+            Add(root, VBClasses.TextBox, "Text1", top: 100);
+            var sink = new RecordingSink();
+            var window = Open(root, picture, sink);
+            Type(window, Key.K, PhysicalKey.K, "k");
+            Type(window, Key.Right, PhysicalKey.ArrowRight, null);
+            var result = (Raised(sink), window.ActiveControl?.Name);
+            window.Close();
+            return result;
+        });
+
+        Expect.Lines(["Picture1.KeyDown(Integer 75, Integer 0)", "Picture1.KeyPress(Integer 107)", "Picture1.KeyUp(Integer 75, Integer 0)",
+            "Picture1.KeyDown(Integer 39, Integer 0)", "Picture1.KeyUp(Integer 39, Integer 0)"], raised);
+        Assert.AreEqual("Picture1", focused);
+    }
+
+    [TestMethod]
+    public void AKeyInAControlAPictureBoxHolds_IsThatControlsAlone()
+    {
+        var raised = UI.Run(() =>
+        {
+            var root = Root();
+            var picture = Add(root, VBClasses.PictureBox, "Picture1");
+            var list = Add(picture, VBClasses.ListBox, "List1");
+            var sink = new RecordingSink();
+            var window = Open(root, list, sink);
+            Type(window, Key.K, PhysicalKey.K, "k");
+            var result = Raised(sink);
+            window.Close();
+            return result;
+        });
+
+        Expect.Lines(["List1.KeyDown(Integer 75, Integer 0)", "List1.KeyPress(Integer 107)", "List1.KeyUp(Integer 75, Integer 0)"], raised);
+    }
+
     [TestMethod]
     public void SpaceOnACheckBox_RaisesItsKeyEvents_ThenClick_AndOnTheSelectedOptionButtonNoClick()
     {
@@ -117,7 +159,7 @@ public sealed class ControlKeyTests
         {
             var root = Root();
             var check1 = Add(root, VBClasses.CheckBox, "Check1");
-            var option1 = Add(root, VBClasses.OptionButton, "Option1", 1500).Set(P.OptionButtonValue, true);
+            var option1 = Add(root, VBClasses.OptionButton, "Option1", 100).Set(P.OptionButtonValue, true);
             var sink = new RecordingSink();
             var window = Open(root, check1, sink);
             Type(window, Key.Space, PhysicalKey.Space, " ");
@@ -146,7 +188,7 @@ public sealed class ControlKeyTests
         {
             var root = Root().Set(P.KeyPreview, preview);
             var button1 = Add(root, VBClasses.ByTypeName("VB." + type)!, "Button1");
-            var command2 = Add(root, VBClasses.CommandButton, "Command2", 1500);
+            var command2 = Add(root, VBClasses.CommandButton, "Command2", 100);
             var sink = new RecordingSink();
             var window = Open(root, button1, sink);
             Type(window, Key.Down, PhysicalKey.ArrowDown, null);
@@ -188,7 +230,7 @@ public sealed class ControlKeyTests
         var (raised, text) = UI.Run(() =>
         {
             var root = Root();
-            var text1 = Add(root, VBClasses.TextBox, "Text1").Set(P.Height, 315d);
+            var text1 = Add(root, VBClasses.TextBox, "Text1").Set(P.Height, 21d);
             var sink = new RecordingSink();
             var window = Open(root, text1, sink);
             var log = Log(sink, root);
@@ -208,7 +250,7 @@ public sealed class ControlKeyTests
         var (raised, text) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             var log = Log(sink, root);
@@ -285,7 +327,7 @@ public sealed class ControlKeyTests
         var raised = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.ComboBoxStyle, style)
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.ComboBoxStyle, style)
                 .Set(P.List, ["alpha", "kappa"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
@@ -308,7 +350,7 @@ public sealed class ControlKeyTests
         var (picked, clicks) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
                 .Set(P.List, ["kiwi", "banana", "Kumquat", "apple"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
@@ -343,7 +385,7 @@ public sealed class ControlKeyTests
         var (picked, clicks) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
                 .Set(P.List, ["MultiPlayer", "banana", "Mango", "MPeg", "kiwi"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
@@ -381,7 +423,7 @@ public sealed class ControlKeyTests
         var (log, shown, typed, chosen) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d)
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d)
                 .Set(P.List, ["apple", "MultiPlayer", "banana", "MPeg", "Mango"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
@@ -414,7 +456,7 @@ public sealed class ControlKeyTests
         var (log, text, open) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.List, ["kiwi", "Kumquat"]);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.List, ["kiwi", "Kumquat"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             var combo = (VBComboBox)window.View.ControlOf(combo1)!;
@@ -438,7 +480,7 @@ public sealed class ControlKeyTests
         var (log, text, index) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.List, ["alpha", "beta"]);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.List, ["alpha", "beta"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             var combo = (VBComboBox)window.View.ControlOf(combo1)!;
@@ -464,7 +506,7 @@ public sealed class ControlKeyTests
         var raised = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.ComboBoxStyle, ComboBoxStyle.DropdownList)
                 .Set(P.List, ["alpha", "beta"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
@@ -492,7 +534,7 @@ public sealed class ControlKeyTests
         var raised = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.List, ["alpha", "beta"]);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.List, ["alpha", "beta"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             var log = Log(sink, root);
@@ -515,7 +557,7 @@ public sealed class ControlKeyTests
         var raised = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d).Set(P.List, ["alpha", "beta"]);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d).Set(P.List, ["alpha", "beta"]);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             var log = Log(sink, root);
@@ -534,7 +576,7 @@ public sealed class ControlKeyTests
         var text = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             sink.Handler = (_, definition, arguments) =>
@@ -577,7 +619,7 @@ public sealed class ControlKeyTests
         var (raised, text) = UI.Run(() =>
         {
             var root = Root();
-            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 315d);
+            var combo1 = Add(root, VBClasses.ComboBox, "Combo1").Set(P.Height, 21d);
             var sink = new RecordingSink();
             var window = Open(root, combo1, sink);
             sink.Handler = (_, definition, arguments) =>
@@ -642,5 +684,152 @@ public sealed class ControlKeyTests
         Expect.Lines(["Form1.KeyDown(Integer 40, Integer 0)", "List1.Click", "Form1.KeyUp(Integer 40, Integer 0)", "List1.KeyUp(Integer 40, Integer 0)"],
             raised);
         Assert.AreEqual(1, index);
+    }
+
+    // The keys the scroll bar grid was measured with: the key, its physical key, and the text it types.
+    private static readonly (string Name, Key Key, PhysicalKey Physical, string? Text)[] ScrollBarKeys =
+    [
+        ("Left", Key.Left, PhysicalKey.ArrowLeft, null), ("Right", Key.Right, PhysicalKey.ArrowRight, null),
+        ("Up", Key.Up, PhysicalKey.ArrowUp, null), ("Down", Key.Down, PhysicalKey.ArrowDown, null),
+        ("PageUp", Key.PageUp, PhysicalKey.PageUp, null), ("PageDown", Key.PageDown, PhysicalKey.PageDown, null),
+        ("Home", Key.Home, PhysicalKey.Home, null), ("End", Key.End, PhysicalKey.End, null), ("A", Key.A, PhysicalKey.A, "a"),
+        ("Space", Key.Space, PhysicalKey.Space, " "), ("Enter", Key.Enter, PhysicalKey.Enter, null),
+        ("Escape", Key.Escape, PhysicalKey.Escape, null), ("F2", Key.F2, PhysicalKey.F2, null), ("Delete", Key.Delete, PhysicalKey.Delete, null),
+    ];
+
+    // A scroll bar of the form, Value 50, SmallChange 1 and LargeChange 10, as the grid has it.
+    private static ComponentInstance ScrollBar(ComponentInstance root, short min, short max) =>
+        Add(root, VBClasses.HScrollBar, "HScroll1").Set(P.Height, 17d).Set(P.Min, min).Set(P.Max, max).Set(P.ScrollBarValue, (short)50)
+            .Set(P.SmallChange, (short)1).Set(P.LargeChange, (short)10);
+
+    // The bar's events as the grid logs them: a key event with its code, the form's marked F, and the bar's with its Value.
+    private static List<string> Log(RecordingSink sink, ComponentInstance root, ComponentInstance bar)
+    {
+        var log = new List<string>();
+        sink.Handler = (source, definition, arguments) =>
+        {
+            if (definition.Name is "MouseMove" or "GotFocus" or "LostFocus")
+                return;
+            var key = definition.Name is "KeyDown" or "KeyPress" or "KeyUp";
+            log.Add((ReferenceEquals(source, root) ? "F" : "") + definition.Name + (key ? " " + arguments[0].AsInteger() : "")
+                + (ReferenceEquals(source, root) ? "" : " v=" + bar.Get(P.ScrollBarValue)));
+        };
+        return log;
+    }
+
+    // Each key on the bar, its Value set back to a start before each, as "> key" and the events the key raised.
+    private static List<string> TypeEach(VBFormWindow window, ComponentInstance bar, List<string> log, short from = 50,
+        params (string Name, Key Key, PhysicalKey Physical, string? Text)[] keys)
+    {
+        var lines = new List<string>();
+        foreach (var (name, key, physical, text) in keys)
+        {
+            bar.Set(P.ScrollBarValue, from);
+            Dispatcher.UIThread.RunJobs();
+            log.Clear();
+            Type(window, key, physical, text);
+            lines.Add("> " + name);
+            lines.AddRange(log);
+        }
+        return lines;
+    }
+
+    // The grid measured with VB6 on a bar from 0 to 100 and on one from 100 to 0: KeyDown before the key moves the bar, a Change where
+    // it moved, and KeyUp after; a KeyPress for a key that types a character, Enter and Esc. Home takes it to the lower of Min and Max.
+    [TestMethod]
+    [DataRow((short)0, (short)100, new short[] { 49, 51, 49, 51, 40, 60, 0, 100 }, DisplayName = "Min 0, Max 100")]
+    [DataRow((short)100, (short)0, new short[] { 51, 49, 51, 49, 60, 40, 0, 100 }, DisplayName = "Min 100, Max 0")]
+    public void AScrollBar_RaisesItsKeyEvents_KeyDownBeforeTheKeyMovesIt_AndKeyUpAfter(short min, short max, short[] moved)
+    {
+        var raised = UI.Run(() =>
+        {
+            var root = Root();
+            var bar = ScrollBar(root, min, max);
+            var sink = new RecordingSink();
+            var window = Open(root, bar, sink);
+            var result = TypeEach(window, bar, Log(sink, root, bar), keys: ScrollBarKeys);
+            window.Close();
+            return result;
+        });
+
+        var codes = new[] { 37, 39, 38, 40, 33, 34, 36, 35 };
+        var expected = new List<string>();
+        for (var i = 0; i < codes.Length; i++)
+            expected.AddRange([$"> {ScrollBarKeys[i].Name}", $"KeyDown {codes[i]} v=50", $"Change v={moved[i]}", $"KeyUp {codes[i]} v={moved[i]}"]);
+        foreach (var (name, code, ascii) in new (string, int, int?)[] { ("A", 65, 97), ("Space", 32, 32), ("Enter", 13, 13), ("Escape", 27, 27), ("F2", 113, null), ("Delete", 46, null) })
+            expected.AddRange(ascii is { } a ? [$"> {name}", $"KeyDown {code} v=50", $"KeyPress {a} v=50", $"KeyUp {code} v=50"] : [$"> {name}", $"KeyDown {code} v=50", $"KeyUp {code} v=50"]);
+        Expect.Lines(expected, raised);
+    }
+
+    [TestMethod]
+    public void AScrollBarAtItsEnd_RaisesNoChangeForAKeyThatWouldTakeItPast_AndAPageStopsAtTheEnd()
+    {
+        var raised = UI.Run(() =>
+        {
+            var root = Root();
+            var bar = ScrollBar(root, 0, 100);
+            var sink = new RecordingSink();
+            var window = Open(root, bar, sink);
+            var log = Log(sink, root, bar);
+            var result = TypeEach(window, bar, log, 0, ScrollBarKeys[0], ScrollBarKeys[6]);
+            result.AddRange(TypeEach(window, bar, log, 100, ScrollBarKeys[1], ScrollBarKeys[7]));
+            result.AddRange(TypeEach(window, bar, log, 95, ScrollBarKeys[5]));
+            window.Close();
+            return result;
+        });
+
+        Expect.Lines(["> Left", "KeyDown 37 v=0", "KeyUp 37 v=0", "> Home", "KeyDown 36 v=0", "KeyUp 36 v=0",
+            "> Right", "KeyDown 39 v=100", "KeyUp 39 v=100", "> End", "KeyDown 35 v=100", "KeyUp 35 v=100",
+            "> PageDown", "KeyDown 34 v=95", "Change v=100", "KeyUp 34 v=100"], raised);
+    }
+
+    // A KeyCode of 0 that the bar's own KeyDown leaves, or the form's with KeyPreview, cancels the key: the bar does not move.
+    [TestMethod]
+    [DataRow(false, DisplayName = "the bar's KeyDown")]
+    [DataRow(true, DisplayName = "the form's KeyDown")]
+    public void AKeyCodeOf0_InAScrollBarsKeyDown_OrTheForms_MovesNothing(bool byTheForm)
+    {
+        var raised = UI.Run(() =>
+        {
+            var root = Root().Set(P.KeyPreview, byTheForm);
+            var bar = ScrollBar(root, 0, 100);
+            var sink = new RecordingSink();
+            var window = Open(root, bar, sink);
+            var log = Log(sink, root, bar);
+            var logging = sink.Handler!;
+            sink.Handler = (source, definition, arguments) =>
+            {
+                logging(source, definition, arguments);
+                if (ReferenceEquals(definition, VBEvents.KeyDown) && ReferenceEquals(source, byTheForm ? root : bar))
+                    arguments[0] = FormValue.FromInteger(0);
+            };
+            var result = TypeEach(window, bar, log, keys: [ScrollBarKeys[1], ScrollBarKeys[5], ScrollBarKeys[7]]);
+            window.Close();
+            return result;
+        });
+
+        Expect.Lines(byTheForm
+            ? ["> Right", "FKeyDown 39", "FKeyUp 39", "KeyUp 39 v=50", "> PageDown", "FKeyDown 34", "FKeyUp 34", "KeyUp 34 v=50",
+               "> End", "FKeyDown 35", "FKeyUp 35", "KeyUp 35 v=50"]
+            : ["> Right", "KeyDown 39 v=50", "KeyUp 39 v=50", "> PageDown", "KeyDown 34 v=50", "KeyUp 34 v=50", "> End", "KeyDown 35 v=50", "KeyUp 35 v=50"],
+            raised);
+    }
+
+    [TestMethod]
+    public void WithKeyPreview_TheFormRaisesEachOfAScrollBarsKeyEventsFirst_AndTheBarMovesBeforeTheFormsKeyUp()
+    {
+        var raised = UI.Run(() =>
+        {
+            var root = Root().Set(P.KeyPreview, true);
+            var bar = ScrollBar(root, 0, 100);
+            var sink = new RecordingSink();
+            var window = Open(root, bar, sink);
+            var result = TypeEach(window, bar, Log(sink, root, bar), keys: [ScrollBarKeys[1], ScrollBarKeys[8]]);
+            window.Close();
+            return result;
+        });
+
+        Expect.Lines(["> Right", "FKeyDown 39", "KeyDown 39 v=50", "Change v=51", "FKeyUp 39", "KeyUp 39 v=51",
+            "> A", "FKeyDown 65", "KeyDown 65 v=50", "FKeyPress 97", "KeyPress 97 v=50", "FKeyUp 65", "KeyUp 65 v=50"], raised);
     }
 }

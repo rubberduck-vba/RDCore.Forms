@@ -1,6 +1,6 @@
 # Timers, scroll bars and shapes
 
-A Timer raises an event at an interval, a scroll bar sets a value, and a Shape and a Line draw figures. The Line's drawing and the scroll bar's focus were measured with VB6.
+A Timer raises an event at an interval, a scroll bar sets a value, and a Shape and a Line draw figures. The Line's drawing and the scroll bar's focus, drag and keys were measured with VB6.
 
 ## Timer
 
@@ -17,13 +17,15 @@ The interval is counted on the system's clock. [`VBControl.SetTimeProvider`](../
 
 [`VBScrollBar`](../api/RDCore.Forms.Avalonia.Controls.VBScrollBar.yml) shows both classes, horizontal and vertical.
 
-- The component's `Value` is the bar's. Moving the thumb sets it, to a whole number, and a change from code moves the thumb. Change is raised each time it changes, either way.
-- Its arrows move it by `SmallChange`, and a click on its track by `LargeChange`.
+- The component's `Value` is the bar's. Moving the thumb sets it, to a whole number, and a change from code moves the thumb.
+- Its arrows move it by `SmallChange`, and a click on its track by `LargeChange`. Each raises Change, and so does a change from code.
+- Dragging the thumb raises Scroll at each whole number it reaches, and no Change. Released, it raises one Change.
 - `Min` is at its left or top end and `Max` at its right or bottom end, so a `Min` greater than `Max` runs it the other way.
 - It takes the focus, and raises GotFocus and LostFocus.
+- With the focus, the arrow keys move it by `SmallChange` and Page Up and Page Down by `LargeChange`: Left, Up and Page Up toward `Min`, and the others toward `Max`. Home takes it to the lower of `Min` and `Max`, and End to the higher. Each raises Change where the value changes; a move stops at the end.
+- It raises KeyDown, KeyPress and KeyUp, the form's first where its `KeyPreview` is True. KeyDown comes before the key moves it, and KeyUp after. A `KeyCode` of 0 left by the form's KeyDown or its own cancels the key: the bar does not move, and KeyUp is still raised.
 
-> [!NOTE]
-> **Not implemented.** The Scroll event is not raised: dragging the thumb raises Change at each whole number it passes. The keyboard does not move a scroll bar.
+RDForms' own, not measured with VB6: a thumb released where it started raises no Change.
 
 ## Shape
 

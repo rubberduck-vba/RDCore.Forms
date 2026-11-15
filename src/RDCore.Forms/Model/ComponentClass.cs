@@ -34,7 +34,9 @@ public sealed class ComponentClass
 {
     private readonly Dictionary<string, PropertyDefinition> propertiesByName;
     private readonly Dictionary<string, EventDefinition> eventsByName;
+    private readonly Dictionary<string, MethodDefinition> methodsByName;
     private readonly Dictionary<PropertyDefinition, object?> defaults;
+    private readonly HashSet<PropertyDefinition> notAvailable;
 
     /// <summary>
     /// Creates a component class.
@@ -54,19 +56,34 @@ public sealed class ComponentClass
     /// Whether an instance has a width and a height. A Timer has a place in the designer and no size, and a running program
     /// cannot see it.
     /// </param>
+    /// <param name="methods">The class's methods; none where it is <see langword="null"/>.</param>
+    /// <param name="notAvailableAtRunTime">
+    /// The properties a program can neither read nor set on an instance of this class, beyond those whose definition says so, such as
+    /// the <c>Left</c> and <c>Top</c> of a Timer; none where it is <see langword="null"/>.
+    /// </param>
+    /// <param name="defaultMember">
+    /// The name of the member the class's default member stands for, as <see cref="DefaultMember"/>; none where it is
+    /// <see langword="null"/>.
+    /// </param>
     /// <exception cref="ArgumentException">
-    /// <paramref name="typeName"/> or <paramref name="defaultName"/> is empty or white space; two properties or two events share a name; or a default
-    /// is given for a property the class does not have, or is not a value the property can hold.
+    /// <paramref name="typeName"/> or <paramref name="defaultName"/> is empty or white space; two properties, two events or two methods share a
+    /// name; a default is given for a property the class does not have, or is not a value the property can hold;
+    /// <paramref name="notAvailableAtRunTime"/> names a property the class does not have; or <paramref name="defaultMember"/> is empty
+    /// or white space.
     /// </exception>
     public ComponentClass(string typeName, string defaultName, ComponentKind kind,
         IReadOnlyList<PropertyDefinition> properties, IReadOnlyList<EventDefinition> events,
         IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null,
-        bool isContainer = false, bool isWindowless = false, bool hasExtent = true)
+        bool isContainer = false, bool isWindowless = false, bool hasExtent = true, IReadOnlyList<MethodDefinition>? methods = null,
+        IReadOnlyList<PropertyDefinition>? notAvailableAtRunTime = null, string? defaultMember = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(typeName);
         ArgumentException.ThrowIfNullOrWhiteSpace(defaultName);
+        if (defaultMember is not null)
+            ArgumentException.ThrowIfNullOrWhiteSpace(defaultMember);
         TypeName = typeName;
         DefaultName = defaultName;
+        DefaultMember = defaultMember;
         Kind = kind;
         IsContainer = isContainer;
         IsWindowless = isWindowless;
@@ -88,6 +105,14 @@ public sealed class ComponentClass
                 throw new ArgumentException($"{typeName} has two events named {@event.Name}.", nameof(events));
         }
 
+        Methods = [.. methods ?? []];
+        methodsByName = new(StringComparer.OrdinalIgnoreCase);
+        foreach (var method in Methods)
+        {
+            if (!methodsByName.TryAdd(method.Name, method))
+                throw new ArgumentException($"{typeName} has two methods named {method.Name}.", nameof(methods));
+        }
+
         this.defaults = [];
         foreach (var (property, value) in defaults ?? new Dictionary<PropertyDefinition, object?>())
         {
@@ -96,6 +121,14 @@ public sealed class ComponentClass
             if (!property.Accepts(value))
                 throw new ArgumentException($"{value} is not a value of {typeName}.{property.Name}.", nameof(defaults));
             this.defaults[property] = value;
+        }
+
+        notAvailable = new(ReferenceEqualityComparer.Instance);
+        foreach (var property in notAvailableAtRunTime ?? [])
+        {
+            if (!Has(property))
+                throw new ArgumentException($"{typeName} has no property {property.Name} to make unavailable at run time.", nameof(notAvailableAtRunTime));
+            notAvailable.Add(property);
         }
     }
 
@@ -113,6 +146,19 @@ public sealed class ComponentClass
     /// The name a designer gives the first instance it adds, less its number, such as <c>Command</c> for <c>Command1</c>.
     /// </summary>
     public string DefaultName { get; }
+
+    /// <summary>
+    /// The name of the member the class's default member stands for, or <see langword="null"/> where the model names none: the member
+    /// that a program reads and assigns through an instance itself, as <c>Command1 = True</c> sets a VB CommandButton's <c>Value</c>.
+    /// </summary>
+    /// <remarks>
+    /// In a VB6 type library, the default member is a hidden member of its own, <c>_Default</c>, with the dispatch ID 0. The name given
+    /// here is the member it reads and assigns. It may be one the class does not hold as a property, such as a DriveListBox's
+    /// <c>Drive</c>, or one that takes an argument, such as a form's <c>Controls</c> (<c>Form1("Command1")</c>), which VB refuses
+    /// with error 450 without one. The model names none for <see cref="VB.VBClasses.UserControl"/> and
+    /// <see cref="VB.VBClasses.PropertyPage"/>.
+    /// </remarks>
+    public string? DefaultMember { get; }
 
     /// <summary>
     /// What the class is to the form that holds it.
@@ -159,6 +205,18 @@ public sealed class ComponentClass
     public EventDefinition? Event(string name) => eventsByName.GetValueOrDefault(name);
 
     /// <summary>
+    /// The class's methods: what a program's code calls on an instance, such as <c>SetFocus</c> or <c>Move</c>.
+    /// </summary>
+    public IReadOnlyList<MethodDefinition> Methods { get; }
+
+    /// <summary>
+    /// The class's method of a given name, compared without regard to case.
+    /// </summary>
+    /// <param name="name">The method's name.</param>
+    /// <returns>The method, or <see langword="null"/> when the class has none of that name.</returns>
+    public MethodDefinition? Method(string name) => methodsByName.GetValueOrDefault(name);
+
+    /// <summary>
     /// Whether the class has <paramref name="property"/>, the definition compared by reference.
     /// </summary>
     /// <param name="property">The property definition.</param>
@@ -182,6 +240,26 @@ public sealed class ComponentClass
     /// <returns>The default value.</returns>
     public T DefaultOf<T>(PropertyDefinition<T> property) =>
         defaults.TryGetValue(property, out var value) ? (T)value! : property.Default;
+
+    /// <summary>
+    /// Whether a program can neither read nor set <paramref name="property"/> on an instance of this class: VB's 393 on a read and 382
+    /// on an assignment.
+    /// </summary>
+    /// <param name="property">The property definition.</param>
+    /// <returns>
+    /// <see langword="true"/> when the definition says so (<see cref="PropertyDefinition.NotAvailableAtRunTime"/>) or the class does.
+    /// </returns>
+    public bool IsNotAvailableAtRunTime(PropertyDefinition property) => property.NotAvailableAtRunTime || notAvailable.Contains(property);
+
+    /// <summary>
+    /// Whether a program cannot set <paramref name="property"/> on an instance of this class: VB's 382 on an assignment.
+    /// </summary>
+    /// <param name="property">The property definition.</param>
+    /// <returns>
+    /// <see langword="true"/> when the property is <see cref="PropertyDefinition.ReadOnlyAtRunTime"/>, or is not available at run time
+    /// (<see cref="IsNotAvailableAtRunTime"/>).
+    /// </returns>
+    public bool IsReadOnlyAtRunTime(PropertyDefinition property) => property.ReadOnlyAtRunTime || IsNotAvailableAtRunTime(property);
 
     /// <summary>
     /// The class's type name.

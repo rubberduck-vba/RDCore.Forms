@@ -17,8 +17,8 @@ namespace RDCore.Forms.Import.VB6;
 /// The designer half, from <c>VERSION</c> to the root block's <c>End</c>, becomes the form; the rest of the file is returned as
 /// <see cref="VB6FormImport.ModuleText"/>. Property and class names are read without regard to case. A component's
 /// <c>Index</c> becomes its <see cref="ComponentInstance.Index"/>, and a root's <c>Client*</c> rectangle its position and size.
-/// Positions and sizes are read as written: in twips, whatever a container's <c>ScaleMode</c>. A Line's ends are in its container's
-/// scale.
+/// A file's positions and sizes are twips whatever a container's <c>ScaleMode</c>, and are read as pixels, at 15 twips a pixel. A Line's
+/// ends are in its container's scale, and are read as written.
 /// </para>
 /// <para>
 /// A read does not throw on what a file holds. A property the model does not have, or whose value it cannot hold, is kept as an
@@ -244,7 +244,8 @@ public static partial class VB6FormReader
 
                 foreach (var property in child.Properties)
                 {
-                    if (componentClass.Property(property.Name) is { } definition)
+                    // a property only a running program sets is not the form's: one in the file is kept as it is.
+                    if (componentClass.Property(property.Name) is { RunTimeOnly: false } definition)
                     {
                         SetFromText(instance, definition, property, instance.ToString());
                     }
@@ -261,6 +262,7 @@ public static partial class VB6FormReader
                     instance.Set(VBProperties.Font, font);
                 }
 
+                OffsetByTimers(instance, container);
                 Push(pending, instance, child, depth);
             }
         }
@@ -271,6 +273,25 @@ public static partial class VB6FormReader
             for (var at = block.Children.Count - 1; at >= 0; at--)
             {
                 pending.Push((container, block.Children[at], depth + 1));
+            }
+        }
+
+        // VB6 places a control written inside a Timer, which holds no control, at the Timer's Left and Top added to its own. A control
+        // written inside another control that cannot hold it keeps the position the file gives it.
+        private static void OffsetByTimers(ComponentInstance instance, ComponentInstance writtenIn)
+        {
+            if (!instance.Class.Has(VBProperties.Left))
+            {
+                return;
+            }
+
+            for (ComponentInstance? host = writtenIn; host is not null && host != instance.Container; host = host.Container)
+            {
+                if (ReferenceEquals(host.Class, VBClasses.Timer))
+                {
+                    instance.Set(VBProperties.Left, instance.Get(VBProperties.Left) + host.Get(VBProperties.Left))
+                        .Set(VBProperties.Top, instance.Get(VBProperties.Top) + host.Get(VBProperties.Top));
+                }
             }
         }
 
@@ -416,7 +437,8 @@ public static partial class VB6FormReader
                 return;
             }
 
-            if (TryConvert(definition.ValueType, literal, out var value) && instance.TrySet(definition, value))
+            if (TryConvert(definition.ValueType, literal, out var value)
+                && instance.TryRead(definition, CodeUnits.IsExtent(definition) && value is double twips ? twips / ScaleModeExtensions.TwipsPerPixel : value))
             {
                 return;
             }
@@ -449,7 +471,7 @@ public static partial class VB6FormReader
                 return;
             }
 
-            if (!instance.TrySet(definition, record))
+            if (!instance.TryRead(definition, record))
             {
                 KeepInvalid(instance, property, component);
             }
