@@ -259,8 +259,13 @@ public static class VBPicture
         var source = stretch
             ? new Rect(picture.Size)
             : new Rect(0, 0, destination.Width * picture.Size.Width / pixels.Width, destination.Height * picture.Size.Height / pixels.Height);
-        context.DrawImage(picture, source, destination);
+        // A stretched picture repeats its pixels, as VB6's StretchBlt does. The backend's default filter blends neighbours, and differs
+        // by platform.
+        using (context.PushRenderOptions(Unfiltered))
+            context.DrawImage(picture, source, destination);
     }
+
+    private static readonly RenderOptions Unfiltered = new() { BitmapInterpolationMode = BitmapInterpolationMode.None };
 }
 
 // A layer that draws a picture at its size in pixels from its top left corner, clipped to it: a PictureBox's, under its controls.

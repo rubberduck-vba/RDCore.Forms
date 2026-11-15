@@ -128,6 +128,23 @@ public sealed class PictureControlTests
         CollectionAssert.AreEqual(new[] { Blue, White, Red, Green }, stretched);
     }
 
+    // a blue and a red pixel stretched over 40 pixels: each repeated 20 times, up to the pixels either side of where they meet, as
+    // VB6's StretchBlt repeats them. A filter that blends neighbours mixes those two.
+    [TestMethod]
+    public void AStretchedPicture_RepeatsItsPixels_WithoutBlendingThem()
+    {
+        var pixels = UI.Run(() =>
+        {
+            var image = new VBImage(new ComponentInstance(VBClasses.Image, "Image1").Set(P.Picture, Png(2, 1, 0xFF0000FF, 0xFFFF0000)).Set(P.Stretch, true));
+            var (window, _) = ControlHost.Show((image, new Rect(10, 5, 40, 40)));
+            var pixels = PixelsAt(window, new(10, 25), new(29, 25), new(30, 25), new(49, 25));
+            window.Close();
+            return pixels;
+        });
+
+        CollectionAssert.AreEqual(new[] { Blue, Blue, Red, Red }, pixels);
+    }
+
     [TestMethod]
     public void APictureBoxsPicture_IsDrawnFromItsClientOrigin_UnderTheControlsItHolds()
     {
