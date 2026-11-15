@@ -10,8 +10,8 @@ using P = RDCore.Forms.Model.VB.VBProperties;
 namespace RDCore.Forms.Avalonia.Controls;
 
 /// <summary>
-/// A placed UserControl: a control that shows a component of a class <see cref="UserControlClasses.Of"/> made, with a copy of that
-/// class's UserControl of its own, and holds the controls placed in it.
+/// A placed UserControl: a control that shows a component of a class <see cref="UserControlClasses.Of"/> made, with its own copy of
+/// that class's UserControl, and holds the controls placed in it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,8 +21,8 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// any of its controls.
 /// </para>
 /// <para>
-/// The controls a form places in it, where its UserControl is a container, are shown over the UserControl's own, each placed from its
-/// top left corner.
+/// The controls a form places in it, where its UserControl is a container, are shown over the UserControl's own, each placed from the
+/// UserControl's top left corner.
 /// </para>
 /// <para>
 /// A UserControl whose controls hold, at any depth, a control placed from its own UserControl, is shown as a placeholder where it
@@ -30,7 +30,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// </para>
 /// <para>
 /// It takes no focus, and Tab passes over it; a press on one of its UserControl's controls gives that control the focus. Its
-/// UserControl's root and controls raise their events to the window's sink, each with its component of the copy as their source.
+/// UserControl's root and controls raise their events to the window's sink, each with its component of the copy as the source.
 /// </para>
 /// </remarks>
 public sealed class VBUserControl : Control, IVBContainer
