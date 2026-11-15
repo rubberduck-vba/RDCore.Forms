@@ -110,7 +110,9 @@ Before anything decodes a picture, [`FormPictures.Inspect`](../api/RDCore.Forms.
 - of a format it does not recognize, or whose header is cut short or holds an impossible value;
 - wider or taller than 16,384 pixels, or of more than 16,777,216 pixels in all. An icon or a cursor is refused when any of its images is.
 
-A refused picture is error 481, "Invalid picture", and so is one whose header passes but whose body the decoder cannot read. It is not drawn, the form still shows, and the control's `PictureError` holds the error. [`VBPicture.Decode`](../api/RDCore.Forms.Avalonia.Controls.VBPicture.yml) decodes a picture the same way for other uses.
+A picture whose header passes is drawn with the pixels the RDCore SDK's `PictureDecoder` decodes, alpha included, from the picture `LoadPicture` makes of the same bytes. A form draws the pixels `SavePicture` writes from, and refuses no picture that `LoadPicture` loads and whose pixels the SDK decodes. An icon or a cursor draws the image `LoadPicture` loads when it is asked for no size: its 32 by 32 image of the most bits per pixel, or its first image where it has none of that size.
+
+A refused picture is error 481, "Invalid picture". So is one that `LoadPicture` refuses, and one whose pixels the SDK does not decode. It is not drawn, the form still shows, and the control's `PictureError` holds the error. [`VBPicture.Decode`](../api/RDCore.Forms.Avalonia.Controls.VBPicture.yml) decodes a picture the same way for other uses.
 
 The controls given the same bytes share one decode, as VB shares one picture object between the controls it is set on. The bytes are decoded once for any number of controls, and again only after none of them holds them.
 
