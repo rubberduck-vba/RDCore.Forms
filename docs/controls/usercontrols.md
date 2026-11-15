@@ -1,13 +1,10 @@
 # UserControls
 
-A UserControl's designer file (`.ctl`) reads as a [`FormDefinition`](../api/RDCore.Forms.Model.FormDefinition.yml) whose root is a `VB.UserControl`. A form places the UserControl as a control of the class [`UserControlClasses.Of`](../api/RDCore.Forms.Model.VB.UserControlClasses.yml) makes from that definition.
-
-> [!NOTE]
-> **Not implemented.** RDForms shows no UserControl: [`VBControls.Create`](../api/RDCore.Forms.Avalonia.Controls.VBControls.yml) returns `null` for a placed one, and neither the root nor a placed control raises an event.
+A UserControl's designer file (`.ctl`) reads as a [`FormDefinition`](../api/RDCore.Forms.Model.FormDefinition.yml) whose root is a `VB.UserControl`. A form places the UserControl as a control of the class [`UserControlClasses.Of`](../api/RDCore.Forms.Model.VB.UserControlClasses.yml) makes from that definition, and a [`VBUserControl`](../api/RDCore.Forms.Avalonia.Controls.VBUserControl.yml) shows it.
 
 ## The root
 
-The root has the properties VB6's Properties window lists for a UserControl, with VB6's defaults. The model holds them and acts on none of them.
+The root has the properties VB6's Properties window lists for a UserControl, with VB6's defaults. A placed control's view follows `BackColor`, `BackStyle`, `Enabled`, `Picture` and `Font` (see [Showing a placed UserControl](#showing-a-placed-usercontrol)). The model holds the others and RDForms acts on none of them.
 
 |Property|Default|
 |---|---|
@@ -54,6 +51,26 @@ A placed control has no `Enabled`, `hWnd` or data-binding member (438 in VB6). I
 
 > [!NOTE]
 > **Not implemented.** A placed control has no `Move`, `ZOrder`, `Parent`, `Container` or `Object`. An `Alignable` one's `Align` does not dock it to an edge of its form.
+
+## Showing a placed UserControl
+
+[`VBControls.Create`](../api/RDCore.Forms.Avalonia.Controls.VBControls.yml) makes a `VBUserControl` for a placed UserControl, and a form's window shows it at the control's place and size. Each placed control has its own copy of its UserControl ([`FormDefinition.Copy`](../api/RDCore.Forms.Model.FormDefinition.yml)), so that its controls are its own: a change to one control's copy leaves the UserControl's definition and the other placed controls as they are. A [`VBFormView`](../api/RDCore.Forms.Avalonia.Rendering.VBFormView.yml) inside it shows the copy, whose root takes the placed control's `Width` and `Height`.
+
+|Setting|Behaviour|
+|---|---|
+|`BackStyle` 1, Opaque|The UserControl paints its `BackColor`, windowed or windowless.|
+|`BackStyle` 0, Transparent|What is behind the UserControl shows where nothing is drawn, as VB6 shows a windowed one's form.|
+|`Enabled` False|None of the UserControl's controls takes input.|
+|`ControlContainer` True|The controls a form places in it are shown over the UserControl's own, placed from the UserControl's top left corner.|
+|`InvisibleAtRuntime` True|Nothing is shown, and `Create` returns `null`.|
+|`Windowless` True|The control is under the windowed controls of its container, as a Label is.|
+
+A UserControl placed in another one is shown with its own controls. A UserControl that holds itself, at any depth, is shown once, with a box that names its class, such as `Project1.Gauge`, where it holds itself (RDForms' own).
+
+A placed UserControl takes no focus, and Tab passes over it; a press on one of its controls gives that control the focus, and Tab from there goes to the form's next control. Its root and its controls raise their events to the window's sink, each with its component of the copy as the source.
+
+> [!NOTE]
+> **Not implemented.** An `Alignable` UserControl's `Align` places nothing. A placed UserControl raises none of its own events (Initialize, ReadProperties, Resize, Show, Paint, Hide, Terminate) and none of its focus events, and its access keys do nothing. A program cannot move a control into one (425 in VB6 for one that is not a container).
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)

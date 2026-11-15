@@ -1,4 +1,5 @@
-﻿using P = RDCore.Forms.Model.VB.VBProperties;
+﻿using System.Runtime.CompilerServices;
+using P = RDCore.Forms.Model.VB.VBProperties;
 
 namespace RDCore.Forms.Model.VB;
 
@@ -74,9 +75,26 @@ public static class UserControlClasses
             properties.AddRange([P.Align, P.Negotiate]);
 
         EventDefinition[] focusEvents = takesFocus ? [VBEvents.GotFocus, VBEvents.LostFocus] : [];
-        return new ComponentClass($"{projectName}.{root.Name}", root.Name, ComponentKind.Control, properties,
+        var placed = new ComponentClass($"{projectName}.{root.Name}", root.Name, ComponentKind.Control, properties,
             [.. events ?? [], .. focusEvents],
             isContainer: root.Get(P.ControlContainer), isWindowless: root.Get(P.Windowless), hasExtent: !invisible,
             methods: takesFocus ? [VBMethods.SetFocus] : [], notAvailableAtRunTime: invisible ? [P.Left, P.Top] : null);
+        definitions.Add(placed, userControl);
+        return placed;
     }
+
+    /// <summary>
+    /// The UserControl a class of placed controls was made from by <see cref="Of"/>.
+    /// </summary>
+    /// <param name="placed">The class.</param>
+    /// <returns>The UserControl's definition, or <see langword="null"/> for a class <see cref="Of"/> did not make.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="placed"/> is <see langword="null"/>.</exception>
+    public static FormDefinition? DefinitionOf(ComponentClass placed)
+    {
+        ArgumentNullException.ThrowIfNull(placed);
+        return definitions.TryGetValue(placed, out var definition) ? definition : null;
+    }
+
+    // Each class's UserControl, for as long as the class lives.
+    private static readonly ConditionalWeakTable<ComponentClass, FormDefinition> definitions = [];
 }
