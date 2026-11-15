@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using RDCore.Forms.Model;
 using RDCore.SDK.Workspace.Pictures;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace RDCore.Forms.Avalonia.Controls;
@@ -35,6 +36,15 @@ public static class VBPicture
     /// </returns>
     public static Bitmap? Decode(byte[]? bytes, out FormError? error) => DecodeWithFormat(bytes, out error, out _);
 
+    [ThreadStatic]
+    private static int decodes;
+
+    /// <summary>
+    /// How many pictures this thread has decoded since it started. The controls that hold the same picture bytes share one decode, so
+    /// setting one picture on any number of controls counts one.
+    /// </summary>
+    public static int DecodesOnThisThread => decodes;
+
     // Decodes a picture, and says the format its header names, where it is accepted.
     internal static Bitmap? DecodeWithFormat(byte[]? bytes, out FormError? error, out PictureFormat? format)
     {
@@ -42,6 +52,7 @@ public static class VBPicture
         format = null;
         if (bytes is null || bytes.Length == 0)
             return null;
+        decodes++;
         if (FormPictures.Inspect(bytes, out var info) is { } refused)
         {
             error = refused;
@@ -73,16 +84,22 @@ public static class VBPicture
         return null;
     }
 
-    // The picture a component holds, decoded once for each value it takes, and the error it was refused with.
+    // The picture a component holds and the error it was refused with. The holders of the same bytes share one decode, as VB shares
+    // one picture object between the controls it is set on: the bytes are decoded once, whatever the number of controls.
     internal sealed class Holder
     {
         private byte[]? decodedFrom;
-        private PictureFormat? format;
-        private (Color Mask, Bitmap Picture)? masked;
+        private Shared? held;
 
-        public Bitmap? Picture { get; private set; }
+        public Bitmap? Picture => held?.Picture;
 
-        public FormError? Error { get; private set; }
+        public FormError? Error => held?.Error;
+
+        // The format its header names, where it is accepted.
+        public PictureFormat? Format => held?.Format;
+
+        // The colour of the picture's lower-left pixel, or null where it draws none.
+        public Color? LowerLeft => held?.LowerLeft;
 
         // Whether the value changes the picture: the same bytes are not decoded again.
         public bool Take(byte[]? bytes)
@@ -90,29 +107,106 @@ public static class VBPicture
             if (ReferenceEquals(bytes, decodedFrom))
                 return false;
             decodedFrom = bytes;
-            Picture?.Dispose();
-            masked?.Picture.Dispose();
-            masked = null;
-            Picture = DecodeWithFormat(bytes, out var error, out format);
-            Error = error;
+            held?.Release();
+            held = Shared.Acquire(bytes);
             return true;
         }
 
         // The picture with its pixels of the mask colour left out, made once for each picture and colour; the picture as it is where
         // there is no mask. VB6 masks a picture of type bitmap (a bitmap, a GIF, a JPEG) and draws an icon or a cursor whole. A PNG,
         // which VB6 does not load, is masked as a bitmap.
+        public Bitmap? MaskedBy(Color? mask) => held?.MaskedBy(mask);
+    }
+
+    // A decode the holders of the same bytes share. It is disposed when the last of them takes other bytes.
+    private sealed class Shared
+    {
+        private static readonly ConditionalWeakTable<byte[], Shared> decoded = new();
+        private readonly byte[] bytes;
+        private readonly Dictionary<Color, Bitmap> masked = [];
+        private Color? lowerLeft;
+        private int holders;
+
+        private Shared(byte[] bytes)
+        {
+            this.bytes = bytes;
+            Picture = DecodeWithFormat(bytes, out var error, out var format);
+            Error = error;
+            Format = format;
+        }
+
+        public Bitmap? Picture { get; }
+
+        public FormError? Error { get; }
+
+        public PictureFormat? Format { get; }
+
+        public Color? LowerLeft
+        {
+            get
+            {
+                if (Picture is null)
+                    return null;
+                lock (decoded)
+                    return lowerLeft ??= PixelAt(Picture, 0, Picture.PixelSize.Height - 1);
+            }
+        }
+
+        public static Shared? Acquire(byte[]? bytes)
+        {
+            if (bytes is null)
+                return null;
+            lock (decoded)
+            {
+                if (!decoded.TryGetValue(bytes, out var shared))
+                {
+                    shared = new Shared(bytes);
+                    decoded.Add(bytes, shared);
+                }
+                shared.holders++;
+                return shared;
+            }
+        }
+
+        public void Release()
+        {
+            lock (decoded)
+            {
+                if (--holders > 0)
+                    return;
+                decoded.Remove(bytes);
+                Picture?.Dispose();
+                foreach (var picture in masked.Values)
+                    picture.Dispose();
+                masked.Clear();
+            }
+        }
+
         public Bitmap? MaskedBy(Color? mask)
         {
-            if (Picture is null || mask is not { } colour || format is PictureFormat.Icon or PictureFormat.Cursor)
+            if (Picture is null || mask is not { } colour || Format is PictureFormat.Icon or PictureFormat.Cursor)
                 return Picture;
-            if (masked is not { } made || made.Mask != colour)
+            lock (decoded)
             {
-                masked?.Picture.Dispose();
-                made = (colour, Masked(Picture, colour));
-                masked = made;
+                if (!masked.TryGetValue(colour, out var made))
+                {
+                    made = Masked(Picture, colour);
+                    masked.Add(colour, made);
+                }
+                return made;
             }
-            return made.Picture;
         }
+    }
+
+    // The colour of one pixel of a picture, its alpha left out.
+    internal static Color PixelAt(Bitmap picture, int x, int y)
+    {
+        using var copy = new WriteableBitmap(picture.PixelSize, new Vector(96, 96), PixelFormats.Bgra8888, AlphaFormat.Premul);
+        using var buffer = copy.Lock();
+        picture.CopyPixels(buffer);
+        var value = Marshal.ReadInt32(buffer.Address, y * buffer.RowBytes + x * 4);
+        var (first, g, third) = ((byte)value, (byte)(value >> 8), (byte)(value >> 16));
+        return buffer.Format == PixelFormats.Rgba8888 ? Color.FromRgb(first, g, third) : Color.FromRgb(third, g, first);
     }
 
     // A copy of a picture whose opaque pixels of exactly one colour are transparent.

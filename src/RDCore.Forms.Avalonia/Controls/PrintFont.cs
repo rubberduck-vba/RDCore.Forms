@@ -1,5 +1,6 @@
 ﻿using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Avalonia;
 using Avalonia.Media;
@@ -14,7 +15,9 @@ namespace RDCore.Forms.Avalonia.Controls;
 // does not draw, keeps VB6's line and column, measured.
 internal sealed class PrintFont
 {
-    private static readonly ConcurrentDictionary<FormFont, PrintFont> fonts = new();
+    // A face belongs to the font manager that loaded it and goes with it, so each font manager has its own print fonts: an application
+    // made again, as each headless test makes one, loads its faces again rather than draw with faces whose font data is gone.
+    private static readonly ConditionalWeakTable<FontManager, ConcurrentDictionary<FormFont, PrintFont>> fonts = new();
 
     private readonly GlyphTypeface typeface;
     private readonly double em;
@@ -44,7 +47,7 @@ internal sealed class PrintFont
     // The baseline's distance from a line's top, in pixels.
     public int Ascent { get; }
 
-    public static PrintFont Of(FormFont font) => fonts.GetOrAdd(font, key => new PrintFont(key));
+    public static PrintFont Of(FormFont font) => fonts.GetValue(FontManager.Current, _ => new()).GetOrAdd(font, key => new PrintFont(key));
 
     // The lines of a text: a carriage return, a line feed, or both together end one.
     public static string[] Lines(string text) => text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
