@@ -239,6 +239,34 @@ public sealed class PrintTests
         Assert.AreEqual(0, other);
     }
 
+    // The pixels a text inks over a white box, in pixels, as "x,y" pairs.
+    private static string Inked(FormFont font, string text)
+    {
+        var surface = new VBDrawingLayer(Box().Set(P.ScaleMode, ScaleMode.Pixel).Set(P.Font, font));
+        surface.Print([Text(text)], false);
+        return string.Join(" ", from y in Enumerable.Range(0, 30) from x in Enumerable.Range(0, 60) where surface.Point(x, y) != 0xFFFFFF select $"{x},{y}");
+    }
+
+    // The default font's face, whichever this OS gives it, has a space glyph that draws nothing.
+    [TestMethod]
+    public void Spaces_InkNothing_InTheDefaultFont()
+    {
+        Assert.AreEqual("", UI.Run(() => Inked(FormFont.Default, "     ")));
+    }
+
+    // Each test runs in an application of its own; a font printed in an earlier one is drawn the same in the next.
+    [TestMethod]
+    public void AFontPrintedInAnEarlierApplication_IsDrawnTheSameInTheNext()
+    {
+        var first = UI.Run(() => (Spaces: Inked(Inter, "     "), Letter: Inked(Inter, "W")));
+        var next = UI.Run(() => (Spaces: Inked(Inter, "     "), Letter: Inked(Inter, "W")));
+
+        Assert.AreEqual("", first.Spaces);
+        Assert.AreEqual("", next.Spaces);
+        Assert.AreNotEqual("", first.Letter);
+        Assert.AreEqual(first.Letter, next.Letter);
+    }
+
     [TestMethod]
     public void FontTransparent_IsAFormsAndAPictureBoxsProperty_TrueByDefault()
     {
