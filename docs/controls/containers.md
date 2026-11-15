@@ -63,7 +63,7 @@ It raises Resize whether or not it or its form is shown.
 
 ## An aligned PictureBox
 
-A PictureBox on the form itself whose `Align` is set is docked to that edge of the form's client area, as measured with VB6. [`AlignLayout`](../api/RDCore.Forms.Model.VB.AlignLayout.yml) lays the boxes out.
+A PictureBox on the form itself whose `Align` is set is docked to that edge of the form's client area, as measured with VB6. [`AlignLayout`](../api/RDCore.Forms.Model.VB.AlignLayout.yml) lays the boxes out. A Data control and an `Alignable` [UserControl](usercontrols.md) are docked by the same rules.
 
 - The top and bottom boxes are laid out first, each across the form's whole width. The left and right boxes then take the height between them.
 - On each edge, the box nearest the edge is the last one in the form's file, whatever its `TabIndex`, and `ZOrder` does not change it. A box aligned at run time, or added by a program and aligned, goes inside the others.
