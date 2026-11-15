@@ -1,5 +1,6 @@
 ﻿using RDCore.Forms.Model;
 using RDCore.Forms.Model.VB;
+using RDCore.SDK.Runtime.Stdole;
 
 namespace RDCore.Forms.Tests.Model;
 
@@ -42,6 +43,63 @@ public sealed class FormFontTests
     public void AtDrawnSize_IsTheSizeVB6ReadsBack(string name, double asked, double expected)
     {
         Assert.AreEqual(expected, new FormFont(name, asked).AtDrawnSize().Size);
+    }
+
+    // A size no StdFont takes is drawn at the smallest size, or the largest: 32767 pixels.
+    [TestMethod]
+    [DataRow("MS Sans Serif", 0, 8.25)]
+    [DataRow("Arial", -3, 1.5)]
+    [DataRow("Arial", 30000, 24575.25)]
+    [DataRow("Arial", 1e30, 24575.25)]
+    [DataRow("Arial", double.NaN, 24575.25)]
+    public void AtDrawnSize_OfASizeNoStdFontTakes_IsTheSmallestOrTheLargest(string name, double asked, double expected)
+    {
+        Assert.AreEqual(expected, new FormFont(name, asked).AtDrawnSize().Size);
+    }
+
+    [TestMethod]
+    public void AFont_MakesTheStdFontThatHoldsIt_AndIsTheFontThatStdFontHolds()
+    {
+        var font = new FormFont("Arial", 13.5, FormFont.BoldWeight, Italic: true, Strikethrough: true, Charset: 2);
+
+        Assert.AreEqual(StdFontFailure.None, font.TryToStdFont(out var std));
+
+        Assert.AreEqual("Arial 700 True False True 2", $"{std!.Name} {std.Weight} {std.Italic} {std.Underline} {std.Strikethrough} {std.Charset}");
+        Assert.AreEqual(13.5m, std.Size);
+        Assert.AreEqual(font, FormFont.FromStdFont(std));
+    }
+
+    // A StdFont stores a weight as 400 or 700, and reads back the size it draws.
+    [TestMethod]
+    public void TheFontAStdFontHolds_HasItsStoredWeight_AndTheSizeItReadsBack()
+    {
+        Assert.AreEqual(StdFontFailure.None, new FormFont("MS Sans Serif", 8, 551, Underline: true).TryToStdFont(out var std));
+
+        Assert.AreEqual(new FormFont("MS Sans Serif", 8.25, FormFont.BoldWeight, Underline: true), FormFont.FromStdFont(std!));
+        Assert.AreEqual(8.25m, std!.Size);
+    }
+
+    [TestMethod]
+    [DataRow("Abcdefghijklmnopqrstuvwxyz012345", 8.25, 400, 0, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", 0, 400, 0, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", double.NaN, 400, 0, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", 24576, 400, 0, StdFontFailure.Overflow)]
+    [DataRow("Arial", 1e30, 400, 0, StdFontFailure.Overflow)]
+    [DataRow("Arial", 8.25, 1001, 0, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", 8.25, 70000, 0, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", 8.25, 400, 256, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Arial", 8.25, 400, -1, StdFontFailure.InvalidPropertyValue)]
+    [DataRow("Abcdefghijklmnopqrstuvwxyz012345", 24576, 400, 0, StdFontFailure.InvalidPropertyValue)]
+    public void AFontWithAValueAStdFontRefuses_MakesNone_AndSaysWhichFailure(string name, double size, int weight, int charset, StdFontFailure expected)
+    {
+        Assert.AreEqual(expected, new FormFont(name, size, weight, Charset: charset).TryToStdFont(out var std));
+        Assert.IsNull(std);
+    }
+
+    [TestMethod]
+    public void FromStdFont_OfNull_Throws()
+    {
+        Assert.ThrowsExactly<ArgumentNullException>(() => FormFont.FromStdFont(null!));
     }
 
     // As measured with VB6: a font holds the size it reads back, so MS Sans Serif set to 14 points holds 13.5, and named Arial then
