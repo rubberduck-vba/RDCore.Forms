@@ -216,7 +216,7 @@ public static class VBProperties
 
     /// <summary>
     /// Whether the text a form's or a PictureBox's <c>Print</c> method draws leaves what is under it. Where it is False, each line's
-    /// cell is filled with the <c>BackColor</c> first. True by default.
+    /// cell is filled with the <c>BackColor</c> first. True by default. A UserControl has it too, as VB6 lists it.
     /// </summary>
     public static readonly PropertyDefinition<bool> FontTransparent = new("FontTransparent", PropertyCategory.Appearance, true);
 
@@ -491,7 +491,8 @@ public static class VBProperties
     public static readonly PropertyDefinition<DataDefaultCursorType> DefaultCursorType = new("DefaultCursorType", PropertyCategory.Behavior);
 
     /// <summary>
-    /// A Data control's <c>Negotiate</c>, which the model keeps as written. A program can neither read it nor set it.
+    /// The <c>Negotiate</c> of a Data control, and of a placed UserControl that is <c>Alignable</c>, which the model keeps as written. A
+    /// program can neither read it nor set it.
     /// </summary>
     public static readonly PropertyDefinition<bool> Negotiate = new("Negotiate", PropertyCategory.Misc) { NotAvailableAtRunTime = true };
 

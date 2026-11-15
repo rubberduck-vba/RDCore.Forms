@@ -28,7 +28,7 @@ namespace RDCore.Forms.Model.VB;
 /// <description><c>TabStop</c>, <c>CausesValidation</c>, <c>HelpContextID</c>, <c>SetFocus</c>, and the <c>GotFocus</c> and <c>LostFocus</c> events.</description>
 /// </item>
 /// <item><term><c>DefaultCancel</c> True</term><description><c>Default</c> and <c>Cancel</c>.</description></item>
-/// <item><term><c>Alignable</c> True</term><description><c>Align</c>.</description></item>
+/// <item><term><c>Alignable</c> True</term><description><c>Align</c> and <c>Negotiate</c>.</description></item>
 /// </list>
 /// A placed control has no <c>Enabled</c>, <c>hWnd</c> or data-binding member, whatever the settings.
 /// </remarks>
@@ -71,7 +71,7 @@ public static class UserControlClasses
         if (root.Get(P.DefaultCancel))
             properties.AddRange([P.Default, P.Cancel]);
         if (root.Get(P.Alignable))
-            properties.Add(P.Align);
+            properties.AddRange([P.Align, P.Negotiate]);
 
         EventDefinition[] focusEvents = takesFocus ? [VBEvents.GotFocus, VBEvents.LostFocus] : [];
         return new ComponentClass($"{projectName}.{root.Name}", root.Name, ComponentKind.Control, properties,

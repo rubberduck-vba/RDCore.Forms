@@ -47,6 +47,7 @@ public sealed class UserControlClassesTests
         Assert.AreEqual(FillStyle.Transparent, root.DefaultOf(P.FillStyle));
         Assert.AreEqual((short)13, root.DefaultOf(P.DrawMode));
         Assert.AreEqual("", root.DefaultOf(P.AccessKeys));
+        Assert.IsTrue(root.DefaultOf(P.FontTransparent));
         foreach (var off in new[] { P.Alignable, P.ControlContainer, P.DefaultCancel, P.EditAtDesignTime, P.ForwardFocus, P.InvisibleAtRuntime,
                      P.Public, P.Windowless, P.AutoRedraw, P.KeyPreview, P.RightToLeft })
         {
@@ -60,7 +61,8 @@ public sealed class UserControlClassesTests
         var root = Read("AccessKeys      =   \"q\"", "Alignable       =   -1  'True", "BackStyle       =   0  'Transparent",
             "CanGetFocus     =   0   'False", "ControlContainer=   -1  'True", "DataBindingBehavior=   1  'vbSimpleBound",
             "DefaultCancel   =   -1  'True", "ForwardFocus    =   -1  'True", "InvisibleAtRuntime=   -1  'True",
-            "Windowless      =   -1  'True", "HitBehavior     =   2  'Use Paint", "PaletteMode     =   4  'None").Root;
+            "Windowless      =   -1  'True", "HitBehavior     =   2  'Use Paint", "PaletteMode     =   4  'None",
+            "FontTransparent =   0   'False").Root;
 
         Assert.AreEqual("q", root.Get(P.AccessKeys));
         Assert.IsTrue(root.Get(P.Alignable));
@@ -74,6 +76,7 @@ public sealed class UserControlClassesTests
         Assert.IsTrue(root.Get(P.Windowless));
         Assert.AreEqual(HitBehavior.UsePaint, root.Get(P.HitBehavior));
         Assert.AreEqual(PaletteMode.None, root.Get(P.PaletteMode));
+        Assert.IsFalse(root.Get(P.FontTransparent));
         Assert.IsEmpty(root.UnmodelledProperties);
     }
 
@@ -94,7 +97,7 @@ public sealed class UserControlClassesTests
     [DataRow("ForwardFocus    =   -1  'True", Visible + " TabIndex", false, DisplayName = "ForwardFocus True")]
     [DataRow("InvisibleAtRuntime=   -1  'True", "Left Top", false, DisplayName = "InvisibleAtRuntime True")]
     [DataRow("DefaultCancel   =   -1  'True", Visible + " " + Focus + " Default Cancel", true, DisplayName = "DefaultCancel True")]
-    [DataRow("Alignable       =   -1  'True", Visible + " " + Focus + " Align", true, DisplayName = "Alignable True")]
+    [DataRow("Alignable       =   -1  'True", Visible + " " + Focus + " Align Negotiate", true, DisplayName = "Alignable True")]
     public void APlacedUserControlsExtender_HasTheMembersItsSettingsGiveIt(string? setting, string properties, bool takesFocus)
     {
         var placed = UserControlClasses.Of(setting is null ? Read() : Read(setting), "Project1");
@@ -103,6 +106,16 @@ public sealed class UserControlClassesTests
         CollectionAssert.AreEqual(takesFocus ? new[] { "SetFocus" } : [], placed.Methods.Select(m => m.Name).ToArray());
         CollectionAssert.AreEqual(takesFocus ? new[] { "GotFocus", "LostFocus" } : [], placed.Events.Select(e => e.Name).ToArray());
         Assert.IsNull(placed.Property("Enabled"));
+    }
+
+    // As measured with VB6: an Alignable control's Negotiate is False in a form's file, and reading it at run time is error 393.
+    [TestMethod]
+    public void AnAlignableUserControlsNegotiate_IsFalse_AndNotAvailableAtRunTime()
+    {
+        var placed = UserControlClasses.Of(Read("Alignable       =   -1  'True"), "Project1");
+
+        Assert.IsFalse(placed.DefaultOf(P.Negotiate));
+        Assert.IsTrue(placed.IsNotAvailableAtRunTime(P.Negotiate));
     }
 
     [TestMethod]
