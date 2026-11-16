@@ -259,7 +259,7 @@ public static class VBPicture
         var source = stretch
             ? new Rect(picture.Size)
             : new Rect(0, 0, destination.Width * picture.Size.Width / pixels.Width, destination.Height * picture.Size.Height / pixels.Height);
-        // A stretched picture repeats its pixels, as VB6's StretchBlt does. The backend's default filter blends neighbours, and differs
+        // A stretched picture repeats its pixels, as VB6's StretchBlt does. The backend's default filter blends neighbors, and differs
         // by platform.
         using (context.PushRenderOptions(Unfiltered))
             context.DrawImage(picture, source, destination);

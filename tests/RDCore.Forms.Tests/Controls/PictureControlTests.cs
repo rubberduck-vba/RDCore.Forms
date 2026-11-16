@@ -129,7 +129,7 @@ public sealed class PictureControlTests
     }
 
     // a blue and a red pixel stretched over 40 pixels: each repeated 20 times, up to the pixels either side of where they meet, as
-    // VB6's StretchBlt repeats them. A filter that blends neighbours mixes those two.
+    // VB6's StretchBlt repeats them. A filter that blends neighbors mixes those two.
     [TestMethod]
     public void AStretchedPicture_RepeatsItsPixels_WithoutBlendingThem()
     {
