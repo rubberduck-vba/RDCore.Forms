@@ -37,7 +37,7 @@
     <value>Ce gestionnaire Exit devient Validate, qui n'est déclenché que si le contrôle qui prend le focus a CausesValidation à True.</value>
   </data>
   <data name="ScrollBarReference" xml:space="preserve">
-    <value>Un ScrollBar devient RDForms.HScrollBar ou RDForms.VScrollBar selon son orientation, donc le portage type cette référence RDForms.Control.</value>
+    <value>Un ScrollBar devient RDForms.HScrollBar ou RDForms.VScrollBar selon son orientation, donc le portage donne à cette référence le type RDForms.Control.</value>
   </data>
   <data name="UnitWrapped" xml:space="preserve">
     <value>Le portage a placé cette expression dans {0} pour garder son unité d'origine : réécrivez-la en DIP et retirez l'appel.</value>
