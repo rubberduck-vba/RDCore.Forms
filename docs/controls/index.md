@@ -4,36 +4,36 @@
 
 ## Catalogue
 
-[`VBControls.Create`](../api/RDCore.Forms.Avalonia.Controls.VBControls.yml) makes the control for a component of one of Visual Basic 6.0's intrinsic classes.
+[`VBControls.Create`](../api/RDCore.Forms.Avalonia.Controls.VBControls.yml) makes the control for a component of an RDForms class: the classes Visual Basic 6.0's intrinsic controls port to.
 
 |Class|Control|Events raised|Page|
 |---|---|---|---|
-|`VB.CommandButton`|[`VBCommandButton`](../api/RDCore.Forms.Avalonia.Controls.VBCommandButton.yml)|Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
-|`VB.CheckBox`|[`VBCheckBox`](../api/RDCore.Forms.Avalonia.Controls.VBCheckBox.yml)|Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
-|`VB.OptionButton`|[`VBOptionButton`](../api/RDCore.Forms.Avalonia.Controls.VBOptionButton.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
-|`VB.Label`|[`VBLabel`](../api/RDCore.Forms.Avalonia.Controls.VBLabel.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Text](text.md)|
-|`VB.TextBox`|[`VBTextBox`](../api/RDCore.Forms.Avalonia.Controls.VBTextBox.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Text](text.md)|
-|`VB.ListBox`|[`VBListBox`](../api/RDCore.Forms.Avalonia.Controls.VBListBox.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Lists](lists.md)|
-|`VB.ComboBox`|[`VBComboBox`](../api/RDCore.Forms.Avalonia.Controls.VBComboBox.yml)|Change, Click, DblClick, DropDown, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus|[Lists](lists.md)|
-|`VB.DriveListBox`|[`VBDriveListBox`](../api/RDCore.Forms.Avalonia.Controls.VBDriveListBox.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus|[File system lists](file-lists.md)|
-|`VB.DirListBox`|[`VBDirListBox`](../api/RDCore.Forms.Avalonia.Controls.VBDirListBox.yml)|Change, Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[File system lists](file-lists.md)|
-|`VB.FileListBox`|[`VBFileListBox`](../api/RDCore.Forms.Avalonia.Controls.VBFileListBox.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, PathChange, PatternChange|[File system lists](file-lists.md)|
-|`VB.Frame`|[`VBFrame`](../api/RDCore.Forms.Avalonia.Controls.VBFrame.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md)|
-|`VB.PictureBox`|[`VBPictureBox`](../api/RDCore.Forms.Avalonia.Controls.VBPictureBox.yml)|Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Paint, Resize|[Containers and pictures](containers.md)|
-|`VB.Image`|[`VBImage`](../api/RDCore.Forms.Avalonia.Controls.VBImage.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md)|
-|`VB.Timer`|[`VBTimer`](../api/RDCore.Forms.Avalonia.Controls.VBTimer.yml)|Timer|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
-|`VB.HScrollBar`, `VB.VScrollBar`|[`VBScrollBar`](../api/RDCore.Forms.Avalonia.Controls.VBScrollBar.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
-|`VB.Shape`|[`VBShape`](../api/RDCore.Forms.Avalonia.Controls.VBShape.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
-|`VB.Line`|[`VBLine`](../api/RDCore.Forms.Avalonia.Controls.VBLine.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
-|`VB.Data`|[`VBData`](../api/RDCore.Forms.Avalonia.Controls.VBData.yml)|None|[Data control](data.md)|
-|`VB.Menu`|The window's [`VBMenuBar`](../api/RDCore.Forms.Avalonia.Rendering.VBMenuBar.yml)|Click|[Menus](menus.md)|
+|`RDForms.CommandButton`|[`VBCommandButton`](../api/RDCore.Forms.Avalonia.Controls.VBCommandButton.yml)|Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
+|`RDForms.CheckBox`|[`VBCheckBox`](../api/RDCore.Forms.Avalonia.Controls.VBCheckBox.yml)|Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
+|`RDForms.OptionButton`|[`VBOptionButton`](../api/RDCore.Forms.Avalonia.Controls.VBOptionButton.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
+|`RDForms.Label`|[`VBLabel`](../api/RDCore.Forms.Avalonia.Controls.VBLabel.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Text](text.md)|
+|`RDForms.TextBox`|[`VBTextBox`](../api/RDCore.Forms.Avalonia.Controls.VBTextBox.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Text](text.md)|
+|`RDForms.ListBox`|[`VBListBox`](../api/RDCore.Forms.Avalonia.Controls.VBListBox.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Lists](lists.md)|
+|`RDForms.ComboBox`|[`VBComboBox`](../api/RDCore.Forms.Avalonia.Controls.VBComboBox.yml)|Change, Click, DblClick, DropDown, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus|[Lists](lists.md)|
+|`RDForms.DriveListBox`|[`VBDriveListBox`](../api/RDCore.Forms.Avalonia.Controls.VBDriveListBox.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus|[File system lists](file-lists.md)|
+|`RDForms.DirListBox`|[`VBDirListBox`](../api/RDCore.Forms.Avalonia.Controls.VBDirListBox.yml)|Change, Click, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[File system lists](file-lists.md)|
+|`RDForms.FileListBox`|[`VBFileListBox`](../api/RDCore.Forms.Avalonia.Controls.VBFileListBox.yml)|Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, PathChange, PatternChange|[File system lists](file-lists.md)|
+|`RDForms.Frame`|[`VBFrame`](../api/RDCore.Forms.Avalonia.Controls.VBFrame.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md)|
+|`RDForms.PictureBox`|[`VBPictureBox`](../api/RDCore.Forms.Avalonia.Controls.VBPictureBox.yml)|Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Paint, Resize|[Containers and pictures](containers.md)|
+|`RDForms.Image`|[`VBImage`](../api/RDCore.Forms.Avalonia.Controls.VBImage.yml)|Click, DblClick, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md)|
+|`RDForms.Timer`|[`VBTimer`](../api/RDCore.Forms.Avalonia.Controls.VBTimer.yml)|Timer|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
+|`RDForms.HScrollBar`, `RDForms.VScrollBar`|[`VBScrollBar`](../api/RDCore.Forms.Avalonia.Controls.VBScrollBar.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
+|`RDForms.Shape`|[`VBShape`](../api/RDCore.Forms.Avalonia.Controls.VBShape.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
+|`RDForms.Line`|[`VBLine`](../api/RDCore.Forms.Avalonia.Controls.VBLine.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
+|`RDForms.Data`|[`VBData`](../api/RDCore.Forms.Avalonia.Controls.VBData.yml)|None|[Data control](data.md)|
+|`RDForms.Menu`|The window's [`VBMenuBar`](../api/RDCore.Forms.Avalonia.Rendering.VBMenuBar.yml)|Click|[Menus](menus.md)|
 |A placed UserControl, such as `Project1.Gauge`|[`VBUserControl`](../api/RDCore.Forms.Avalonia.Controls.VBUserControl.yml)|None of its own; its UserControl's root and controls raise theirs|[UserControls](usercontrols.md)|
 
-A `VB.Menu` has no control of its own, and `Create` returns `null` for it: a form's window shows its menus on its [menu bar](menus.md). It returns `null` for a UserControl that is invisible at run time too.
+A `RDForms.Menu` has no control of its own, and `Create` returns `null` for it: a form's window shows its menus on its [menu bar](menus.md). It returns `null` for a UserControl that is invisible at run time too.
 
 ## Showing a form
 
-A [`VBFormWindow`](../api/RDCore.Forms.Avalonia.Rendering.VBFormWindow.yml) shows a form whose root is a `VB.Form`. Its client area is a [`VBFormView`](../api/RDCore.Forms.Avalonia.Rendering.VBFormView.yml), which holds the form's controls. The controls raise their events to the [`IComponentEventSink`](../api/RDCore.Forms.Model.IComponentEventSink.yml) set on the window; a window with no sink raises none.
+A [`VBFormWindow`](../api/RDCore.Forms.Avalonia.Rendering.VBFormWindow.yml) shows a form whose root is a `RDForms.Form`. Its client area is a [`VBFormView`](../api/RDCore.Forms.Avalonia.Rendering.VBFormView.yml), which holds the form's controls. The controls raise their events to the [`IComponentEventSink`](../api/RDCore.Forms.Model.IComponentEventSink.yml) set on the window; a window with no sink raises none.
 
 ```csharp
 using RDCore.Forms.Avalonia.Controls;
@@ -96,7 +96,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 
 |Rule|Behaviour|
 |---|---|
-|Class|Named by its ProgID, such as `VB.CommandButton`, without regard to case. A menu's or a form's class is refused.|
+|Class|Named by its ProgID, such as `RDForms.CommandButton`, without regard to case. A menu's or a form's class is refused.|
 |Name|Any name that no other control has, compared without regard to case, even one that starts with a digit, holds a space, is a keyword, or is the form's own name. An empty name is refused, and so is a name of white space only (RDForms' own).|
 |Container|The form, or a Frame or a PictureBox of the form.|
 |Defaults|Hidden, at 0, 0, and 80 by 32 pixels (1200 by 480 twips) where the class has an extent. The next `TabIndex` after the form's others. A caption or a text is "".|

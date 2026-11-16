@@ -167,6 +167,10 @@ public static partial class VB6FormReader
 
         public List<UnmodelledProperty> UnmodelledHeader { get; } = [];
 
+        // The RDForms class a class of VB6's VB library ports to: VB.TextBox is RDForms.TextBox. A class of another library has none.
+        private static ComponentClass? PortedClass(string typeName) =>
+            typeName.StartsWith("VB.", StringComparison.OrdinalIgnoreCase) ? VBClasses.ByTypeName("RDForms." + typeName[3..]) : null;
+
         public FormDefinition? Import(DesignerFile file, DesignerBlock root)
         {
             if (root.Name.Length == 0)
@@ -176,7 +180,7 @@ public static partial class VB6FormReader
                 return null;
             }
 
-            var rootClass = VBClasses.ByTypeName(root.TypeName);
+            var rootClass = PortedClass(root.TypeName);
             if (rootClass is not { Kind: ComponentKind.Root })
             {
                 diagnostics.Add(VB6ImportDiagnosticKind.NotAFormRoot, root.Line, root.TypeName);
@@ -236,7 +240,7 @@ public static partial class VB6FormReader
                     continue;
                 }
 
-                var componentClass = VBClasses.ByTypeName(child.TypeName)
+                var componentClass = PortedClass(child.TypeName)
                     ?? projectClasses.FirstOrDefault(c => c.TypeName.Equals(child.TypeName, StringComparison.OrdinalIgnoreCase));
                 if (componentClass is null or { Kind: ComponentKind.Root })
                 {

@@ -96,7 +96,7 @@ public sealed class ControlKeyTests
         var raised = UI.Run(() =>
         {
             var root = Root();
-            var button = Add(root, VBClasses.ByTypeName("VB." + type)!, "Button1");
+            var button = Add(root, VBClasses.ByTypeName("RDForms." + type)!, "Button1");
             if (type == "OptionButton")
                 button.Set(P.OptionButtonValue, true);
             var sink = new RecordingSink();
@@ -187,7 +187,7 @@ public sealed class ControlKeyTests
         var (raised, focused, value) = UI.Run(() =>
         {
             var root = Root().Set(P.KeyPreview, preview);
-            var button1 = Add(root, VBClasses.ByTypeName("VB." + type)!, "Button1");
+            var button1 = Add(root, VBClasses.ByTypeName("RDForms." + type)!, "Button1");
             var command2 = Add(root, VBClasses.CommandButton, "Command2", 100);
             var sink = new RecordingSink();
             var window = Open(root, button1, sink);

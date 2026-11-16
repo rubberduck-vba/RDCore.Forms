@@ -19,30 +19,30 @@ public sealed class ComponentClassTests
 
     // The member each VB class's default member stands for, as VB6 reads and assigns it through the instance.
     [TestMethod]
-    [DataRow("VB.Form", "Controls")]
-    [DataRow("VB.MDIForm", "Controls")]
-    [DataRow("VB.CommandButton", "Value")]
-    [DataRow("VB.CheckBox", "Value")]
-    [DataRow("VB.OptionButton", "Value")]
-    [DataRow("VB.HScrollBar", "Value")]
-    [DataRow("VB.VScrollBar", "Value")]
-    [DataRow("VB.TextBox", "Text")]
-    [DataRow("VB.ComboBox", "Text")]
-    [DataRow("VB.ListBox", "Text")]
-    [DataRow("VB.Label", "Caption")]
-    [DataRow("VB.Frame", "Caption")]
-    [DataRow("VB.PictureBox", "Picture")]
-    [DataRow("VB.Image", "Picture")]
-    [DataRow("VB.DriveListBox", "Drive")]
-    [DataRow("VB.DirListBox", "Path")]
-    [DataRow("VB.FileListBox", "FileName")]
-    [DataRow("VB.Shape", "Shape")]
-    [DataRow("VB.Line", "Visible")]
-    [DataRow("VB.Timer", "Enabled")]
-    [DataRow("VB.Data", "Caption")]
-    [DataRow("VB.Menu", "Enabled")]
-    [DataRow("VB.UserControl", null)]
-    [DataRow("VB.PropertyPage", null)]
+    [DataRow("RDForms.Form", "Controls")]
+    [DataRow("RDForms.MDIForm", "Controls")]
+    [DataRow("RDForms.CommandButton", "Value")]
+    [DataRow("RDForms.CheckBox", "Value")]
+    [DataRow("RDForms.OptionButton", "Value")]
+    [DataRow("RDForms.HScrollBar", "Value")]
+    [DataRow("RDForms.VScrollBar", "Value")]
+    [DataRow("RDForms.TextBox", "Text")]
+    [DataRow("RDForms.ComboBox", "Text")]
+    [DataRow("RDForms.ListBox", "Text")]
+    [DataRow("RDForms.Label", "Caption")]
+    [DataRow("RDForms.Frame", "Caption")]
+    [DataRow("RDForms.PictureBox", "Picture")]
+    [DataRow("RDForms.Image", "Picture")]
+    [DataRow("RDForms.DriveListBox", "Drive")]
+    [DataRow("RDForms.DirListBox", "Path")]
+    [DataRow("RDForms.FileListBox", "FileName")]
+    [DataRow("RDForms.Shape", "Shape")]
+    [DataRow("RDForms.Line", "Visible")]
+    [DataRow("RDForms.Timer", "Enabled")]
+    [DataRow("RDForms.Data", "Caption")]
+    [DataRow("RDForms.Menu", "Enabled")]
+    [DataRow("RDForms.UserControl", null)]
+    [DataRow("RDForms.PropertyPage", null)]
     public void AVBClassesDefaultMember_IsTheMemberVB6ReadsAndAssignsThroughTheInstance(string typeName, string? member) =>
         Assert.AreEqual(member, VBClasses.ByTypeName(typeName)!.DefaultMember);
 
@@ -87,7 +87,7 @@ public sealed class ComponentClassTests
     [TestMethod]
     public void TheCatalog_FindsAClassByItsTypeName_WithoutRegardToCase()
     {
-        Assert.AreSame(VBClasses.TextBox, VBClasses.ByTypeName("vb.textbox"));
+        Assert.AreSame(VBClasses.TextBox, VBClasses.ByTypeName("rdforms.textbox"));
         Assert.IsNull(VBClasses.ByTypeName("MSComctlLib.ListView"));
         Assert.AreEqual("TextBox", VBClasses.TextBox.ClassName);
     }
@@ -134,8 +134,8 @@ public sealed class ComponentClassTests
     }
 
     [TestMethod]
-    [DataRow("VB.HScrollBar")]
-    [DataRow("VB.VScrollBar")]
+    [DataRow("RDForms.HScrollBar")]
+    [DataRow("RDForms.VScrollBar")]
     public void TheCatalog_GivesAScrollBarItsKeyEvents(string typeName)
     {
         var bar = VBClasses.ByTypeName(typeName)!;

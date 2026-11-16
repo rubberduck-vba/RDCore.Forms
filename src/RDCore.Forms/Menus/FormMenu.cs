@@ -6,7 +6,7 @@ using P = RDCore.Forms.Model.VB.VBProperties;
 namespace RDCore.Forms.Menus;
 
 /// <summary>
-/// A form's menus: the <c>VB.Menu</c> components its root holds, as the items of its menu bar, each holding the items of its own
+/// A form's menus: the <c>RDForms.Menu</c> components its root holds, as the items of its menu bar, each holding the items of its own
 /// menu.
 /// </summary>
 /// <remarks>
@@ -163,7 +163,7 @@ public sealed class FormMenuItem
     {
         ArgumentNullException.ThrowIfNull(menu);
         if (!IsMenu(menu))
-            throw new ArgumentException($"The component is a {menu.Class.TypeName}, not a VB.Menu.", nameof(menu));
+            throw new ArgumentException($"The component is a {menu.Class.TypeName}, not an RDForms.Menu.", nameof(menu));
         return items.GetValue(menu, m => new FormMenuItem(m));
     }
 

@@ -29,7 +29,7 @@ public sealed class DefaultCancelTests
     private static (ComponentInstance Root, ComponentInstance Control) Form(string type, bool buttons)
     {
         var root = Root();
-        var control = Add(root, VBClasses.ByTypeName("VB." + type)!, type == "CommandButton" ? "Command3" : "Control1", 8);
+        var control = Add(root, VBClasses.ByTypeName("RDForms." + type)!, type == "CommandButton" ? "Command3" : "Control1", 8);
         if (type == "OptionButton")
             control.Set(P.OptionButtonValue, true);
         Add(root, VBClasses.CommandButton, "Command1", 96).Set(P.Default, buttons);

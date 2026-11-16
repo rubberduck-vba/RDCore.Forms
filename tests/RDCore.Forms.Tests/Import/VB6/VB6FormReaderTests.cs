@@ -45,6 +45,19 @@ public sealed class VB6FormReaderTests
         Assert.AreEqual(new UnmodelledComponent("VB.CommandButton", "Command1", 0, "Begin VB.CommandButton Command1 \r\nEnd"), import.UnmodelledRoot);
     }
 
+    // the classes of VB6's VB library port to RDForms': VB.Form is RDForms.Form, VB.Label is RDForms.Label. A class an RDForms
+    // document names is no VB6 class.
+    [TestMethod]
+    public void AVBClass_IsReadAsTheRDFormsClassItPortsTo()
+    {
+        var import = VB6FormReader.Read(Form([.. Label(), "   Begin RDForms.Label Label2 ", "   End"]));
+
+        Assert.AreSame(VBClasses.Form, import.Form!.Root.Class);
+        Assert.AreEqual("RDForms.Label", import.Form.Find("Label1")!.Class.TypeName);
+        Assert.IsNull(import.Form.Find("Label2"));
+        Assert.AreEqual(VB6ImportDiagnosticKind.UnmodelledClass, import.Diagnostics.Single().Kind);
+    }
+
     [TestMethod]
     public void PropertyAndClassNames_AreReadWithoutRegardToCase()
     {

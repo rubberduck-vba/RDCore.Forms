@@ -1,6 +1,6 @@
 # UserControls
 
-A UserControl's designer file (`.ctl`) reads as a [`FormDefinition`](../api/RDCore.Forms.Model.FormDefinition.yml) whose root is a `VB.UserControl`. A form places the UserControl as a control of the class [`UserControlClasses.Of`](../api/RDCore.Forms.Model.VB.UserControlClasses.yml) makes from that definition, and a [`VBUserControl`](../api/RDCore.Forms.Avalonia.Controls.VBUserControl.yml) shows it.
+A UserControl's designer file (`.ctl`) reads as a [`FormDefinition`](../api/RDCore.Forms.Model.FormDefinition.yml) whose root is an `RDForms.UserControl`. A form places the UserControl as a control of the class [`UserControlClasses.Of`](../api/RDCore.Forms.Model.VB.UserControlClasses.yml) makes from that definition, and a [`VBUserControl`](../api/RDCore.Forms.Avalonia.Controls.VBUserControl.yml) shows it.
 
 ## The root
 

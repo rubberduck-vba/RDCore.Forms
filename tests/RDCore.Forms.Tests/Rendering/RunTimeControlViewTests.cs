@@ -42,8 +42,8 @@ public sealed class RunTimeControlViewTests
         var (inView, inFrame, under, hidden, tabOrder) = UI.Run(() =>
         {
             var (window, form, _) = Open();
-            var button = form.AddControl("VB.CommandButton", "cmdNew");
-            var inside = form.AddControl("VB.CommandButton", "cmdIn", form.Find("Frame1"));
+            var button = form.AddControl("RDForms.CommandButton", "cmdNew");
+            var inside = form.AddControl("RDForms.CommandButton", "cmdIn", form.Find("Frame1"));
             var view = window.View;
             var shown = view.ControlOf(button)!;
             var hidden = !shown.IsVisible;
@@ -70,7 +70,7 @@ public sealed class RunTimeControlViewTests
         var raised = UI.Run(() =>
         {
             var (window, form, sink) = Open();
-            var button = form.AddControl("VB.CommandButton", "cmdNew");
+            var button = form.AddControl("RDForms.CommandButton", "cmdNew");
             button.Set(P.Left, 8d).Set(P.Top, 160d).Set(P.Visible, true);
             Dispatcher.UIThread.RunJobs();
             sink.Raised.Clear();
@@ -91,11 +91,11 @@ public sealed class RunTimeControlViewTests
         var (onShown, beforeShown, afterShown) = UI.Run(() =>
         {
             var (window, form, _) = Open();
-            var onShown = form.AddControl("VB.ListBox", "lstNew").Get(P.Height);
+            var onShown = form.AddControl("RDForms.ListBox", "lstNew").Get(P.Height);
             window.Close();
 
             var hiddenForm = new FormDefinition(new ComponentInstance(VBClasses.Form, "Form2").Set(P.Width, 320d).Set(P.Height, 240d));
-            var list = hiddenForm.AddControl("VB.ListBox", "lstNew");
+            var list = hiddenForm.AddControl("RDForms.ListBox", "lstNew");
             var beforeShown = list.Get(P.Height);
             var hiddenWindow = new VBFormWindow(hiddenForm);
             hiddenWindow.Show();
@@ -116,9 +116,9 @@ public sealed class RunTimeControlViewTests
         var (gone, heldGone, focused, raised) = UI.Run(() =>
         {
             var (window, form, sink) = Open();
-            var frame = form.AddControl("VB.Frame", "fraNew");
-            var inFrame = form.AddControl("VB.CommandButton", "cmdInNew", frame);
-            var button = form.AddControl("VB.CommandButton", "cmdNew");
+            var frame = form.AddControl("RDForms.Frame", "fraNew");
+            var inFrame = form.AddControl("RDForms.CommandButton", "cmdInNew", frame);
+            var button = form.AddControl("RDForms.CommandButton", "cmdNew");
             button.Set(P.Top, 160d).Set(P.Visible, true);
             Dispatcher.UIThread.RunJobs();
             var buttonControl = window.View.ControlOf(button)!;

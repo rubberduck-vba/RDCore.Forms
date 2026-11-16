@@ -270,7 +270,7 @@ public sealed class FormXamlTests
             button.UnmodelledProperties);
         Assert.IsNull(button.Index);
         Assert.IsFalse(button.IsSet(P.Width));
-        CollectionAssert.AreEqual(new[] { "Grid", "VB.TextBox" }, form.Root.UnmodelledContents.Select(c => c.TypeName.Replace($"{{{Ns}}}", "")).ToArray());
+        CollectionAssert.AreEqual(new[] { "Grid", "RDForms.TextBox" }, form.Root.UnmodelledContents.Select(c => c.TypeName.Replace($"{{{Ns}}}", "")).ToArray());
         Assert.AreEqual(2, form.Root.UnmodelledContents[1].Position);
         Assert.AreEqual("Font", form.Find("Text1")!.UnmodelledProperties.Single().Name);
     }

@@ -125,7 +125,7 @@ public sealed class VBFormWindow : Window, IMenuHost, IFormFocus
         ArgumentNullException.ThrowIfNull(form);
         ArgumentNullException.ThrowIfNull(fileSystem);
         if (!ReferenceEquals(form.Root.Class, VBClasses.Form))
-            throw new ArgumentException($"The form's root is a {form.Root.Class.TypeName}, not a VB.Form.", nameof(form));
+            throw new ArgumentException($"The form's root is a {form.Root.Class.TypeName}, not an RDForms.Form.", nameof(form));
         View = new VBFormView(form, fileSystem);
         MenuBar = new VBMenuBar(form.Root);
         DockPanel.SetDock(MenuBar, Dock.Top);

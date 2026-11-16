@@ -14,7 +14,7 @@ public sealed class DataClassTests
 
     [TestMethod]
     public void TheDataClass_IsInTheCatalog_ByItsTypeName() =>
-        Assert.AreSame(Data, VBClasses.ByTypeName("vb.data"));
+        Assert.AreSame(Data, VBClasses.ByTypeName("rdforms.data"));
 
     [TestMethod]
     public void ItsEvents_AreTheOnesOfItsTypeInformation() =>

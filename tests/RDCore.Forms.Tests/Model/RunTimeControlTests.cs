@@ -28,7 +28,7 @@ public sealed class RunTimeControlTests
         var events = new List<string>();
         form.ControlAdded += (_, e) => events.Add($"{e.Control.Name} in {e.Container.Name}");
 
-        var added = form.AddControl("vb.commandbutton", "cmdNew");
+        var added = form.AddControl("rdforms.commandbutton", "cmdNew");
 
         Assert.AreSame(VBClasses.CommandButton, added.Class);
         Assert.IsFalse(added.Get(P.Visible));
@@ -48,9 +48,9 @@ public sealed class RunTimeControlTests
         form.Find("Frame1")!.SetContainer(form.Root, 0);
         new ComponentInstance(VBClasses.OptionButton, "Option1").SetContainer(form.Find("Frame1")!);
 
-        form.AddControl("VB.CommandButton", "cmdNew");
-        var inFrame = form.AddControl("VB.CommandButton", "cmdIn", form.Find("Frame1"));
-        form.AddControl("VB.Label", "lblNew");
+        form.AddControl("RDForms.CommandButton", "cmdNew");
+        var inFrame = form.AddControl("RDForms.CommandButton", "cmdIn", form.Find("Frame1"));
+        form.AddControl("RDForms.Label", "lblNew");
 
         Expect(["Frame1", "Option1", "Command1", "cmdNew", "cmdIn", "lblNew"], Names(form));
         Assert.AreSame(form.Find("Frame1"), inFrame.Container);
@@ -63,12 +63,12 @@ public sealed class RunTimeControlTests
         var form = Form();
 
         foreach (var name in new[] { "1abc", "a b", "_a", "a$", new string('m', 41), "Sub", "Form1", "Me" })
-            form.AddControl("VB.CommandButton", name);
+            form.AddControl("RDForms.CommandButton", name);
 
-        Assert.AreEqual(727, Error(() => form.AddControl("VB.CommandButton", "frame1")));
-        Assert.AreEqual(727, Error(() => form.AddControl("VB.CommandButton", "A B")));
-        Assert.AreEqual(728, Error(() => form.AddControl("VB.CommandButton", "")));
-        Assert.AreEqual(728, Error(() => form.AddControl("VB.CommandButton", "  ")));
+        Assert.AreEqual(727, Error(() => form.AddControl("RDForms.CommandButton", "frame1")));
+        Assert.AreEqual(727, Error(() => form.AddControl("RDForms.CommandButton", "A B")));
+        Assert.AreEqual(728, Error(() => form.AddControl("RDForms.CommandButton", "")));
+        Assert.AreEqual(728, Error(() => form.AddControl("RDForms.CommandButton", "  ")));
         Assert.AreEqual(10, form.Controls.Count);
     }
 
@@ -76,15 +76,17 @@ public sealed class RunTimeControlTests
     public void AClassOrAContainerControlsAddCannotTake_IsRefused_AndAddsNothing()
     {
         var form = Form();
-        var button = form.AddControl("VB.CommandButton", "cmdNew");
+        var button = form.AddControl("RDForms.CommandButton", "cmdNew");
         var raised = 0;
         form.ControlAdded += (_, _) => raised++;
 
-        Assert.AreEqual(711, Error(() => form.AddControl("VB.Bogus", "x1")));
-        Assert.AreEqual(720, Error(() => form.AddControl("VB.Menu", "mnuNew")));
-        Assert.AreEqual(720, Error(() => form.AddControl("VB.Form", "frmNew")));
-        Assert.AreEqual(721, Error(() => form.AddControl("VB.CommandButton", "cmdIn2", button)));
-        Assert.ThrowsExactly<ArgumentException>(() => form.AddControl("VB.CommandButton", "cmdIn3", new ComponentInstance(VBClasses.Frame, "Other")));
+        Assert.AreEqual(711, Error(() => form.AddControl("RDForms.Bogus", "x1")));
+        // a VB6 ProgID is the port's to rewrite
+        Assert.AreEqual(711, Error(() => form.AddControl("VB.CommandButton", "x2")));
+        Assert.AreEqual(720, Error(() => form.AddControl("RDForms.Menu", "mnuNew")));
+        Assert.AreEqual(720, Error(() => form.AddControl("RDForms.Form", "frmNew")));
+        Assert.AreEqual(721, Error(() => form.AddControl("RDForms.CommandButton", "cmdIn2", button)));
+        Assert.ThrowsExactly<ArgumentException>(() => form.AddControl("RDForms.CommandButton", "cmdIn3", new ComponentInstance(VBClasses.Frame, "Other")));
 
         Assert.AreEqual(3, form.Controls.Count);
         Assert.AreEqual(0, raised);
@@ -94,10 +96,10 @@ public sealed class RunTimeControlTests
     public void RemovingAContainer_RemovesWhatItHolds_AndTheOtherTabIndexesCloseUp()
     {
         var form = Form();
-        var frame = form.AddControl("VB.Frame", "fraNew");
-        var inFrame = form.AddControl("VB.CommandButton", "cmdInNew", frame);
-        var button = form.AddControl("VB.CommandButton", "cmdNew");
-        var text = form.AddControl("VB.TextBox", "txtNew");
+        var frame = form.AddControl("RDForms.Frame", "fraNew");
+        var inFrame = form.AddControl("RDForms.CommandButton", "cmdInNew", frame);
+        var button = form.AddControl("RDForms.CommandButton", "cmdNew");
+        var text = form.AddControl("RDForms.TextBox", "txtNew");
         var events = new List<string>();
         form.ControlRemoved += (_, e) => events.Add($"{e.Control.Name} from {e.Container.Name}");
 
@@ -116,7 +118,7 @@ public sealed class RunTimeControlTests
     public void OnlyAControlAdded_IsRemoved_AndOnceOnly()
     {
         var form = Form();
-        var button = form.AddControl("VB.CommandButton", "cmdNew");
+        var button = form.AddControl("RDForms.CommandButton", "cmdNew");
         form.RemoveControl(button);
 
         Assert.AreEqual(730, Error(() => form.RemoveControl("cmdNew")));
@@ -131,7 +133,7 @@ public sealed class RunTimeControlTests
     public void AContainerAddedThatHoldsAControlOfTheFormsFile_Is740_AndNothingIsRemoved()
     {
         var form = Form();
-        var frame = form.AddControl("VB.Frame", "fraX");
+        var frame = form.AddControl("RDForms.Frame", "fraX");
         var command = form.Find("Command1")!;
         command.SetContainer(frame);
 
@@ -148,9 +150,9 @@ public sealed class RunTimeControlTests
     public void ANameRemoved_CanBeAddedAgain()
     {
         var form = Form();
-        form.RemoveControl(form.AddControl("VB.CommandButton", "cmdNew"));
+        form.RemoveControl(form.AddControl("RDForms.CommandButton", "cmdNew"));
 
-        var again = form.AddControl("VB.CommandButton", "cmdNew");
+        var again = form.AddControl("RDForms.CommandButton", "cmdNew");
 
         Assert.IsTrue(form.IsAddedAtRunTime(again));
         Assert.AreEqual((short)2, again.Get(P.TabIndex));

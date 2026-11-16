@@ -23,7 +23,7 @@ public enum ComponentKind
 }
 
 /// <summary>
-/// The metadata of a component class, such as VB's <c>VB.CommandButton</c>: its type name, the properties and events it
+/// The metadata of a component class, such as <c>RDForms.CommandButton</c>: its type name, the properties and events it
 /// has, and how it sits on a form.
 /// </summary>
 /// <remarks>
@@ -41,7 +41,7 @@ public sealed class ComponentClass
     /// <summary>
     /// Creates a component class.
     /// </summary>
-    /// <param name="typeName">The class's qualified type name, such as <c>VB.CommandButton</c>.</param>
+    /// <param name="typeName">The class's qualified type name, such as <c>RDForms.CommandButton</c>.</param>
     /// <param name="defaultName">The name a designer gives the first instance it adds, less its number, such as <c>Command</c>.</param>
     /// <param name="kind">What the class is to the form that holds it.</param>
     /// <param name="properties">The class's properties, in the order a designer lists them.</param>
@@ -133,7 +133,7 @@ public sealed class ComponentClass
     }
 
     /// <summary>
-    /// The class's qualified type name, such as <c>VB.CommandButton</c>.
+    /// The class's qualified type name, such as <c>RDForms.CommandButton</c>.
     /// </summary>
     public string TypeName { get; }
 

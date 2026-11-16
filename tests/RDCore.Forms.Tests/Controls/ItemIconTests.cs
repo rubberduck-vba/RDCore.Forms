@@ -35,14 +35,14 @@ public sealed class ItemIconTests
     }
 
     [TestMethod]
-    [DataRow("VB.ListBox")]
-    [DataRow("VB.ComboBox")]
+    [DataRow("RDForms.ListBox")]
+    [DataRow("RDForms.ComboBox")]
     public void AddItemRemoveItemAndClear_KeepItemDataAndItemIconInStepWithTheItems(string className)
     {
         byte[][] pictures = [Gif1x1, Bitmap2x2];
         var (added, removed, cleared, data, icon) = UI.Run(() =>
         {
-            var isList = className == "VB.ListBox";
+            var isList = className == "RDForms.ListBox";
             var instance = new ComponentInstance(isList ? VBClasses.ListBox : VBClasses.ComboBox, "List1")
                 .Set(P.List, ["b", "c"]).Set(P.ItemData, [7, 8]).Set(P.ItemIcon, [pictures[0], pictures[1]]);
             Control control = isList ? new VBListBox(instance) : new VBComboBox(instance);

@@ -35,8 +35,8 @@ public sealed class GraphicalButtonTests
 
     private static Control Make(ComponentInstance instance) => instance.Class.TypeName switch
     {
-        "VB.CommandButton" => new VBCommandButton(instance),
-        "VB.CheckBox" => new VBCheckBox(instance),
+        "RDForms.CommandButton" => new VBCommandButton(instance),
+        "RDForms.CheckBox" => new VBCheckBox(instance),
         _ => new VBOptionButton(instance),
     };
 
@@ -82,9 +82,9 @@ public sealed class GraphicalButtonTests
     private static readonly Rect Cell = new(10, 10, 100, 60);
 
     [TestMethod]
-    [DataRow("VB.CommandButton")]
-    [DataRow("VB.CheckBox")]
-    [DataRow("VB.OptionButton")]
+    [DataRow("RDForms.CommandButton")]
+    [DataRow("RDForms.CheckBox")]
+    [DataRow("RDForms.OptionButton")]
     public void AStandardButton_DrawsNoPicture(string type)
     {
         var red = UI.Run(() =>
@@ -118,9 +118,9 @@ public sealed class GraphicalButtonTests
     }
 
     [TestMethod]
-    [DataRow("VB.CommandButton")]
-    [DataRow("VB.CheckBox")]
-    [DataRow("VB.OptionButton")]
+    [DataRow("RDForms.CommandButton")]
+    [DataRow("RDForms.CheckBox")]
+    [DataRow("RDForms.OptionButton")]
     public void AGraphicalButton_CentresItsPictureAcross_AboveItsCaption_AtTheBottom(string type)
     {
         var (red, caption) = UI.Run(() =>
@@ -324,9 +324,9 @@ public sealed class GraphicalButtonTests
         Button(type, ButtonStyle.Graphical, caption: "").Set(P.BackColor, Yellow).Set(P.Picture, picture).Set(P.UseMaskColor, useMaskColor);
 
     [TestMethod]
-    [DataRow("VB.CommandButton")]
-    [DataRow("VB.CheckBox")]
-    [DataRow("VB.OptionButton")]
+    [DataRow("RDForms.CommandButton")]
+    [DataRow("RDForms.CheckBox")]
+    [DataRow("RDForms.OptionButton")]
     public void UseMaskColor_LeavesTheMaskColorOutOfThePicture_SilverByDefault(string type)
     {
         var (masked, unmasked) = UI.Run(() =>

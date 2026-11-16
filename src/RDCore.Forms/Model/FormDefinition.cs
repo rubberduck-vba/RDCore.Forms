@@ -116,8 +116,8 @@ public sealed class FormDefinition
     }
 
     /// <summary>
-    /// Adds a control of a VB class to the form, as a program's <c>Controls.Add</c> does: the class named by its ProgID, such as
-    /// <c>VB.CommandButton</c>, without regard to case.
+    /// Adds a control of an RDForms class to the form, as a program's <c>Controls.Add</c> does: the class named by its ProgID, such
+    /// as <c>RDForms.CommandButton</c>, without regard to case.
     /// </summary>
     /// <param name="progId">The class's ProgID.</param>
     /// <param name="name">The control's name.</param>
@@ -125,7 +125,7 @@ public sealed class FormDefinition
     /// places it in the root.</param>
     /// <returns>The control added.</returns>
     /// <exception cref="FormErrorException">
-    /// No VB class has that ProgID: 711, Invalid class string. Otherwise as
+    /// No RDForms class has that ProgID: 711, Invalid class string. Otherwise as
     /// <see cref="AddControl(ComponentClass, string, ComponentInstance?)"/>.
     /// </exception>
     /// <exception cref="ArgumentException"><paramref name="container"/> is not a component of this form.</exception>
