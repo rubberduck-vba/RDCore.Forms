@@ -45,4 +45,7 @@
   <data name="CoordinatesConverted" xml:space="preserve">
     <value>Le portage reconvertit X et Y dans l'unité d'origine avec {0} sur les premières lignes de ce gestionnaire : réécrivez le gestionnaire en DIP et retirez ces lignes.</value>
   </data>
+  <data name="ScrollBarTypeNameChanged" xml:space="preserve">
+    <value>Ce contrôle est un {0} après le portage, donc son TypeName n'est plus ScrollBar : comparez-le avec {0}.</value>
+  </data>
 </root>

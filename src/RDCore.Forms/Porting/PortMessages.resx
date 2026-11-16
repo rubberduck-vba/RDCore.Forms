@@ -45,4 +45,7 @@
   <data name="CoordinatesConverted" xml:space="preserve">
     <value>The port converts X and Y back to the legacy unit with {0} on this handler's first lines: rewrite the handler in DIP and remove them.</value>
   </data>
+  <data name="ScrollBarTypeNameChanged" xml:space="preserve">
+    <value>This control is a {0} after the port, so its TypeName is no longer ScrollBar: compare it with {0}.</value>
+  </data>
 </root>

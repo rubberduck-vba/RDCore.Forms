@@ -35,10 +35,10 @@ internal static class VB6PortData
         .. Place.Select(m => Member("MDIForm", m, m, Length)),
         .. new[] { "X1", "Y1", "X2", "Y2" }.Select(m => Member("Line", m, m, ContainerLength)),
 
-        // Appearance's 3-D edge is SpecialEffect's sunken one.
+        // Appearance's 3-D edge is SpecialEffect's sunken one. VB6's VB and VBRUN libraries name no constant of its values.
         Member(Extender, "Appearance", "SpecialEffect", None, new ValuePort(
             new Dictionary<object, object> { [0] = 0, [1] = 2 },
-            new Dictionary<string, string> { ["vbAppearFlat"] = "0", ["vbAppear3d"] = "2" })),
+            new Dictionary<string, string>())),
 
         // An Image's Stretch is PictureSizeMode's clip or stretch.
         Member("Image", "Stretch", "PictureSizeMode", None, new ValuePort(

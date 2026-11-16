@@ -22,6 +22,7 @@ public sealed class PortDiagnosticTests
         PortDiagnosticKind.ScrollBarReference => PortDiagnostic.ScrollBarReference(),
         PortDiagnosticKind.UnitWrapped => PortDiagnostic.UnitWrapped("FromTwips"),
         PortDiagnosticKind.CoordinatesConverted => PortDiagnostic.CoordinatesConverted("ToPoints"),
+        PortDiagnosticKind.ScrollBarTypeNameChanged => PortDiagnostic.ScrollBarTypeNameChanged("RDForms.HScrollBar"),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
     };
 
@@ -64,6 +65,7 @@ public sealed class PortDiagnosticTests
     [DataRow(PortDiagnosticKind.ScrollBarReference, PortDiagnosticSeverity.Warning)]
     [DataRow(PortDiagnosticKind.UnitWrapped, PortDiagnosticSeverity.Hint)]
     [DataRow(PortDiagnosticKind.CoordinatesConverted, PortDiagnosticSeverity.Hint)]
+    [DataRow(PortDiagnosticKind.ScrollBarTypeNameChanged, PortDiagnosticSeverity.Warning)]
     public void EveryKind_HasItsSeverity(PortDiagnosticKind kind, PortDiagnosticSeverity severity)
     {
         Assert.AreEqual(severity, PortDiagnostic.SeverityOf(kind));

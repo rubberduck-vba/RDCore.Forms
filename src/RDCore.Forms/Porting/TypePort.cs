@@ -88,4 +88,12 @@ public sealed record OrientationPort(string Horizontal, string Vertical)
         Auto => width > height ? Horizontal : Vertical,
         _ => null,
     };
+
+    /// <summary>
+    /// What the code port reports at a <c>TypeName</c> or <c>TypeOf ... Is</c> comparison on a control ported to one of the two
+    /// classes, whose type name is no longer the legacy class's.
+    /// </summary>
+    /// <param name="rdFormsName">The control's RDForms class: <see cref="Horizontal"/> or <see cref="Vertical"/>.</param>
+    /// <returns>The diagnostic.</returns>
+    public PortDiagnostic TypeNameChanged(string rdFormsName) => PortDiagnostic.ScrollBarTypeNameChanged(rdFormsName);
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using RDCore.Forms.Model.VB;
 using RDCore.Forms.Porting;
 
@@ -119,6 +120,16 @@ public sealed class FormsPortMapTests
         Assert.AreEqual("RDForms.HScrollBar", port.ByOrientation.Horizontal);
         Assert.AreEqual("RDForms.VScrollBar", port.ByOrientation.Vertical);
         Assert.AreEqual(PortDiagnosticKind.ScrollBarReference, port.Diagnostic?.Kind);
+    }
+
+    // TypeName(x) = "ScrollBar" is False once x is an RDForms.HScrollBar: the port reports the comparison, naming the class
+    [TestMethod]
+    public void ATypeComparisonOnAPortedScrollBar_IsAWarningNamingItsClass()
+    {
+        var diagnostic = MSForms.TypeOf("ScrollBar")!.ByOrientation!.TypeNameChanged("RDForms.HScrollBar");
+
+        Assert.AreEqual(("RDC40012", PortDiagnosticSeverity.Warning), (diagnostic.Code, diagnostic.Severity));
+        StringAssert.Contains(diagnostic.MessageIn(CultureInfo.GetCultureInfo("en-CA")), "RDForms.HScrollBar");
     }
 
     [TestMethod]

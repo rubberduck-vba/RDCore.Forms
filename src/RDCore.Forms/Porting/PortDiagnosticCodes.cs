@@ -19,6 +19,7 @@ internal static class PortDiagnosticCodes
         [PortDiagnosticKind.ScrollBarReference] = ("RDC40009", Warning),
         [PortDiagnosticKind.UnitWrapped] = ("RDC40010", Hint),
         [PortDiagnosticKind.CoordinatesConverted] = ("RDC40011", Hint),
+        [PortDiagnosticKind.ScrollBarTypeNameChanged] = ("RDC40012", Warning),
     };
 
     public static string CodeOf(PortDiagnosticKind kind) => Table[kind].Code;

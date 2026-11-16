@@ -69,6 +69,12 @@ public enum PortDiagnosticKind
     /// A handler the code port gave two first lines converting <c>X</c> and <c>Y</c> back to the legacy unit.
     /// </summary>
     CoordinatesConverted,
+
+    /// <summary>
+    /// A <c>TypeName</c> or <c>TypeOf ... Is</c> comparison on a control ported from MSForms' <c>ScrollBar</c>: the control is an
+    /// <c>RDForms.HScrollBar</c> or an <c>RDForms.VScrollBar</c>, so <c>TypeName(x) = "ScrollBar"</c> is <c>False</c> after the port.
+    /// </summary>
+    ScrollBarTypeNameChanged,
 }
 
 /// <summary>
@@ -238,6 +244,14 @@ public sealed record PortDiagnostic
     /// <param name="function">The <c>RDForms.Units</c> function the lines call, such as <c>ToPoints</c>.</param>
     /// <returns>The diagnostic.</returns>
     public static PortDiagnostic CoordinatesConverted(string function) => new(PortDiagnosticKind.CoordinatesConverted, function);
+
+    /// <summary>
+    /// A type comparison on a ported ScrollBar: <see cref="PortDiagnosticKind.ScrollBarTypeNameChanged"/>.
+    /// </summary>
+    /// <param name="rdFormsName">The control's RDForms class, such as <c>RDForms.HScrollBar</c>.</param>
+    /// <returns>The diagnostic.</returns>
+    public static PortDiagnostic ScrollBarTypeNameChanged(string rdFormsName) =>
+        new(PortDiagnosticKind.ScrollBarTypeNameChanged, rdFormsName);
 
     /// <summary>
     /// Whether another diagnostic is of the same kind, with the same arguments.

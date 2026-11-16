@@ -75,8 +75,8 @@ public sealed class ValuePortTests
     {
         AssertConverts(Appearance, 0, 0);
         AssertConverts(Appearance, 1, 2);
-        Assert.AreEqual("0", Appearance.Constants["vbAppearFlat"]);
-        Assert.AreEqual("2", Appearance.Constants["vbAppear3d"]);
+        // VB6's VB and VBRUN libraries name no constant of Appearance's values, so a program writes 0 and 1.
+        Assert.IsEmpty(Appearance.Constants);
     }
 
     [TestMethod]
