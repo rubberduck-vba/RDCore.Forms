@@ -1,5 +1,5 @@
 using System.Globalization;
-using RDCore.Forms.Model.VB;
+using RDCore.Forms.Model;
 using RDCore.Forms.Porting;
 
 namespace RDCore.Forms.Tests.Porting;
@@ -26,14 +26,14 @@ public sealed class FormsPortMapTests
     // Types
 
     [TestMethod]
-    public void EveryVBClassOfTheModel_PortsToTheRDFormsClassOfItsName()
+    public void EveryClassOfTheModel_IsTheRDFormsClassItsVBClassPortsTo()
     {
-        foreach (var vbClass in VBClasses.All)
+        foreach (var rdFormsClass in ComponentClasses.All)
         {
-            var name = vbClass.TypeName["VB.".Length..];
-            var port = VB6.TypeOf(vbClass.TypeName);
-            Assert.IsNotNull(port, vbClass.TypeName);
-            Assert.AreEqual("RDForms." + name, port.RDFormsName);
+            var name = rdFormsClass.TypeName["RDForms.".Length..];
+            var port = VB6.TypeOf("VB." + name);
+            Assert.IsNotNull(port, rdFormsClass.TypeName);
+            Assert.AreEqual(rdFormsClass.TypeName, port.RDFormsName);
             Assert.AreEqual(TypePortKind.Class, port.Kind);
             Assert.AreEqual("VB", port.LegacyLibrary);
             Assert.AreEqual(name, port.LegacyName);
