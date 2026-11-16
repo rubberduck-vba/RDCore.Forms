@@ -1,6 +1,6 @@
 # Form events
 
-A [`VBFormWindow`](../api/RDCore.Forms.Avalonia.Rendering.VBFormWindow.yml) raises its root's own events to the window's sink, in the order VB6 raises them (measured with VB6).
+A [`RDFormsFormWindow`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormWindow.yml) raises its root's own events to the window's sink, in the order VB6 raises them (measured with VB6).
 
 Initialize, Load and Terminate are the program's: the window raises none of them. A program raises Initialize and Load before it shows the window.
 
@@ -31,7 +31,7 @@ Each form keeps the control that last had the focus on it: that control takes th
 |Situation|Raised|
 |---|---|
 |The user clicks the close box|QueryUnload with an `UnloadMode` of 0, then Unload.|
-|[`Unload`](../api/RDCore.Forms.Avalonia.Rendering.VBFormWindow.yml) is called, as VB's `Unload` statement|QueryUnload with an `UnloadMode` of 1, then Unload. It returns whether the form unloaded.|
+|[`Unload`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormWindow.yml) is called, as VB's `Unload` statement|QueryUnload with an `UnloadMode` of 1, then Unload. It returns whether the form unloaded.|
 |`Close` is called, as VB's `End` closes a form|Nothing.|
 |`Unload` is called from the root's own QueryUnload or Unload|Nothing: it returns False and the unload goes on.|
 

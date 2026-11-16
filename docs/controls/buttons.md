@@ -6,7 +6,7 @@ The behaviour below was measured with VB6.
 
 ## CommandButton
 
-[`VBCommandButton`](../api/RDCore.Forms.Avalonia.Controls.VBCommandButton.yml)
+[`RDFormsCommandButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsCommandButton.yml)
 
 - Click comes before MouseUp.
 - An arrow key moves the focus to the previous or next control in its container, and raises no key event.
@@ -28,7 +28,7 @@ A CommandButton has no `ForeColor`, as in VB6, where a program's read or assignm
 
 ## CheckBox
 
-[`VBCheckBox`](../api/RDCore.Forms.Avalonia.Controls.VBCheckBox.yml)
+[`RDFormsCheckBox`](../api/RDCore.Forms.Avalonia.Controls.RDFormsCheckBox.yml)
 
 |Case|Behaviour|
 |---|---|
@@ -40,7 +40,7 @@ A CommandButton has no `ForeColor`, as in VB6, where a program's read or assignm
 
 ## OptionButton
 
-[`VBOptionButton`](../api/RDCore.Forms.Avalonia.Controls.VBOptionButton.yml)
+[`RDFormsOptionButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsOptionButton.yml)
 
 The option buttons in one container are a group: selecting one clears the others.
 

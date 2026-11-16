@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Xml;
 using RDCore.Forms.Model;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Xaml;
 

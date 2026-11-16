@@ -4,7 +4,7 @@ Frame and PictureBox hold controls; PictureBox and Image draw pictures. The thre
 
 ## Frame
 
-[`VBFrame`](../api/RDCore.Forms.Avalonia.Controls.VBFrame.yml)
+[`RDFormsFrame`](../api/RDCore.Forms.Avalonia.Controls.RDFormsFrame.yml)
 
 - An etched edge runs through the middle of the caption's line, and the caption paints its own background over it.
 - Its background covers the whole control.
@@ -12,7 +12,7 @@ Frame and PictureBox hold controls; PictureBox and Image draw pictures. The thre
 
 ## PictureBox
 
-[`VBPictureBox`](../api/RDCore.Forms.Avalonia.Controls.VBPictureBox.yml)
+[`RDFormsPictureBox`](../api/RDCore.Forms.Avalonia.Controls.RDFormsPictureBox.yml)
 
 - Its border is a sunken edge when 3-D, and one pixel when flat. The controls it holds are placed inside the border, from its client origin.
 - Its `Picture` is drawn at its own size in pixels from the client origin, clipped, under the controls it holds.
@@ -26,7 +26,7 @@ Its key events are RDForms' own, not measured with VB6. With the focus, it raise
 
 ## Image
 
-[`VBImage`](../api/RDCore.Forms.Avalonia.Controls.VBImage.yml) is windowless: it takes no focus, and it is under every windowed control in its container.
+[`RDFormsImage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsImage.yml) is windowless: it takes no focus, and it is under every windowed control in its container.
 
 - Its single border is a sunken edge.
 - Its `Picture` is drawn inside its border: stretched over the whole of it where `Stretch` is set, and otherwise at its own size in pixels from the top left corner, clipped.
@@ -63,7 +63,7 @@ It raises Resize whether or not it or its form is shown.
 
 ## An aligned PictureBox
 
-A PictureBox on the form itself whose `Align` is set is docked to that edge of the form's client area, as measured with VB6. [`AlignLayout`](../api/RDCore.Forms.Model.VB.AlignLayout.yml) lays the boxes out. A Data control and an `Alignable` [UserControl](usercontrols.md) are docked by the same rules.
+A PictureBox on the form itself whose `Align` is set is docked to that edge of the form's client area, as measured with VB6. [`AlignLayout`](../api/RDCore.Forms.Model.AlignLayout.yml) lays the boxes out. A Data control and an `Alignable` [UserControl](usercontrols.md) are docked by the same rules.
 
 - The top and bottom boxes are laid out first, each across the form's whole width. The left and right boxes then take the height between them.
 - On each edge, the box nearest the edge is the last one in the form's file, whatever its `TabIndex`, and `ZOrder` does not change it. A box aligned at run time, or added by a program and aligned, goes inside the others.
@@ -73,7 +73,7 @@ A PictureBox on the form itself whose `Align` is set is docked to that edge of t
 - A box in a Frame or in another PictureBox is not aligned: its `Align` reads 0 whatever its file says, and a program's assignment leaves it so.
 - On an MDI form, a box is aligned to the top unless its file says otherwise, and an assignment of 0 to its `Align` leaves it as it was.
 
-A program's assignments to an aligned box, through [`VBRunTime.Assign`](../api/RDCore.Forms.Model.VB.VBRunTime.yml):
+A program's assignments to an aligned box, through [`RunTime.Assign`](../api/RDCore.Forms.Model.RunTime.yml):
 
 |Assignment|Top or bottom box|Left or right box|
 |---|---|---|
@@ -112,7 +112,7 @@ Before anything decodes a picture, [`FormPictures.Inspect`](../api/RDCore.Forms.
 
 A picture whose header passes is drawn with the pixels the RDCore SDK's `PictureDecoder` decodes, alpha included, from the picture `LoadPicture` makes of the same bytes. A form draws the same pixels that `SavePicture` writes, and refuses no picture that `LoadPicture` loads and whose pixels the SDK decodes. An icon or a cursor draws the image `LoadPicture` loads when it is asked for no size: its 32 by 32 image of the most bits per pixel, or its first image where it has none of that size.
 
-A refused picture is error 481, "Invalid picture". So is one that `LoadPicture` refuses, and one whose pixels the SDK does not decode. It is not drawn, the form still shows, and the control's `PictureError` holds the error. [`VBPicture.Decode`](../api/RDCore.Forms.Avalonia.Controls.VBPicture.yml) decodes a picture the same way for other uses.
+A refused picture is error 481, "Invalid picture". So is one that `LoadPicture` refuses, and one whose pixels the SDK does not decode. It is not drawn, the form still shows, and the control's `PictureError` holds the error. [`RDFormsPicture.Decode`](../api/RDCore.Forms.Avalonia.Controls.RDFormsPicture.yml) decodes a picture the same way for other uses.
 
 The controls given the same bytes share one decode, as VB shares one picture object between the controls it is set on. The bytes are decoded once for any number of controls, and again only after none of them holds them.
 

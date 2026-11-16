@@ -2,9 +2,8 @@
 using System.Xml;
 using System.Xml.Linq;
 using RDCore.Forms.Model;
-using RDCore.Forms.Model.VB;
 using K = RDCore.Forms.Xaml.FormXamlDiagnosticKind;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Xaml;
 
@@ -326,7 +325,7 @@ internal sealed class FormXamlReader(FormXamlDiagnosticBag diagnostics)
 
     // A class of the catalog, by its name without its library, such as CommandButton.
     private static ComponentClass? ClassOf(string name) =>
-        name.Contains('.') ? null : VBClasses.ByTypeName("RDForms." + name) is { } found && found.ClassName == name ? found : null;
+        name.Contains('.') ? null : ComponentClasses.ByTypeName("RDForms." + name) is { } found && found.ClassName == name ? found : null;
 
     private static int LineOf(XObject element) => element is IXmlLineInfo info && info.HasLineInfo() ? info.LineNumber : 0;
 }

@@ -1,6 +1,5 @@
 ﻿using RDCore.Forms.Model;
-using RDCore.Forms.Model.VB;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Tests.Model;
 
@@ -11,9 +10,9 @@ public sealed class RunTimeControlTests
 {
     private static FormDefinition Form()
     {
-        var root = new ComponentInstance(VBClasses.Form, "Form1");
-        new ComponentInstance(VBClasses.Frame, "Frame1").Set(P.TabIndex, (short)1).SetContainer(root);
-        new ComponentInstance(VBClasses.CommandButton, "Command1").Set(P.TabIndex, (short)0).SetContainer(root);
+        var root = new ComponentInstance(ComponentClasses.Form, "Form1");
+        new ComponentInstance(ComponentClasses.Frame, "Frame1").Set(P.TabIndex, (short)1).SetContainer(root);
+        new ComponentInstance(ComponentClasses.CommandButton, "Command1").Set(P.TabIndex, (short)0).SetContainer(root);
         return new FormDefinition(root);
     }
 
@@ -30,7 +29,7 @@ public sealed class RunTimeControlTests
 
         var added = form.AddControl("rdforms.commandbutton", "cmdNew");
 
-        Assert.AreSame(VBClasses.CommandButton, added.Class);
+        Assert.AreSame(ComponentClasses.CommandButton, added.Class);
         Assert.IsFalse(added.Get(P.Visible));
         Assert.AreEqual((0d, 0d, 80d, 32d), (added.Get(P.Left), added.Get(P.Top), added.Get(P.Width), added.Get(P.Height)));
         Assert.AreEqual((short)2, added.Get(P.TabIndex));
@@ -46,7 +45,7 @@ public sealed class RunTimeControlTests
     {
         var form = Form();
         form.Find("Frame1")!.SetContainer(form.Root, 0);
-        new ComponentInstance(VBClasses.OptionButton, "Option1").SetContainer(form.Find("Frame1")!);
+        new ComponentInstance(ComponentClasses.OptionButton, "Option1").SetContainer(form.Find("Frame1")!);
 
         form.AddControl("RDForms.CommandButton", "cmdNew");
         var inFrame = form.AddControl("RDForms.CommandButton", "cmdIn", form.Find("Frame1"));
@@ -86,7 +85,7 @@ public sealed class RunTimeControlTests
         Assert.AreEqual(720, Error(() => form.AddControl("RDForms.Menu", "mnuNew")));
         Assert.AreEqual(720, Error(() => form.AddControl("RDForms.Form", "frmNew")));
         Assert.AreEqual(721, Error(() => form.AddControl("RDForms.CommandButton", "cmdIn2", button)));
-        Assert.ThrowsExactly<ArgumentException>(() => form.AddControl("RDForms.CommandButton", "cmdIn3", new ComponentInstance(VBClasses.Frame, "Other")));
+        Assert.ThrowsExactly<ArgumentException>(() => form.AddControl("RDForms.CommandButton", "cmdIn3", new ComponentInstance(ComponentClasses.Frame, "Other")));
 
         Assert.AreEqual(3, form.Controls.Count);
         Assert.AreEqual(0, raised);

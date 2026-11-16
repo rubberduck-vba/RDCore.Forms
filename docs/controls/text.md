@@ -4,7 +4,7 @@ Label and TextBox. The behaviour below was measured with VB6.
 
 ## Label
 
-[`VBLabel`](../api/RDCore.Forms.Avalonia.Controls.VBLabel.yml) is windowless: it takes no focus, and it is under every windowed control in its container.
+[`RDFormsLabel`](../api/RDCore.Forms.Avalonia.Controls.RDFormsLabel.yml) is windowless: it takes no focus, and it is under every windowed control in its container.
 
 |Property|Behaviour|
 |---|---|
@@ -39,7 +39,7 @@ A Label's `Picture` and `PicturePosition` are an RD-VBA addition: VB6's Label ha
 
 ## TextBox
 
-[`VBTextBox`](../api/RDCore.Forms.Avalonia.Controls.VBTextBox.yml)
+[`RDFormsTextBox`](../api/RDCore.Forms.Avalonia.Controls.RDFormsTextBox.yml)
 
 |Case|Behaviour|
 |---|---|

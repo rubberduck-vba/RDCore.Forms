@@ -1,7 +1,7 @@
 ﻿// Derived from HexIDE (https://github.com/hexide-io/HexIDE), commit ae17f1db.
 // Copyright (c) 2024 Bartosz Korczyński. Copyright (c) 2026 The HexIDE Authors. MIT License; see NOTICE.md.
 
-using RDCore.Forms.Model.VB;
+using RDCore.Forms.Model;
 
 namespace RDCore.Forms.Model;
 
@@ -132,7 +132,7 @@ public sealed class FormDefinition
     public ComponentInstance AddControl(string progId, string name, ComponentInstance? container = null)
     {
         ArgumentNullException.ThrowIfNull(progId);
-        var type = VBClasses.All.FirstOrDefault(c => string.Equals(c.TypeName, progId, StringComparison.OrdinalIgnoreCase))
+        var type = ComponentClasses.All.FirstOrDefault(c => string.Equals(c.TypeName, progId, StringComparison.OrdinalIgnoreCase))
                    ?? throw new FormErrorException(FormError.InvalidClassString(progId));
         return AddControl(type, name, container);
     }
@@ -177,12 +177,12 @@ public sealed class FormDefinition
         if (!container.Class.IsContainer)
             throw new FormErrorException(FormError.NotAValidControlContainer(container.Class.ClassName));
         var control = new ComponentInstance(type, name);
-        if (type.Has(VBProperties.Visible))
-            control.Set(VBProperties.Visible, false);
+        if (type.Has(Properties.Visible))
+            control.Set(Properties.Visible, false);
         if (type.HasExtent)
-            control.Set(VBProperties.Width, 80d).Set(VBProperties.Height, 32d);
-        if (type.Has(VBProperties.TabIndex))
-            control.Set(VBProperties.TabIndex, (short)Root.Descendants().Count(c => c.Class.Has(VBProperties.TabIndex)));
+            control.Set(Properties.Width, 80d).Set(Properties.Height, 32d);
+        if (type.Has(Properties.TabIndex))
+            control.Set(Properties.TabIndex, (short)Root.Descendants().Count(c => c.Class.Has(Properties.TabIndex)));
         control.SetContainer(container);
         added.Add(control);
         ControlAdded?.Invoke(this, new FormControlEventArgs(control, container));
@@ -230,13 +230,13 @@ public sealed class FormDefinition
         control.SetContainer(null);
         foreach (var component in removed)
             added.Remove(component);
-        var freed = removed.Where(c => c.Class.Has(VBProperties.TabIndex)).Select(c => c.Get(VBProperties.TabIndex)).ToList();
-        foreach (var other in Root.Descendants().Where(c => c.Class.Has(VBProperties.TabIndex)))
+        var freed = removed.Where(c => c.Class.Has(Properties.TabIndex)).Select(c => c.Get(Properties.TabIndex)).ToList();
+        foreach (var other in Root.Descendants().Where(c => c.Class.Has(Properties.TabIndex)))
         {
-            var tabIndex = other.Get(VBProperties.TabIndex);
+            var tabIndex = other.Get(Properties.TabIndex);
             var below = freed.Count(f => f < tabIndex);
             if (below > 0)
-                other.Set(VBProperties.TabIndex, (short)(tabIndex - below));
+                other.Set(Properties.TabIndex, (short)(tabIndex - below));
         }
         ControlRemoved?.Invoke(this, new FormControlEventArgs(control, container));
     }

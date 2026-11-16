@@ -3,8 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Input;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
-using RDCore.Forms.Model.VB;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using P = RDCore.Forms.Model.Properties;
 using UI = RDCore.Forms.Tests.Headless.Headless;
 
 namespace RDCore.Forms.Tests.Controls;
@@ -17,8 +16,8 @@ public sealed class TextControlTests
     {
         var (text, raised) = UI.Run(() =>
         {
-            var instance = new ComponentInstance(VBClasses.TextBox, "Text1");
-            var box = new VBTextBox(instance);
+            var instance = new ComponentInstance(ComponentClasses.TextBox, "Text1");
+            var box = new RDFormsTextBox(instance);
             var (window, sink) = ControlHost.Show(box);
             box.Focus();
             window.KeyTextInput("ab");
@@ -40,12 +39,12 @@ public sealed class TextControlTests
     {
         var text = UI.Run(() =>
         {
-            var instance = new ComponentInstance(VBClasses.TextBox, "Text1");
-            var box = new VBTextBox(instance);
+            var instance = new ComponentInstance(ComponentClasses.TextBox, "Text1");
+            var box = new RDFormsTextBox(instance);
             var (window, sink) = ControlHost.Show(box);
             sink.Handler = (_, definition, arguments) =>
             {
-                if (ReferenceEquals(definition, VBEvents.KeyPress))
+                if (ReferenceEquals(definition, Events.KeyPress))
                     arguments[0] = FormValue.FromInteger(arguments[0].AsInteger() == 'x' ? (short)0 : (short)char.ToUpperInvariant((char)arguments[0].AsInteger()));
             };
             box.Focus();
@@ -62,8 +61,8 @@ public sealed class TextControlTests
     {
         var (shown, raised) = UI.Run(() =>
         {
-            var instance = new ComponentInstance(VBClasses.TextBox, "Text1");
-            var box = new VBTextBox(instance);
+            var instance = new ComponentInstance(ComponentClasses.TextBox, "Text1");
+            var box = new RDFormsTextBox(instance);
             var (window, sink) = ControlHost.Show(box);
             instance.Set(P.Text, "set by code");
             instance.Set(P.Text, "set by code");
@@ -80,7 +79,7 @@ public sealed class TextControlTests
     {
         var raised = UI.Run(() =>
         {
-            var box = new VBTextBox(new ComponentInstance(VBClasses.TextBox, "Text1"));
+            var box = new RDFormsTextBox(new ComponentInstance(ComponentClasses.TextBox, "Text1"));
             var (window, sink) = ControlHost.Show(box);
             box.Focus();
             window.KeyPress(Key.Left, RawInputModifiers.Shift, PhysicalKey.ArrowLeft, null);
@@ -96,7 +95,7 @@ public sealed class TextControlTests
     [TestMethod]
     public void ALockedBox_IsReadOnly()
     {
-        var readOnly = UI.Run(() => new VBTextBox(new ComponentInstance(VBClasses.TextBox, "Text1").Set(P.Locked, true)).IsReadOnly);
+        var readOnly = UI.Run(() => new RDFormsTextBox(new ComponentInstance(ComponentClasses.TextBox, "Text1").Set(P.Locked, true)).IsReadOnly);
 
         Assert.IsTrue(readOnly);
     }
@@ -106,8 +105,8 @@ public sealed class TextControlTests
     {
         var (with, without) = UI.Run(() =>
         {
-            var with = new VBLabel(new ComponentInstance(VBClasses.Label, "Label1").Set(P.Caption, "E&xit"));
-            var without = new VBLabel(new ComponentInstance(VBClasses.Label, "Label2").Set(P.Caption, "E&xit").Set(P.UseMnemonic, false));
+            var with = new RDFormsLabel(new ComponentInstance(ComponentClasses.Label, "Label1").Set(P.Caption, "E&xit"));
+            var without = new RDFormsLabel(new ComponentInstance(ComponentClasses.Label, "Label2").Set(P.Caption, "E&xit").Set(P.UseMnemonic, false));
             return (with.DrawnText, without.DrawnText);
         });
 
@@ -120,7 +119,7 @@ public sealed class TextControlTests
     {
         var raised = UI.Run(() =>
         {
-            var (window, sink) = ControlHost.Show(new VBLabel(new ComponentInstance(VBClasses.Label, "Label1")));
+            var (window, sink) = ControlHost.Show(new RDFormsLabel(new ComponentInstance(ComponentClasses.Label, "Label1")));
             window.MouseDown(new Point(20, 10), MouseButton.Left);
             window.MouseUp(new Point(20, 10), MouseButton.Left);
             // Far from the first press, so that it is no double click's second.

@@ -21,14 +21,14 @@ Both controls have the same members for their items:
 **RD-VBA addition.** An item's icon is drawn before its text, scaled to fit a square as tall as the text. Where any item has an icon, every item's text starts after that square, so that the text lines up. An icon is any picture a [PictureBox can draw](containers.md#pictures); a metafile icon is not drawn.
 
 ```csharp
-var list = new VBListBox(new ComponentInstance(VBClasses.ListBox, "List1"));
+var list = new RDFormsListBox(new ComponentInstance(ComponentClasses.ListBox, "List1"));
 list.AddItem("Open");
 list.SetItemIcon(0, File.ReadAllBytes("open.png"));
 ```
 
 ## ListBox
 
-[`VBListBox`](../api/RDCore.Forms.Avalonia.Controls.VBListBox.yml)
+[`RDFormsListBox`](../api/RDCore.Forms.Avalonia.Controls.RDFormsListBox.yml)
 
 |Case|Behaviour|
 |---|---|
@@ -63,7 +63,7 @@ A ListBox's rows are a line of its font high, as a [Simple Combo's](#simple-comb
 
 ## ComboBox
 
-[`VBComboBox`](../api/RDCore.Forms.Avalonia.Controls.VBComboBox.yml)
+[`RDFormsComboBox`](../api/RDCore.Forms.Avalonia.Controls.RDFormsComboBox.yml)
 
 |Style|Behaviour|
 |---|---|

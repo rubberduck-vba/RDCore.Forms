@@ -5,7 +5,7 @@
 /// </summary>
 /// <remarks>
 /// The definition describes the call. What the method does is the form's: a shown form's window runs it (see
-/// <c>VBFormWindow.Invoke</c> in RDCore.Forms.Avalonia).
+/// <c>RDFormsFormWindow.Invoke</c> in RDCore.Forms.Avalonia).
 /// </remarks>
 public sealed class MethodDefinition
 {

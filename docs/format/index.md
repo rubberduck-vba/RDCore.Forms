@@ -28,7 +28,7 @@ Every element is in the namespace `https://rubberduckvba.ca/schemas/rdforms`.
 |Element|Is|Holds|
 |---|---|---|
 |`Form`, `MDIForm`, `UserControl`, `PropertyPage`|The root: the form itself. Only the root has `FormatVersion`.|The form's components, and its property elements.|
-|A control class, such as `CommandButton` or `Frame`|A component of that class of [`VBClasses`](../api/RDCore.Forms.Model.VB.VBClasses.yml).|The components placed in it, where its class is a container, and its property elements.|
+|A control class, such as `CommandButton` or `Frame`|A component of that class of [`ComponentClasses`](../api/RDCore.Forms.Model.ComponentClasses.yml).|The components placed in it, where its class is a container, and its property elements.|
 |`Menu`|A menu item.|Its submenu's items.|
 |`UnmodelledComponent`|A component the model does not have, such as an ActiveX control, kept as text: its `TypeName`, its `Name`, and its text as the element's content.|Text.|
 

@@ -1,5 +1,5 @@
 ﻿using RDCore.Forms.Drawing;
-using P = RDCore.Forms.Model.VB.VBProperties;
+using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Model;
 
