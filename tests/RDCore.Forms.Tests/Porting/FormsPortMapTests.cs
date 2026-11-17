@@ -35,7 +35,7 @@ public sealed class FormsPortMapTests
     [TestMethod]
     public void EveryClassOfTheModel_IsTheRDFormsClassItsVBClassPortsTo()
     {
-        foreach (var rdFormsClass in ComponentClasses.All)
+        foreach (var rdFormsClass in ComponentClasses.All.Where(c => !MSFormsOnly.Contains(c.ClassName)))
         {
             var name = rdFormsClass.TypeName["RDForms.".Length..];
             var port = VB6.TypeOf("VB." + name);
@@ -45,6 +45,22 @@ public sealed class FormsPortMapTests
             Assert.AreEqual("VB", port.LegacyLibrary);
             Assert.AreEqual(name, port.LegacyName);
             Assert.AreSame(port, VB6.TypeOf(name));
+        }
+    }
+
+    // The classes of the model that MSForms has and VB does not.
+    private static readonly string[] MSFormsOnly = ["ToggleButton", "SpinButton"];
+
+    [TestMethod]
+    public void EachClassOfTheModel_ThatVBDoesNotHave_IsTheRDFormsClassItsMSFormsClassPortsTo_AndNoVBClassPortsToIt()
+    {
+        foreach (var name in MSFormsOnly)
+        {
+            var rdFormsClass = ComponentClasses.ByTypeName("RDForms." + name);
+            Assert.IsNotNull(rdFormsClass, name);
+            Assert.AreEqual(rdFormsClass.TypeName, MSForms.TypeOf(name)?.RDFormsName);
+            Assert.AreEqual(rdFormsClass.TypeName, MSForms.TypeOf("MSForms." + name)?.RDFormsName);
+            Assert.IsNull(VB6.TypeOf("VB." + name), name);
         }
     }
 

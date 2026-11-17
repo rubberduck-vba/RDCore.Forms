@@ -834,6 +834,53 @@ public static class Properties
     public static readonly PropertyDefinition<string> ContextMenu = new("ContextMenu", PropertyCategory.Behavior, "");
 
     /// <summary>
+    /// Whether a click can give a ToggleButton the value Null. True makes a click go from False to True, from True to Null, and from
+    /// Null to False. False, the default, makes a click switch between False and True, and a ToggleButton is Null only where code or
+    /// the form's file makes it so.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> TripleState = new("TripleState", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// Whether a ToggleButton is down: True, False, the default, or <see langword="null"/> where it is Null, neither down nor up. A
+    /// Boolean or a Null to a program.
+    /// </summary>
+    public static readonly PropertyDefinition<bool?> ToggleButtonValue = new("Value", PropertyCategory.Misc, false);
+
+    /// <summary>
+    /// A SpinButton's value, a Long to a program. Its arrows move it by <see cref="SpinButtonSmallChange"/>, from
+    /// <see cref="SpinButtonMin"/> to <see cref="SpinButtonMax"/>.
+    /// </summary>
+    public static readonly PropertyDefinition<int> SpinButtonValue = new("Value", PropertyCategory.Misc);
+
+    /// <summary>
+    /// The value a SpinButton's down or left arrow moves its value toward, a Long to a program; 0 by default.
+    /// </summary>
+    public static readonly PropertyDefinition<int> SpinButtonMin = new("Min", PropertyCategory.Behavior);
+
+    /// <summary>
+    /// The value a SpinButton's up or right arrow moves its value toward, a Long to a program; 100 by default.
+    /// </summary>
+    public static readonly PropertyDefinition<int> SpinButtonMax = new("Max", PropertyCategory.Behavior, 100);
+
+    /// <summary>
+    /// How much a click on one of a SpinButton's arrows changes its value, a Long to a program; 1 by default.
+    /// </summary>
+    public static readonly PropertyDefinition<int> SpinButtonSmallChange = new("SmallChange", PropertyCategory.Behavior, 1);
+
+    /// <summary>
+    /// Whether a SpinButton's arrows are one above the other or side by side. Auto, the default, follows the control's shape: side by
+    /// side where it is wider than it is tall.
+    /// </summary>
+    public static readonly PropertyDefinition<ControlOrientation> Orientation =
+        new("Orientation", PropertyCategory.Appearance, ControlOrientation.Auto);
+
+    /// <summary>
+    /// The milliseconds between the repeated moves of a SpinButton's value while one of its arrows is held down; 50 by default. The
+    /// first move comes as the arrow is pressed, and the second five times the delay later.
+    /// </summary>
+    public static readonly PropertyDefinition<int> Delay = new("Delay", PropertyCategory.Behavior, 50) { Valid = delay => delay >= 0 };
+
+    /// <summary>
     /// The data source the control's value is bound to, as an MSForms form names it, such as a worksheet cell (<c>Sheet1!A1</c>). It is
     /// kept as text and binds nothing: nothing resolves it. Empty by default.
     /// </summary>

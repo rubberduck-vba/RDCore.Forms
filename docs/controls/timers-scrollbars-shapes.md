@@ -1,6 +1,6 @@
 # Timers, scroll bars and shapes
 
-A Timer raises an event at an interval, a scroll bar sets a value, and a Shape and a Line draw figures. The Line's drawing and the scroll bar's focus, drag and keys were measured with VB6.
+A Timer raises an event at an interval, a scroll bar and a SpinButton set a value, and a Shape and a Line draw figures. The Line's drawing and the scroll bar's focus, drag and keys were measured with VB6.
 
 ## Timer
 
@@ -26,6 +26,26 @@ The interval is counted on the system's clock. [`RDFormsControl.SetTimeProvider`
 - It raises KeyDown, KeyPress and KeyUp, the form's first where its `KeyPreview` is True. KeyDown comes before the key moves it, and KeyUp after. A `KeyCode` of 0 left by the form's KeyDown or its own cancels the key: the bar does not move, and KeyUp is still raised.
 
 RDForms' own, not measured with VB6: a thumb released where it started raises no Change.
+
+## SpinButton
+
+[`RDFormsSpinButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsSpinButton.yml) is two arrows that move a value, from MSForms. `Value`, `Min`, `Max` and `SmallChange` are Longs.
+
+|Case|Behaviour|
+|---|---|
+|The up or right arrow|Raises SpinUp, then moves `Value` by `SmallChange` toward `Max`.|
+|The down or left arrow|Raises SpinDown, then moves `Value` by `SmallChange` toward `Min`.|
+|A move past `Min` or `Max`|Stops at the end. An arrow at the end still raises its SpinUp or SpinDown.|
+|`Min` greater than `Max`|The arrows move `Value` the other way.|
+|Change|Raised when `Value` changes, by an arrow or by code, and only then.|
+|An arrow held down|Repeats. The second move comes five times `Delay` milliseconds after the press, and the others every `Delay` milliseconds (50 by default).|
+|`Orientation`|Vertical puts the arrows one above the other, and Horizontal side by side, the down arrow on the left. Auto, the default, puts them side by side where the control is wider than it is tall.|
+|The focus|It takes it, and raises GotFocus and LostFocus, KeyDown, KeyPress and KeyUp. The Up and Right keys spin it up, and the Down and Left keys down.|
+
+Its behaviour is RDForms' own, not measured with MSForms. The arrows are drawn in its `ForeColor` on its `BackColor`.
+
+> [!NOTE]
+> **Not implemented.** The `MouseIcon` is not drawn.
 
 ## Shape
 

@@ -82,7 +82,7 @@ internal static class FormXamlWriter
             writer.WriteAttributeString("Index", index.ToString(CultureInfo.InvariantCulture));
         foreach (var property in component.Class.Properties)
         {
-            if (!property.RunTimeOnly && component.IsSet(property) && FormXamlValues.Format(component.GetBoxed(property)) is { } text)
+            if (!property.RunTimeOnly && component.IsSet(property) && FormXamlValues.Format(property.ValueType, component.GetBoxed(property)) is { } text)
                 writer.WriteAttributeString(property.Name, text);
         }
     }

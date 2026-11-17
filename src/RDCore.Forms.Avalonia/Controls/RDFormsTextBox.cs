@@ -35,9 +35,13 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// It raises Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove and MouseUp, MouseUp before Click.
 /// </para>
 /// </remarks>
-public sealed class RDFormsTextBox : TextBox, IRaisesKeyEvents
+public sealed class RDFormsTextBox : TextBox, IRaisesKeyEvents, IKeepsEdits
 {
     private readonly ComponentInstance instance;
+
+    // Set as the user changes the text, and cleared as the change is kept: the focus leaving the box raises BeforeUpdate and
+    // AfterUpdate for it. A change from code is not the user's.
+    private bool edited;
 
     // Set while the box's text goes to the component, or the component's comes to the box.
     private bool syncing;
@@ -170,6 +174,7 @@ public sealed class RDFormsTextBox : TextBox, IRaisesKeyEvents
             return;
         if (change.Property == TextProperty && !syncing)
         {
+            edited = true;
             // The text the user changes selects nothing in the component: the box's caret, which a deletion leaves in place, is put back.
             Sync(() => instance.Set(P.Text, Text ?? ""));
             TakeSelection();
@@ -231,6 +236,17 @@ public sealed class RDFormsTextBox : TextBox, IRaisesKeyEvents
             }
         }
         base.OnKeyDown(e);
+    }
+
+    bool IKeepsEdits.KeepEdit()
+    {
+        if (!edited)
+            return true;
+        if (ControlEvents.Cancelled(RDFormsControl.Raise(this, Events.BeforeUpdate, FormValue.FromBoolean(false))))
+            return false;
+        edited = false;
+        RDFormsControl.Raise(this, Events.AfterUpdate);
+        return true;
     }
 
     // The KeyAscii the handlers left, the form's first, the code typed where there are none. One outside a character's range types
