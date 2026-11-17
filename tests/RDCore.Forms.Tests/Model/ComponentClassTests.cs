@@ -139,7 +139,8 @@ public sealed class ComponentClassTests
     {
         var bar = ComponentClasses.ByTypeName(typeName)!;
 
-        CollectionAssert.AreEquivalent(new[] { "Change", "GotFocus", "KeyDown", "KeyPress", "KeyUp", "LostFocus", "Scroll" },
+        CollectionAssert.AreEquivalent(new[] { "Change", "GotFocus", "KeyDown", "KeyPress", "KeyUp", "LostFocus", "Scroll", "Validate", "BeforeUpdate",
+            "AfterUpdate", "BeforeDragOver", "BeforeDropOrPaste", "Error" },
             bar.Events.Select(e => e.Name).ToArray());
         Assert.AreSame(Events.KeyPress, bar.Event("keypress"));
     }

@@ -123,7 +123,7 @@ public sealed class FormFocusTests
     }
 
     [TestMethod]
-    public void TheFocusMovedBetweenTheActiveFormsControls_RaisesLostFocusThenGotFocus()
+    public void TheFocusMovedBetweenTheActiveFormsControls_RaisesValidateThenLostFocusThenGotFocus()
     {
         var raised = UI.Run(() =>
         {
@@ -137,6 +137,6 @@ public sealed class FormFocusTests
             return result;
         });
 
-        Expect.Lines(["TextBox1.LostFocus", "TextBox2.GotFocus"], raised);
+        Expect.Lines(["TextBox1.Validate(Boolean False)", "TextBox1.LostFocus", "TextBox2.GotFocus"], raised);
     }
 }
