@@ -39,6 +39,7 @@ var x = window.Invoke(combo, Methods.List, [FormValue.FromInteger(0)]).AsString(
 |`Clear`|Method|yes|yes|
 |`List(Index)` As String|Property|yes|yes|
 |`ItemData(Index)` As Long|Property|yes|yes|
+|`ItemIcon(Index)`, an object|Property, RD-VBA addition|yes|yes|
 |`Selected(Index)` As Boolean|Property|yes|no|
 |`ListIndex` As Integer|Property|yes|yes|
 |`ListCount` As Integer|Read-only property|yes|yes|
@@ -52,6 +53,7 @@ var x = window.Invoke(combo, Methods.List, [FormValue.FromInteger(0)]).AsString(
 |Arguments|`List` without its index is error 449, and with two arguments error 450.|
 |Read-only|An assignment is error 383, "'ListCount' property is read-only" for `ListCount`. A value of the wrong type is error 13 first.|
 |`Text`|A ListBox's and a Dropdown List's is the selected item's text, and setting it selects the first item whose whole text it is (383 on a Dropdown List where none has it). Another combo's is its edit box's: see [ComboBox](#combobox).|
+|`ItemIcon`|An object (`FormValue.FromObject`): the bytes of the item's picture file, or `Nothing` for none. Assigning anything else is error 13, and a picture that is refused error 481 (see [Item icons](#item-icons)).|
 |`Column`|Error 438: VB6's ListBox has no `Column`, which is an MSForms ListBox's.|
 
 The index and argument rules follow RDForms' own rules, as a method's do. A ListBox or ComboBox that `Controls.Add` adds takes the same members as one of the form's file.
