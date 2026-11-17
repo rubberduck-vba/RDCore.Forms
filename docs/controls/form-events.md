@@ -39,7 +39,7 @@ A handler that sets `Cancel` to True, in BeforeUpdate or in Validate, keeps the 
 The order of BeforeUpdate, AfterUpdate and Validate is RDForms' own: an MSForms UserForm raises BeforeUpdate and AfterUpdate before its Exit, which ports to Validate.
 
 > [!NOTE]
-> **Not implemented.** The other controls with a value (ComboBox, ListBox, CheckBox, OptionButton and the scroll bars) declare BeforeUpdate and AfterUpdate and raise neither. BeforeDragOver, BeforeDropOrPaste and Error are declared on the controls and containers MSForms gives them, with `RDForms.DataObject` and `RDForms.ReturnEffect` arguments, and never raised.
+> **Not implemented.** The other controls with a value (ComboBox, ListBox, CheckBox, OptionButton, the scroll bars, MultiPage and TabStrip) declare BeforeUpdate and AfterUpdate and raise neither. BeforeDragOver, BeforeDropOrPaste and Error are declared on the controls and containers MSForms gives them, with `RDForms.DataObject` and `RDForms.ReturnEffect` arguments, and never raised. A MultiPage's and a TabStrip's take the page's or the tab's `Index` first, and a MultiPage's Error does too.
 
 ## Unloading
 

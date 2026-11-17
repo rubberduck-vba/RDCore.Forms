@@ -29,6 +29,9 @@
 |`RDForms.ToggleButton`|[`RDFormsToggleButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsToggleButton.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, Validate|[Buttons](buttons.md)|
 |`RDForms.SpinButton`|[`RDFormsSpinButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsSpinButton.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, SpinDown, SpinUp, Validate|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
 |`RDForms.Menu`|The window's [`RDFormsMenuBar`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsMenuBar.yml)|Click|[Menus](menus.md)|
+|`RDForms.MultiPage`|[`RDFormsMultiPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsMultiPage.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, Validate|[Containers and pictures](containers.md#multipage)|
+|`RDForms.Page`|[`RDFormsPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsPage.yml)|None; its MultiPage raises its tab's|[Containers and pictures](containers.md#multipage)|
+|`RDForms.TabStrip`|[`RDFormsTabStrip`](../api/RDCore.Forms.Avalonia.Controls.RDFormsTabStrip.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, Validate|[Containers and pictures](containers.md#tabstrip)|
 |A placed UserControl, such as `Project1.Gauge`|[`RDFormsUserControl`](../api/RDCore.Forms.Avalonia.Controls.RDFormsUserControl.yml)|None of its own; its UserControl's root and controls raise theirs|[UserControls](usercontrols.md)|
 
 A `RDForms.Menu` has no control of its own, and `Create` returns `null` for it: a form's window shows its menus on its [menu bar](menus.md). It returns `null` for a UserControl that is invisible at run time too.
@@ -79,13 +82,14 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |Units|The model holds a control's `Left`, `Top`, `Width` and `Height` in pixels (1/96 inch, 15 twips), whatever its container's `ScaleMode`. A program's code reads them in its own unit: VB6 code in the container's scale (twips in a Frame, and for a form's own), VBA code in points, and code made for RDForms in pixels ([`CodeUnits`](../api/RDCore.Forms.Model.CodeUnits.yml)). A Line's ends are in its container's scale.|
 |Converting|A pixel is 15 twips and 0.75 point. [`Units`](../api/RDCore.Forms.Model.Units.yml) converts a length: `FromTwips` and `FromPoints` give pixels, `ToTwips` and `ToPoints` give the length in twips or points. A length keeps its fractions: 7 twips are 7/15 of a pixel.|
 |Containers|A control placed in a Frame or a PictureBox is shown in it. A control placed in any other component is not shown.|
+|Containers|A control placed in a Frame, a PictureBox or a MultiPage's page is shown in it, and a page's controls only while its page is selected. A MultiPage holds only pages, and a page is placed only in a MultiPage. A control placed in any other component is not shown.|
 |Stacking|In each container, the first control the form holds is on top until [`ZOrder`](methods.md#zorder) moves one. A windowless control (a Label, an Image, a Shape or a Line) is under every windowed one.|
 |Tab order|One order across the whole form, by `TabIndex`, the form's order deciding a tie. A `TabIndex` past the last place takes the first free place, in the form's order.|
 |Focus|Tab skips a control that takes no focus (a Label, a Frame, an Image, a Timer, a Shape, a Line or a Data control), one whose `TabStop` is False, and one that is hidden or disabled or in a hidden or disabled container.|
 
 ## A control's container at run time
 
-A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(control, container)`. It places the control, with the controls it holds, in the form or in a Frame or a PictureBox of the same form, and raises `FormDefinition.ContainerChanged`. A shown form's view moves the control at once. Every control has a `Container` except a Timer (`ComponentClass.HasContainer`); a menu item has none.
+A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(control, container)`. It places the control, with the controls it holds, in the form or in a Frame, a PictureBox or a MultiPage's page of the same form, and a page in a MultiPage, and raises `FormDefinition.ContainerChanged`. A shown form's view moves the control at once. Every control has a `Container` except a Timer (`ComponentClass.HasContainer`); a menu item has none.
 
 |Rule|Behaviour|
 |---|---|
@@ -95,7 +99,7 @@ A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(con
 |Focus|A control that has the focus and is placed in a Frame or a PictureBox keeps it, and no LostFocus or GotFocus is raised.|
 |Order|The control is last in its new container's contents, so `FormDefinition.Controls` and a tie of `TabIndex` follow the new order (RDForms' own).|
 
-`SetContainer` refuses with error 425, Invalid object use, and changes nothing, where the container is `Nothing`, holds no controls (a TextBox, a menu item), is the control itself or a control it holds, or is another form or a control of another form.
+`SetContainer` refuses with error 425, Invalid object use, and changes nothing, where the container is `Nothing`, holds no controls (a TextBox, a menu item) or none of the control's class (a page outside a MultiPage, another control in one), is the control itself or a control it holds, or is another form or a control of another form.
 
 > [!NOTE]
 > **Not implemented.** A control that has the focus keeps it when it is placed back in the form, too. In VB6, a TextBox placed from a Frame back in the form, outside the Frame's area, raised LostFocus and gave the focus to the Frame (observed once).
@@ -130,7 +134,7 @@ A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(con
 |---|---|
 |Class|Named by its ProgID, such as `RDForms.CommandButton`, without regard to case. A menu's or a form's class is refused.|
 |Name|Any name that no other control has, compared without regard to case, even one that starts with a digit, holds a space, is a keyword, or is the form's own name. An empty name is refused, and so is a name of white space only (RDForms' own).|
-|Container|The form, or a Frame or a PictureBox of the form.|
+|Container|The form, or a Frame, a PictureBox or a MultiPage's page of the form. A page's container is a MultiPage, which takes no other control.|
 |Defaults|Hidden, at 0, 0, and 80 by 32 pixels (1200 by 480 twips) where the class has an extent. The next `TabIndex` after the form's others. A caption or a text is "".|
 |Stacking|Under the controls already in its container, windowed or windowless.|
 |Order|`FormDefinition.Controls` holds the controls of the form's file depth first, then those added, in the order added, whatever their container.|
@@ -141,7 +145,7 @@ A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(con
 |---|---|
 |711|No VB class has the ProgID.|
 |720|The class is a menu's or a form's.|
-|721|The container holds no controls, such as a CommandButton.|
+|721|The container holds no controls, such as a CommandButton, or not that class: a page outside a MultiPage, or another control in one.|
 |727|The name is taken.|
 |728|The name is empty, or white space only.|
 |729|The control to remove was not added at run time, or is an element of a [control array](#control-arrays), even one a program's `Load` added.|

@@ -42,12 +42,16 @@ public sealed class ComponentClassTests
     [DataRow("RDForms.Menu", "Enabled")]
     [DataRow("RDForms.UserControl", null)]
     [DataRow("RDForms.PropertyPage", null)]
+    [DataRow("RDForms.MultiPage", "Value")]
+    [DataRow("RDForms.TabStrip", "Value")]
+    [DataRow("RDForms.Page", null)]
     public void AVBClassesDefaultMember_IsTheMemberVB6ReadsAndAssignsThroughTheInstance(string typeName, string? member) =>
         Assert.AreEqual(member, ComponentClasses.ByTypeName(typeName)!.DefaultMember);
 
     [TestMethod]
-    public void EveryVBClass_ButAUserControlAndAPropertyPage_HasADefaultMember() =>
-        CollectionAssert.AreEquivalent(new[] { ComponentClasses.UserControl, ComponentClasses.PropertyPage }, ComponentClasses.All.Where(c => c.DefaultMember is null).ToArray());
+    public void EveryClass_ButAUserControlAPropertyPageAndAPage_HasADefaultMember() =>
+        CollectionAssert.AreEquivalent(new[] { ComponentClasses.UserControl, ComponentClasses.PropertyPage, ComponentClasses.Page },
+            ComponentClasses.All.Where(c => c.DefaultMember is null).ToArray());
 
     [TestMethod]
     [DataRow("")]
@@ -92,14 +96,16 @@ public sealed class ComponentClassTests
     }
 
     [TestMethod]
-    public void TheCatalog_GivesEachControlItsPlaceAndSize_ExceptTheLineAndTheTimer()
+    public void TheCatalog_GivesEachControlItsPlaceAndSize_ExceptTheLineTheTimerAndAPage()
     {
         var withoutExtent = ComponentClasses.All.Where(c => c.Kind == ComponentKind.Control && !c.Has(Properties.Height)).ToArray();
 
-        CollectionAssert.AreEquivalent(new[] { ComponentClasses.Timer, ComponentClasses.Line }, withoutExtent);
+        CollectionAssert.AreEquivalent(new[] { ComponentClasses.Timer, ComponentClasses.Line, ComponentClasses.Page }, withoutExtent);
         Assert.IsTrue(ComponentClasses.Timer.Has(Properties.Left));
         Assert.IsFalse(ComponentClasses.Line.Has(Properties.Left));
+        Assert.IsFalse(ComponentClasses.Page.Has(Properties.Left));
         Assert.IsFalse(ComponentClasses.Timer.HasExtent);
+        Assert.IsFalse(ComponentClasses.Page.HasExtent);
     }
 
     [TestMethod]

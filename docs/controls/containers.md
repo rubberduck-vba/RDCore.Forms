@@ -1,6 +1,6 @@
 # Containers and pictures
 
-Frame and PictureBox hold controls; PictureBox and Image draw pictures. The three controls' behaviour was measured with VB6.
+Frame and PictureBox hold controls; PictureBox and Image draw pictures. The three controls' behaviour was measured with VB6. A MultiPage holds pages of controls, one shown at a time, and a TabStrip shows tabs over an area that holds nothing: the two are MS Forms classes, and their behaviour is RDForms' own, not measured with MS Forms.
 
 ## Frame
 
@@ -60,6 +60,45 @@ Its key events are RDForms' own, not measured with VB6. With the focus, it raise
 - Its `Picture` is drawn inside its border: stretched over the whole of it where `Stretch` is set, and otherwise at its own size in pixels from the top left corner, clipped.
 - Where `Stretch` is not set, it takes its picture's size: see [A size from the picture](#a-size-from-the-picture).
 - The whole rectangle takes the pointer, where it draws nothing too. It raises MouseUp before Click, and Click only where the release is over the image again.
+
+## MultiPage
+
+[`RDFormsMultiPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsMultiPage.yml) shows a tab for each of its pages, and the selected page under them. Each page is a [`RDFormsPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsPage.yml).
+
+- A page, of the class `RDForms.Page`, is placed only in a MultiPage, and a MultiPage holds only pages. A page has no place or size of its own: it fills the MultiPage under its tabs. The controls placed in a page are shown on it, as a Frame's are.
+- A page's tab shows its `Caption`, with its access key, and its `ToolTipText`. A hidden page has no tab. A disabled page's tab is drawn disabled and cannot be selected.
+- `Value` is the index of the selected page, from 0, or -1 where there is none. Only the selected page and its controls are shown.
+- A press of the left button on an enabled tab selects its page, which raises Change where `Value` changes, and takes the focus. Its release over the same tab raises Click with the tab's index, after MouseUp.
+- Its mouse events take the tab's index first, -1 where the pointer is over no tab: `MouseDown(Index, Button, Shift, X, Y)`. X and Y are in twips. A double click's second press raises `DblClick(Index, Cancel)` in place of MouseDown, and no Click.
+- With the focus on the MultiPage itself, the arrow keys along its tabs select the next or the previous tab, skipping the hidden and the disabled ones, and stop at the last and the first. From anywhere in it, Ctrl+Tab and Ctrl+Shift+Tab do the same, and go round. Each raises Change and Click.
+- A program changing `Value` raises Change once, and none where the value is the same.
+- `Style` draws the tabs as tabs, as buttons, or not at all. `TabOrientation` puts them on the top, bottom, left or right edge. `MultiRow` wraps them on several rows where they do not fit on one. `TabFixedWidth` and `TabFixedHeight` give every tab that size in pixels, and 0 sizes each one to its caption.
+
+[`Pages`](../api/RDCore.Forms.Model.Pages.yml) is a MultiPage's collection of pages, as a program's `Pages` is:
+
+|Member|Behaviour|
+|---|---|
+|`Count`, `Item`|The pages, by index from 0 or by name without regard to case. An index outside them is 5, and a name no page has is 730.|
+|`Add`|Adds a page, by default at the end, named `Page` and the first free number, and captioned with its name. An index outside 0 to `Count` is 5.|
+|`Remove`, `Clear`|Remove pages, with the controls on them.|
+|`SelectedItem`|The selected page, or none.|
+
+`Value` follows the selected page as pages are added and removed. The first page added is selected. Where the selected page is removed, the page after it is selected, or the last page where it was the last.
+
+A MultiPage added by a program gets two pages, named `Page` and the first free numbers.
+
+## TabStrip
+
+[`RDFormsTabStrip`](../api/RDCore.Forms.Avalonia.Controls.RDFormsTabStrip.yml) shows tabs over a client area. It holds no controls: a program shows what each tab stands for in controls placed over the client area.
+
+- Its tabs are its `Tabs` list, two by default, `Tab1` and `Tab2`. Each tab has a `Name`, a `Caption`, a `ToolTipText`, `Enabled`, `Visible` and a `Tag`.
+- `Value`, `Style`, `TabOrientation`, `MultiRow`, `TabFixedWidth` and `TabFixedHeight`, the mouse, the keys and the events are a MultiPage's, for its tabs.
+- `ClientLeft`, `ClientTop`, `ClientWidth` and `ClientHeight` give the client area in pixels from the TabStrip's top left corner: the area inside its edge that the tabs leave, or the whole TabStrip inside its edge where `Style` draws no tabs.
+
+[`Tabs`](../api/RDCore.Forms.Model.Tabs.yml) is a TabStrip's collection of tabs, as a program's `Tabs` is: `Count`, `Item` by index or name, `Add` (named `Tab` and the first free number by default), `Remove`, `Clear` and `SelectedItem`, as a MultiPage's `Pages` has. An index outside the tabs, a name no tab has, and a name another tab has are 5.
+
+> [!NOTE]
+> **Not implemented.** A `Value` outside the pages or the tabs raises no error 380, and a page's or a tab's index cannot be changed. A page's `Picture` is not drawn, and a page has no scroll bars. A MultiPage declares Layout, AddControl and RemoveControl and does not raise them, and it has no Scroll event. The order of the events was not measured with MS Forms.
 
 ## A size from the picture
 

@@ -180,6 +180,9 @@ public sealed class RDFormsFormView : Canvas
         host.Children.Add(control);
         controls.Add(e.Control, control);
         shown.Add(e.Control);
+        // A control added with contents of its own, as a MultiPage comes with its pages.
+        if (control is IRDFormsContainer inner)
+            Place(e.Control, inner.ChildHost);
     }
 
     // A control removed at run time, with what it holds. Where the focus was in it, it goes to the first control of the tab order that

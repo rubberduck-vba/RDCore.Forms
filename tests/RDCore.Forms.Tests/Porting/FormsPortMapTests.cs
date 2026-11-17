@@ -32,10 +32,14 @@ public sealed class FormsPortMapTests
 
     // Types
 
+    // The classes only MSForms has: a VB6 form has none of them.
+    private static readonly ComponentClass[] MSFormsOnly =
+        [ComponentClasses.ToggleButton, ComponentClasses.SpinButton, ComponentClasses.MultiPage, ComponentClasses.Page, ComponentClasses.TabStrip];
+
     [TestMethod]
-    public void EveryClassOfTheModel_IsTheRDFormsClassItsVBClassPortsTo()
+    public void EveryClassOfTheModel_IsTheRDFormsClassItsVBClassPortsTo_ButThoseOnlyMSFormsHas()
     {
-        foreach (var rdFormsClass in ComponentClasses.All.Where(c => !MSFormsOnly.Contains(c.ClassName)))
+        foreach (var rdFormsClass in ComponentClasses.All.Except(MSFormsOnly))
         {
             var name = rdFormsClass.TypeName["RDForms.".Length..];
             var port = VB6.TypeOf("VB." + name);
@@ -48,19 +52,18 @@ public sealed class FormsPortMapTests
         }
     }
 
-    // The classes of the model that MSForms has and VB does not.
-    private static readonly string[] MSFormsOnly = ["ToggleButton", "SpinButton"];
-
     [TestMethod]
-    public void EachClassOfTheModel_ThatVBDoesNotHave_IsTheRDFormsClassItsMSFormsClassPortsTo_AndNoVBClassPortsToIt()
+    public void TheClassesOnlyMSFormsHas_AreTheRDFormsClassesItsClassesPortTo_AndVBHasNone()
     {
-        foreach (var name in MSFormsOnly)
+        foreach (var rdFormsClass in MSFormsOnly)
         {
-            var rdFormsClass = ComponentClasses.ByTypeName("RDForms." + name);
-            Assert.IsNotNull(rdFormsClass, name);
+            var name = rdFormsClass.TypeName["RDForms.".Length..];
+            Assert.IsNull(VB6.TypeOf("VB." + name), rdFormsClass.TypeName);
+            var port = MSForms.TypeOf("MSForms." + name);
+            Assert.IsNotNull(port, rdFormsClass.TypeName);
+            Assert.AreEqual(rdFormsClass.TypeName, port.RDFormsName);
+            Assert.AreEqual(TypePortKind.Class, port.Kind);
             Assert.AreEqual(rdFormsClass.TypeName, MSForms.TypeOf(name)?.RDFormsName);
-            Assert.AreEqual(rdFormsClass.TypeName, MSForms.TypeOf("MSForms." + name)?.RDFormsName);
-            Assert.IsNull(VB6.TypeOf("VB." + name), name);
         }
     }
 

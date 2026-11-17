@@ -917,6 +917,52 @@ public static class Properties
     /// </summary>
     public static readonly PropertyDefinition<double> ScrollTop = new("ScrollTop", PropertyCategory.Position);
 
+    /// <summary>
+    /// Whether a MultiPage's or a TabStrip's tabs wrap onto more rows when they do not fit in one. When they do not, the tabs that do
+    /// not fit are cut off.
+    /// </summary>
+    public static readonly PropertyDefinition<bool> MultiRow = new("MultiRow", PropertyCategory.Appearance);
+
+    /// <summary>
+    /// How a MultiPage or a TabStrip shows its tabs: as tabs, the default, as buttons, or not at all. Its <c>Style</c>.
+    /// </summary>
+    public static readonly PropertyDefinition<TabStyle> TabStyle = new("Style", PropertyCategory.Appearance, Model.TabStyle.Tabs)
+    {
+        Valid = Enum.IsDefined,
+    };
+
+    /// <summary>
+    /// Which side of a MultiPage or a TabStrip its tabs are on, the top by default.
+    /// </summary>
+    public static readonly PropertyDefinition<TabOrientation> TabOrientation =
+        new("TabOrientation", PropertyCategory.Appearance, Model.TabOrientation.Top) { Valid = Enum.IsDefined };
+
+    /// <summary>
+    /// The width of every tab of a MultiPage or a TabStrip, in DIP; 0, the default, sizes each tab to its caption.
+    /// </summary>
+    public static readonly PropertyDefinition<double> TabFixedWidth = new("TabFixedWidth", PropertyCategory.Appearance) { Valid = w => w >= 0 };
+
+    /// <summary>
+    /// The height of every tab of a MultiPage or a TabStrip, in DIP; 0, the default, sizes the tabs to their captions' font.
+    /// </summary>
+    public static readonly PropertyDefinition<double> TabFixedHeight = new("TabFixedHeight", PropertyCategory.Appearance) { Valid = h => h >= 0 };
+
+    /// <summary>
+    /// The index of a MultiPage's selected page, or of a TabStrip's selected tab, from 0; -1 when it has none. Setting it selects that
+    /// page or tab. Its <c>Value</c>.
+    /// </summary>
+    public static readonly PropertyDefinition<int> SelectedIndex = new("Value", PropertyCategory.Behavior) { Valid = i => i >= -1 };
+
+    /// <summary>
+    /// A TabStrip's tabs, in their order: two, <c>Tab1</c> and <c>Tab2</c>, by default. No two have the same name, compared without
+    /// regard to case. A program changes them through <see cref="Model.Tabs"/>.
+    /// </summary>
+    public static readonly PropertyDefinition<IReadOnlyList<Tab>> Tabs = new("Tabs", PropertyCategory.List, [new("Tab1", "Tab1"), new("Tab2", "Tab2")])
+    {
+        Valid = tabs => tabs.All(t => t is not null)
+                        && tabs.Select(t => t.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() == tabs.Count,
+    };
+
     private static IReadOnlyList<IReadOnlyList<(PropertyDefinition, object?)>> TextAssigned(ComponentInstance component, string text) =>
         component.Class.Has(SelStart) && text != component.Get(Text)
             ? [[(Text, text), (SelStart, 0), (SelLength, 0)]]

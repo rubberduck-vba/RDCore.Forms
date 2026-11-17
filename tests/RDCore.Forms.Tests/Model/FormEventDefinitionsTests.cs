@@ -70,6 +70,17 @@ public sealed class FormEventDefinitionsTests
     }
 
     [TestMethod]
+    public void AMultiPageAndATabStrip_HaveTheUpdateEvents_AndAPage_WhoseEventsAreItsMultiPages_HasNone()
+    {
+        foreach (var type in new[] { ComponentClasses.MultiPage, ComponentClasses.TabStrip })
+            CollectionAssert.IsSubsetOf(new[] { Events.Validate, Events.BeforeUpdate, Events.AfterUpdate }, type.Events.ToArray(), type.TypeName);
+        Assert.IsEmpty(ComponentClasses.Page.Events);
+        Assert.IsFalse(ComponentClasses.Page.Has(Properties.CausesValidation));
+        Assert.AreSame(Events.Error, ComponentClasses.TabStrip.Event("Error"));
+        Assert.AreSame(Events.PageError, ComponentClasses.MultiPage.Event("Error"));
+    }
+
+    [TestMethod]
     public void TheDataControl_KeepsItsOwnValidateAndError()
     {
         Assert.AreEqual("Action As Integer, Save As Integer", Signature(ComponentClasses.Data.Event("Validate")!));
@@ -88,6 +99,21 @@ public sealed class FormEventDefinitionsTests
     [DataRow("UserForm", "BeforeDropOrPaste", "RDForms.Form", "BeforeDropOrPaste")]
     [DataRow("Frame", "BeforeDragOver", "RDForms.Frame", "BeforeDragOver")]
     [DataRow("Frame", "Error", "RDForms.Frame", "Error")]
+    [DataRow("MultiPage", "Exit", "RDForms.MultiPage", "Validate")]
+    [DataRow("MultiPage", "BeforeUpdate", "RDForms.MultiPage", "BeforeUpdate")]
+    [DataRow("MultiPage", "BeforeDragOver", "RDForms.MultiPage", "BeforeDragOver")]
+    [DataRow("MultiPage", "BeforeDropOrPaste", "RDForms.MultiPage", "BeforeDropOrPaste")]
+    [DataRow("MultiPage", "Error", "RDForms.MultiPage", "Error")]
+    [DataRow("MultiPage", "AddControl", "RDForms.MultiPage", "AddControl")]
+    [DataRow("MultiPage", "RemoveControl", "RDForms.MultiPage", "RemoveControl")]
+    [DataRow("MultiPage", "DblClick", "RDForms.MultiPage", "DblClick")]
+    [DataRow("MultiPage", "MouseDown", "RDForms.MultiPage", "MouseDown")]
+    [DataRow("TabStrip", "Exit", "RDForms.TabStrip", "Validate")]
+    [DataRow("TabStrip", "BeforeUpdate", "RDForms.TabStrip", "BeforeUpdate")]
+    [DataRow("TabStrip", "BeforeDragOver", "RDForms.TabStrip", "BeforeDragOver")]
+    [DataRow("TabStrip", "BeforeDropOrPaste", "RDForms.TabStrip", "BeforeDropOrPaste")]
+    [DataRow("TabStrip", "Error", "RDForms.TabStrip", "Error")]
+    [DataRow("TabStrip", "MouseUp", "RDForms.TabStrip", "MouseUp")]
     public void AnMSFormsHandler_PortsToTheEventOfItsClass_WithTheSameParameters(string legacyClass, string legacyEvent, string rdformsClass,
         string rdformsEvent)
     {
