@@ -13,7 +13,8 @@ namespace RDCore.Forms.Libraries;
 /// <remarks>
 /// <para>
 /// <c>VB</c> is what <c>rdc export-library</c> reads from VB6.OLB, with each property, method and event of a modelled class that VB6.OLB
-/// does not declare: Opacity, a Label's Picture, a control's ContextMenu, and the others <see cref="Additions"/> lists. Each of these is
+/// does not declare: Opacity, a Label's Picture, a control's ContextMenu, and the others <see cref="Additions"/> lists, and App's
+/// PlatformVersion and ComponentVersion, which read the platform's versions. Each of these is
 /// marked <see cref="MemberDescription.IsAddition"/>. The description keeps VB6.OLB's GUID and version, so a project's reference to VB6.OLB
 /// finds it. Every member VB6.OLB declares stays in it, whether the model holds the member or not. A setting of VB6's designer that
 /// VB6.OLB declares no member for, such as a UserControl's CanGetFocus, is not in it.
@@ -72,11 +73,12 @@ public sealed class RDFormsLibraries : ILibrarySource
         };
     }
 
-    // A class with what its modelled classes have and VB6.OLB does not declare; a class the model does not implement is as exported.
+    // A class with what its modelled classes have and VB6.OLB does not declare, then what RD-VBA adds to it; any other class is as exported.
     private static ClassDescription WithAdditions(ClassDescription declared, LibraryDescription exported)
     {
         var modelled = ModelledAs(declared.Name);
-        if (modelled.Count == 0)
+        var platform = PlatformAdditions.GetValueOrDefault(declared.Name) ?? [];
+        if (modelled.Count == 0 && platform.Length == 0)
             return declared;
 
         var members = declared.Members.ToList();
@@ -94,8 +96,20 @@ public sealed class RDFormsLibraries : ILibrarySource
             foreach (var raised in modelledClass.Events.Where(raised => !events.Any(known => string.Equals(known.Name, raised.Name, StringComparison.OrdinalIgnoreCase))))
                 events.Add(new EventDescription { Name = raised.Name, IsAddition = true, Parameters = [.. raised.Parameters.Select(parameter => Parameter(parameter.Name, parameter.TypeName))] });
         }
+        members.AddRange(Added(platform.Where(member => !Declared(member.Name))));
         return declared with { Members = [.. members], Events = [.. events] };
     }
+
+    // What RD-VBA adds to a class of VB6.OLB that no model class implements: App's PlatformVersion and ComponentVersion(Name), read-only, which give the
+    // platform's version and that of one of its components ("RDCore", "RDCore.SDK", "RDCore.Forms").
+    private static readonly Dictionary<string, MemberDescription[]> PlatformAdditions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["App"] =
+        [
+            new MemberDescription { Name = "PlatformVersion", Kind = MemberKind.PropertyGet, Type = "String" },
+            new MemberDescription { Name = "ComponentVersion", Kind = MemberKind.PropertyGet, Type = "String", Parameters = [Parameter("Name", "String", byVal: true)] },
+        ],
+    };
 
     // What VB6's designer sets on a root that VB6.OLB declares no member for, and that RD-VBA adds none for: VB6's documentation has each of a
     // UserControl's "not available at run time", and a UserControl's or a PropertyPage's place is its extender's Left and Top.

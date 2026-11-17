@@ -32,6 +32,7 @@ public sealed class RDFormsLibrariesTests
         "DirListBox.Opacity", "DirListBox.ContextMenu",
         "FileListBox.Opacity", "FileListBox.ContextMenu",
         "Menu.CheckOnClick", "Menu.Picture",
+        "App.PlatformVersion", "App.ComponentVersion",
         "Shape.Opacity",
         "Line.Opacity",
         "Image.Opacity", "Image.ContextMenu",
@@ -128,6 +129,20 @@ public sealed class RDFormsLibrariesTests
                 }
             }
         }
+    }
+
+    [TestMethod]
+    public void AppsVersions_AreReadOnlyStrings_TheComponentsByItsName()
+    {
+        var app = VB().Classes.Single(declared => declared.Name == "App");
+
+        var platform = app.Members.Single(member => member.Name == "PlatformVersion");
+        var component = app.Members.Single(member => member.Name == "ComponentVersion");
+
+        Assert.AreEqual((MemberKind.PropertyGet, "String", 0, true), (platform.Kind, platform.Type, platform.Parameters.Length, platform.IsAddition));
+        Assert.AreEqual((MemberKind.PropertyGet, "String", true), (component.Kind, component.Type, component.IsAddition));
+        var name = component.Parameters.Single();
+        Assert.AreEqual(("Name", "String", true, false), (name.Name, name.Type, name.IsByVal, name.IsOptional));
     }
 
     [TestMethod]
