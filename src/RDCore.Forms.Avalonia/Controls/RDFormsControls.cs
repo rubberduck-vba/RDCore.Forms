@@ -12,13 +12,13 @@ public static class RDFormsControls
     private static readonly IFileSystem MachineFileSystem = new FileSystem();
 
     /// <summary>
-    /// Makes the control that shows a component of one of VB's intrinsic control classes, or a placed UserControl: a
+    /// Makes the control that shows a component of one of RDForms' control classes, or a placed UserControl: a
     /// <see cref="RDFormsUserControl"/>.
     /// </summary>
     /// <param name="instance">The component.</param>
     /// <returns>
     /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, a UserControl that is invisible at run
-    /// time, and a class that is neither VB's nor one <see cref="UserControlClasses.Of"/> made.
+    /// time, and a class that is neither RDForms' nor one <see cref="UserControlClasses.Of"/> made.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> is <see langword="null"/>.</exception>
     /// <remarks>
@@ -27,7 +27,7 @@ public static class RDFormsControls
     public static Control? Create(ComponentInstance instance) => Create(instance, MachineFileSystem);
 
     /// <summary>
-    /// Makes the control that shows a component of one of VB's intrinsic control classes, or a placed UserControl, with the file
+    /// Makes the control that shows a component of one of RDForms' control classes, or a placed UserControl, with the file
     /// system its file system lists show.
     /// </summary>
     /// <param name="instance">The component.</param>
@@ -37,7 +37,7 @@ public static class RDFormsControls
     /// </param>
     /// <returns>
     /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, a UserControl that is invisible at run
-    /// time, and a class that is neither VB's nor one <see cref="UserControlClasses.Of"/> made.
+    /// time, and a class that is neither RDForms' nor one <see cref="UserControlClasses.Of"/> made.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> or <paramref name="fileSystem"/> is <see langword="null"/>.</exception>
     public static Control? Create(ComponentInstance instance, IFileSystem fileSystem)
@@ -81,6 +81,10 @@ public static class RDFormsControls
             return new RDFormsLine(instance);
         if (ReferenceEquals(type, ComponentClasses.Data))
             return new RDFormsData(instance);
+        if (ReferenceEquals(type, ComponentClasses.ToggleButton))
+            return new RDFormsToggleButton(instance);
+        if (ReferenceEquals(type, ComponentClasses.SpinButton))
+            return new RDFormsSpinButton(instance);
         if (UserControlClasses.DefinitionOf(type) is not null)
             return type.HasExtent ? new RDFormsUserControl(instance, fileSystem) : null;
         return null;

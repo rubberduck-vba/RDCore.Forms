@@ -1,8 +1,8 @@
 # Buttons
 
-CommandButton, CheckBox and OptionButton. Each draws its `Caption` with its access key: a single `&` marks the character after it, and `&&` shows one `&`.
+CommandButton, CheckBox, OptionButton and ToggleButton. Each draws its `Caption` with its access key: a single `&` marks the character after it, and `&&` shows one `&`.
 
-The behaviour below was measured with VB6.
+The behaviour of the CommandButton, the CheckBox and the OptionButton was measured with VB6. VB6 has no ToggleButton, which comes from MSForms: see [ToggleButton](#togglebutton).
 
 ## CommandButton
 
@@ -53,6 +53,27 @@ The option buttons in one container are a group: selecting one clears the others
 |An arrow key|Moves the focus to the previous or next control in its container, and selects a button it lands on.|
 |A double click|The second press raises MouseDown, then DblClick.|
 |The pointer|The whole rectangle takes it, whatever part of it the theme draws.|
+
+## ToggleButton
+
+[`RDFormsToggleButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsToggleButton.yml)
+
+A push button that stays down once clicked. Its `Value` is True while it is down, False while it is up, and Null where it is neither; a Null button is drawn up.
+
+|Case|Behaviour|
+|---|---|
+|A click|Puts an up button down, and a down one up. With `TripleState` True, a click on a down button makes it Null, and a click on a Null one puts it up.|
+|`Value` from code|Shows in the button. Null comes only from code or the form's file where `TripleState` is False.|
+|Change, then Click|Raised when `Value` changes, by a click or by code, and only then. Both come before MouseUp.|
+|`Locked` True|A click leaves `Value` as it is, and raises no Change or Click.|
+|A double click|The second press raises MouseDown, then DblClick.|
+|An arrow key|Moves the focus to the previous or next control in its container.|
+|Space|Raises KeyDown, KeyPress and KeyUp, then clicks the button.|
+
+Its behaviour is RDForms' own, not measured with MSForms.
+
+> [!NOTE]
+> **Not implemented.** The button does not draw its `Picture`, and ignores `PicturePosition`, `AutoSize`, `WordWrap`, `BackStyle` and `MouseIcon`. The form's file keeps their values.
 
 ## Style Graphical
 
