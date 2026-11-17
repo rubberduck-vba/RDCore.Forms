@@ -260,4 +260,27 @@ public sealed class PagesAndTabsTests
         Assert.AreEqual(5, CodeOf(() => _ = tabs["Tab9"]));
         Assert.AreEqual(5, CodeOf(() => tabs.Remove("Tab9")));
     }
+
+    [TestMethod]
+    public void AProgramsContainer_PutsAPageInAMultiPageOnly_AndAControlInAPageButNotInAMultiPage()
+    {
+        var (form, multiPage, pages) = MultiPage();
+        var other = form.AddControl(ComponentClasses.MultiPage, "MultiPage2");
+        var frame = form.AddControl(ComponentClasses.Frame, "Frame1");
+        var text = form.AddControl(ComponentClasses.TextBox, "Text1");
+        var (page1, page2) = (pages[0], pages[1]);
+
+        Assert.AreEqual(425, CodeOf(() => form.SetContainer(page1, frame)));
+        Assert.AreEqual(425, CodeOf(() => form.SetContainer(page1, form.Root)));
+        Assert.AreEqual(425, CodeOf(() => form.SetContainer(text, multiPage)));
+        Assert.AreSame(multiPage, page1.Container);
+        Assert.AreSame(form.Root, text.Container);
+
+        form.SetContainer(text, page2);
+        form.SetContainer(page1, other);
+
+        Assert.AreSame(page2, text.Container);
+        Assert.AreSame(other, page1.Container);
+        CollectionAssert.AreEqual(new[] { page2 }, multiPage.Contents.ToArray());
+    }
 }
