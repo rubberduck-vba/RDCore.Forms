@@ -9,6 +9,34 @@ Frame and PictureBox hold controls; PictureBox and Image draw pictures. The thre
 - An etched edge runs through the middle of the caption's line, and the caption paints its own background over it.
 - Its background covers the whole control.
 - It takes no focus. It raises MouseUp before Click, and Click only where the release is over the Frame again. A press on a control it holds is that control's.
+- It scrolls the controls it holds: see [Scrolling a form or a Frame](#scrolling-a-form-or-a-frame).
+
+## Scrolling a form or a Frame
+
+A form and a Frame scroll the controls they hold. The members are MSForms', in pixels. What follows is RDForms' own, not measured with MSForms.
+
+|Member|Default|What it does|
+|---|---|---|
+|`ScrollBars`|None|The bars it can show: None, Horizontal, Vertical or Both. A bar shows where there is more to scroll than the inside shows.|
+|`KeepScrollBarsVisible`|Both|The bars of `ScrollBars` that show even with nothing to scroll.|
+|`ScrollWidth`, `ScrollHeight`|0|The size of the area it scrolls. At 0, or at no more than the inside's size, it has nothing to scroll that way.|
+|`ScrollLeft`, `ScrollTop`|0|How far it is scrolled. Setting one scrolls the inside, no further than the area's end, whether or not a bar shows, and the property keeps the value it was given. The user's scroll sets both.|
+
+The mouse wheel scrolls a form or a Frame that has more to scroll than it shows, with or without a bar. A Frame's bars are at the edges of the whole Frame, over its edge.
+
+Each scroll that moves the inside raises `Scroll(ActionX, ActionY, RequestDx, RequestDy, ActualDx, ActualDy)`: what scrolled it across and down, the distance asked, and the distance it scrolled, in pixels, to the right and down. A program's `ScrollLeft` or `ScrollTop` raises it at once; the user's scroll raises it once the scroll is done, with the distance asked the same as the distance scrolled.
+
+|What scrolled it|Action|
+|---|---|
+|A program setting `ScrollLeft` or `ScrollTop`|PropertyChange (8), in that direction only. The distance asked is the change of the property.|
+|A bar's arrow, an arrow key, or the mouse wheel|LineUp (1) or LineDown (2)|
+|A bar's track, Page Up or Page Down|PageUp (3) or PageDown (4)|
+|Home or End|Begin (5) or End (6)|
+|A bar's thumb, dragged|AbsoluteChange (7)|
+|A control taking the focus, scrolled into view|FocusRequest (10)|
+
+> [!NOTE]
+> **Not implemented.** The `Scroll` method, `VerticalScrollBarSide`, and the ControlRequest (9) action.
 
 ## PictureBox
 

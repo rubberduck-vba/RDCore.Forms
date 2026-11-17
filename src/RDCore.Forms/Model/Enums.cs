@@ -509,8 +509,8 @@ public enum ListBoxMultiSelect
 }
 
 /// <summary>
-/// The scroll bars of a VB TextBox: its <c>ScrollBars</c>, set at design time and read-only to a program. A box that is not
-/// multi-line has none, whatever it is set to.
+/// Which scroll bars a component has: a TextBox's <c>ScrollBars</c>, set at design time and read-only to a program (a box that is
+/// not multi-line has none, whatever it is set to), and a form's or a Frame's <c>ScrollBars</c> and <c>KeepScrollBarsVisible</c>.
 /// </summary>
 public enum ScrollBars
 {
@@ -737,4 +737,55 @@ public enum NegotiatePosition
     /// On the right.
     /// </summary>
     Right = 3,
+}
+
+/// <summary>
+/// What scrolled a form or a Frame, across or down: the <c>ActionX</c> and <c>ActionY</c> of its <c>Scroll</c> event.
+/// </summary>
+public enum ScrollAction
+{
+    /// <summary>
+    /// No scroll in that direction.
+    /// </summary>
+    NoChange = 0,
+    /// <summary>
+    /// A line left or up: a click on a scroll bar's arrow, or the mouse wheel.
+    /// </summary>
+    LineUp = 1,
+    /// <summary>
+    /// A line right or down: a click on a scroll bar's arrow, or the mouse wheel.
+    /// </summary>
+    LineDown = 2,
+    /// <summary>
+    /// A page left or up: a click on a scroll bar's track.
+    /// </summary>
+    PageUp = 3,
+    /// <summary>
+    /// A page right or down: a click on a scroll bar's track.
+    /// </summary>
+    PageDown = 4,
+    /// <summary>
+    /// To the left or top end.
+    /// </summary>
+    Begin = 5,
+    /// <summary>
+    /// To the right or bottom end.
+    /// </summary>
+    End = 6,
+    /// <summary>
+    /// A scroll bar's thumb dragged.
+    /// </summary>
+    AbsoluteChange = 7,
+    /// <summary>
+    /// A program set <c>ScrollLeft</c> or <c>ScrollTop</c>.
+    /// </summary>
+    PropertyChange = 8,
+    /// <summary>
+    /// A control asked to be scrolled into view.
+    /// </summary>
+    ControlRequest = 9,
+    /// <summary>
+    /// A control that took the focus was scrolled into view.
+    /// </summary>
+    FocusRequest = 10,
 }

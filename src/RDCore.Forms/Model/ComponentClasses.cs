@@ -58,8 +58,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass Form = Root("RDForms.Form", "Form",
         [P.Caption, P.BackColor, P.Enabled, P.ForeColor, P.Icon, P.Picture, P.MousePointer, P.ShowInTaskbar, P.Font, P.FontTransparent, P.StartUpPosition, P.KeyPreview,
-         P.MaxButton, P.MinButton, P.Visible, P.AutoRedraw, P.DrawMode, P.DrawStyle, P.DrawWidth, P.FillColor, P.FillStyle, P.ContextMenu],
-        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate],
+         P.MaxButton, P.MinButton, P.Visible, P.AutoRedraw, P.DrawMode, P.DrawStyle, P.DrawWidth, P.FillColor, P.FillStyle, P.ContextMenu,
+         .. ScrollingProperties],
+        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate, ContainerScroll],
         [M.Move, M.Refresh, M.SetFocus]);
 
     /// <summary>
@@ -153,8 +154,8 @@ public static class ComponentClasses
     /// <c>RDForms.Frame</c>, a container.
     /// </summary>
     public static readonly ComponentClass Frame = Control("RDForms.Frame", "Frame",
-        [P.Caption, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.MousePointer, P.TabIndex, P.ToolTipText],
-        [Click, DblClick, MouseDown, MouseMove, MouseUp], isContainer: true);
+        [P.Caption, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.MousePointer, P.TabIndex, P.ToolTipText, .. ScrollingProperties],
+        [Click, DblClick, MouseDown, MouseMove, MouseUp, ContainerScroll], isContainer: true);
 
     /// <summary>
     /// <c>RDForms.ListBox</c>. Its colors default to the window's. A program reaches its items through its list members, which its window
@@ -303,6 +304,10 @@ public static class ComponentClasses
         [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];
 
     private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll];
+
+    // A form's and a Frame's scroll bars and the area they scroll.
+    private static PropertyDefinition[] ScrollingProperties =>
+        [P.ContainerScrollBars, P.KeepScrollBarsVisible, P.ScrollHeight, P.ScrollWidth, P.ScrollLeft, P.ScrollTop];
 
     private static PropertyDefinition[] ScaleProperties => [P.ScaleMode, P.ScaleLeft, P.ScaleTop, P.ScaleWidth, P.ScaleHeight];
 

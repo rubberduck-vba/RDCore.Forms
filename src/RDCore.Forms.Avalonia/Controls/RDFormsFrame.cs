@@ -23,6 +23,10 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// It takes no focus. It raises Click, DblClick, MouseDown, MouseMove and MouseUp, MouseUp before Click; Click only where the release
 /// is over the Frame again. A press on a control it holds is that control's.
 /// </para>
+/// <para>
+/// The controls it holds scroll in its <see cref="Scroller"/>, by its <c>ScrollLeft</c> and <c>ScrollTop</c>, over at least its
+/// <c>ScrollWidth</c> by <c>ScrollHeight</c>, and it raises Scroll. Its scroll bars are at the edges of the whole Frame.
+/// </para>
 /// </remarks>
 public sealed class RDFormsFrame : Control, IRDFormsContainer
 {
@@ -50,11 +54,18 @@ public sealed class RDFormsFrame : Control, IRDFormsContainer
     public RDFormsFrame(ComponentInstance instance)
     {
         // The edge's top is 7 pixels down, through the middle of the caption's line, where Windows draws a group box's.
-        var panel = new Panel { Children = { new RDFormsEdge { Edge = RDFormsEdgeStyle.Etched, Margin = new Thickness(0, 7, 0, 0) }, caption, ChildHost } };
+        ComponentBinding.Bind(this, instance, ComponentClasses.Frame, Apply);
+        // The controls it holds scroll by its ScrollLeft and ScrollTop; the caption and the edge stay.
+        Scroller = new RDFormsScroller(instance, this, ChildHost, followsSize: false);
+        var panel = new Panel { Children = { new RDFormsEdge { Edge = RDFormsEdgeStyle.Etched, Margin = new Thickness(0, 7, 0, 0) }, caption, Scroller } };
         VisualChildren.Add(panel);
         LogicalChildren.Add(panel);
-        ComponentBinding.Bind(this, instance, ComponentClasses.Frame, Apply);
     }
+
+    /// <summary>
+    /// The scroll viewer the controls it holds are in: its offset is the Frame's <c>ScrollLeft</c> and <c>ScrollTop</c>.
+    /// </summary>
+    public ScrollViewer Scroller { get; }
 
     /// <inheritdoc/>
     public Canvas ChildHost { get; } = new();
