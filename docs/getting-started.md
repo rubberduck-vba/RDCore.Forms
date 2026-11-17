@@ -5,7 +5,7 @@ A project uses RDCore.Forms from its package, or from its source.
 
 ## Installing
 
-The RDCore.Forms package holds the model (the `RDCore.Forms` assembly) and the controls and the window (the `RDCore.Forms.Avalonia` assembly). It depends on Avalonia and on RDCore.SDK. It is a prerelease:
+The RDCore.Forms package holds the model (the `RDCore.Forms` assembly), and the controls and the window (the `RDCore.Forms.Avalonia` assembly). It depends on Avalonia and on RDCore.SDK. It is a prerelease:
 
 ```
 dotnet add package RDCore.Forms --prerelease

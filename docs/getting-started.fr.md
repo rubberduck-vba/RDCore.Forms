@@ -5,7 +5,7 @@ Un projet utilise RDCore.Forms à partir de son paquet, ou de ses sources.
 
 ## Installer
 
-Le paquet RDCore.Forms contient le modèle (l'assembly `RDCore.Forms`) ainsi que les contrôles et la fenêtre (l'assembly `RDCore.Forms.Avalonia`). Il dépend d'Avalonia et de RDCore.SDK. C'est une préversion :
+Le paquet RDCore.Forms contient le modèle (l'assemblage `RDCore.Forms`) ainsi que les contrôles et la fenêtre (l'assemblage `RDCore.Forms.Avalonia`). Il dépend d'Avalonia et de RDCore.SDK. C'est une préversion :
 
 ```
 dotnet add package RDCore.Forms --prerelease
