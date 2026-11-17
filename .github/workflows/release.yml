@@ -1,6 +1,7 @@
 name: Release
 
-# Publishes the RDCore.Forms package (the model's assembly and the Avalonia controls' assembly) to nuget.org from a v<VersionPrefix>[-suffix] tag a maintainer pushes.
+# Publishes the RDCore.Forms package (the model's assembly and the Avalonia controls' assembly) to nuget.org from a
+# v<VersionPrefix>[-suffix] tag a maintainer pushes.
 # The build job runs the repo's code with read-only permissions; the publish job runs none of it, waits for a required
 # reviewer on the `release` environment, and pushes with a short-lived key from NuGet trusted publishing (no stored secret).
 # A dry run (Run workflow) builds, tests and packs, and keeps the package and its symbols as an artifact; it never publishes.
@@ -97,7 +98,7 @@ jobs:
        grep -q '/fr/RDCore.Forms.resources.dll$' <<< "$lib" || { echo "::error::The package has no French resources for RDCore.Forms."; exit 1; }
        nuspec=$(unzip -p "packages/RDCore.Forms.$v.nupkg" RDCore.Forms.nuspec)
        for dep in Avalonia RDCore.SDK; do
-         grep -q "id=\"$dep\"" <<< "$nuspec" || { echo "::error::The package doesn't depend on $dep."; exit 1; }
+         grep -q "id=\"$dep\"" <<< "$nuspec" || { echo "::error::The package does not depend on $dep."; exit 1; }
        done
        ! grep -q 'id="RDCore.Forms' <<< "$nuspec" || { echo "::error::The package depends on an RDCore.Forms package."; exit 1; }
 

@@ -14,11 +14,11 @@
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.5" />
     <PackageReference Include="Avalonia.Skia" Version="12.0.5" />
     <PackageReference Include="Avalonia.Themes.Simple" Version="12.0.5" />
-    <!-- the model's own package dependency, which the package states for it: the model is no package dependency. -->
+    <!-- the model's own package dependency, which this package states in its place, since the model ships inside it. -->
     <PackageReference Include="RDCore.SDK" Version="$(RDCoreSdkVersion)" />
   </ItemGroup>
 
-  <!-- the model ships inside this package as its own assembly, so it is no package dependency: its assembly, xmldoc and fr resources
+  <!-- the model ships inside this package as its own assembly, so it is not a package dependency: its assembly, xmldoc and fr resources
        go in lib/, and its symbols in the .snupkg. -->
   <ItemGroup>
     <ProjectReference Include="..\RDCore.Forms\RDCore.Forms.csproj" PrivateAssets="all" />

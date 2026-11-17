@@ -5,11 +5,11 @@ RDCore.Forms est la bibliothèque de formulaires de la plateforme [RDCore](https
 
 ## Ce qu'elle contient
 
-Le paquet RDCore.Forms contient deux assemblys :
+Le paquet RDCore.Forms contient deux assemblages :
 
-|Assembly|Contenu|
+|Assemblage|Contenu|
 |---|---|
-|`RDCore.Forms`|Le modèle des formulaires : les classes de composants, leurs propriétés et leurs événements, les composants d'un formulaire, la lecture et l'écriture du [document RDForms](format/index.md) (en anglais), et le lecteur qui importe un formulaire Visual Basic 6.0 dans le modèle. Elle n'a aucune dépendance d'interface.|
+|`RDCore.Forms`|Le modèle des formulaires : les classes de composants, leurs propriétés et leurs événements, les composants d'un formulaire, la lecture et l'écriture du [document RDForms](format/index.md) (en anglais), et le lecteur qui importe un formulaire Visual Basic 6.0 dans le modèle. Il n'a aucune dépendance d'interface.|
 |`RDCore.Forms.Avalonia`|Les contrôles d'un formulaire, et la fenêtre construite à partir du modèle, rendue avec [Avalonia](https://avaloniaui.net).|
 
 > [!NOTE]
