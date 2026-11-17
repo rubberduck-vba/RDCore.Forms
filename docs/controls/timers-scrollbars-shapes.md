@@ -48,6 +48,19 @@ RDForms' own, not measured with VB6: a thumb released where it started raises no
 - A wider line is solid whatever its `BorderStyle`, and covers both ends. Across, it covers `BorderWidth` rows centred on the end's row, the extra one above where the width is even. A vertical line covers as many columns, the extra one to the left.
 - Inside Solid draws as Solid, and Transparent draws nothing. Every `DrawMode` draws as Copy Pen (13).
 
+## Converting from MSForms
+
+The names an MSForms ScrollBar and SpinButton take in RDForms (see [Converting from MSForms](index.md#converting-from-msforms)):
+
+|MSForms|RDForms|
+|---|---|
+|`ScrollBar`|`RDForms.HScrollBar` or `RDForms.VScrollBar`, by its `Orientation`. A variable declared `As ScrollBar` is `As RDForms.Control` (RDC40009), and a `TypeName` compared with `"ScrollBar"` is RDC40012.|
+|`SpinButton`|`RDForms.SpinButton`, with its members of the same name.|
+|`Value`, `Min`, `Max`, `SmallChange`, `LargeChange` and the other members of the same name|The same.|
+
+> [!NOTE]
+> **Not implemented.** A scroll bar's and a SpinButton's BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.
+
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
 

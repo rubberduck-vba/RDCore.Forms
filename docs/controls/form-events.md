@@ -99,6 +99,22 @@ Where more than one CommandButton has `Default` or `Cancel` True, the first the 
 
 What a character typed in a ListBox selects is on the [Lists](lists.md) page.
 
+## Converting from MSForms
+
+The handlers of an MSForms form and its controls take these names and parameters in RDForms (see [Converting from MSForms](index.md#converting-from-msforms)):
+
+|MSForms|RDForms|
+|---|---|
+|`UserForm_Initialize`, `UserForm_Activate` and the form's other handlers|`Form_Initialize`, `Form_Activate`, and so on.|
+|`UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)`|`Form_QueryUnload`, its parameters as declared.|
+|`Enter()`|`GotFocus()`.|
+|`Exit(ByVal Cancel As MSForms.ReturnBoolean)`|`Validate(Cancel As Boolean)`. Validate is raised only where the control that takes the focus has `CausesValidation` True: RDC40008 marks each Exit handler ported.|
+|`BeforeUpdate(ByVal Cancel As MSForms.ReturnBoolean)`, `AfterUpdate()`|`BeforeUpdate(Cancel As Boolean)`, `AfterUpdate()`.|
+|`DblClick(ByVal Cancel As MSForms.ReturnBoolean)`|`DblClick(Cancel As Boolean)`.|
+|`KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)`, and KeyDown's and KeyUp's `KeyCode`|`KeyAscii As Integer`, `KeyCode As Integer`.|
+|MouseDown, MouseMove and MouseUp, `X` and `Y` in points|The same, `X` and `Y` in pixels.|
+|BeforeDragOver, BeforeDropOrPaste and Error|The same, with `RDForms.DataObject`, `RDForms.ReturnEffect`, `RDForms.DragState` and `RDForms.Action`, and ByRef values for the Return* wrappers.|
+
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
 

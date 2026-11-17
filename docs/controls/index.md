@@ -81,6 +81,27 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |Tab order|One order across the whole form, by `TabIndex`, the form's order deciding a tie. A `TabIndex` past the last place takes the first free place, in the form's order.|
 |Focus|Tab skips a control that takes no focus (a Label, a Frame, an Image, a Timer, a Shape, a Line or a Data control), one whose `TabStop` is False, and one that is hidden or disabled or in a hidden or disabled container.|
 
+## Converting from MSForms
+
+[`FormsPortMap.MSForms`](../api/RDCore.Forms.Porting.FormsPortMap.yml) gives the RDForms name of each MSForms class, member, event and constant, for a ported form and its code; [Importing MSForms](../import/msforms.md) reads a form's file with it. Every page of this section lists the names its own controls take. The names of every class:
+
+|MSForms|RDForms|
+|---|---|
+|`UserForm`|`RDForms.Form`. A handler such as `UserForm_Click` is `Form_Click`.|
+|`TextBox`, `MSForms.Control` and each other class|The class of the same name: `RDForms.TextBox`, `RDForms.Control`.|
+|`Controls.Add("Forms.TextBox.1")`|`Controls.Add("RDForms.TextBox")`, for each control `Controls.Add` creates. `Forms.ScrollBar.1` is `RDForms.VScrollBar`.|
+|`Left`, `Top`, `Width`, `Height` and `Move`, in points|The same, in pixels.|
+|`ControlTipText`|`ToolTipText`.|
+|A form's `InsideWidth` and `InsideHeight`|`ScaleWidth` and `ScaleHeight`, in pixels.|
+|An `fm` enum, such as `fmBorderStyle`|The RDForms enum without the `fm`: `RDForms.BorderStyle`. A constant, such as `fmBorderStyleSingle`, is its value, `1`.|
+|`ReturnInteger`, `ReturnBoolean`, `ReturnString`, `ReturnSingle`|A ByRef `Integer`, `Boolean`, `String` or `Single`. The wrapper's `.Value` is the argument itself.|
+|`DataObject`, `ReturnEffect`, `Font`, `NewFont`|`RDForms.DataObject`, `RDForms.ReturnEffect`, `RDForms.Font`.|
+|`ThunderDFrame`, the window class of a UserForm|None: a ported form is an RDForms window. A `FindWindow` call that looks for it is RDC40013.|
+|A member of the same name and meaning (`Caption`, `BackColor`, `Enabled`, ...)|The same.|
+
+> [!NOTE]
+> **Not implemented.** A form has no `Zoom`, `DrawBuffer` or clipboard and undo members (`Copy`, `Cut`, `Paste`, `UndoAction`, `RedoAction`, `CanPaste`, `CanUndo` and `CanRedo`), and raises no Zoom event. Its BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.
+
 ## A control's container at run time
 
 A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(control, container)`. It places the control, with the controls it holds, in the form or in a Frame or a PictureBox of the same form, and raises `FormDefinition.ContainerChanged`. A shown form's view moves the control at once. Every control has a `Container` except a Timer (`ComponentClass.HasContainer`); a menu item has none.

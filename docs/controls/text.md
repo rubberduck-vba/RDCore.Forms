@@ -75,6 +75,21 @@ A Label's `Picture` and `PicturePosition` are an RD-VBA addition: VB6's Label ha
 |`Text` from code|A different text selects nothing, the caret before the first character. The same text keeps the selection, with no Change.|
 |A new line|`SelStart` and `SelLength` count its CR and its LF, and a selection can start or end between them. The box shows the caret at the nearest place it can.|
 
+## Converting from MSForms
+
+The names an MSForms Label and TextBox take in RDForms (see [Converting from MSForms](index.md#converting-from-msforms)):
+
+|MSForms|RDForms|
+|---|---|
+|`Accelerator` of a Label|A `&` before the access key's letter in `Caption`. An assignment of `Accelerator` from code is RDC40001.|
+|`TextAlign` of a Label or a TextBox|`Alignment`, with VB's values: `fmTextAlignLeft` (1) is 0, `fmTextAlignCenter` (2) is 2, and `fmTextAlignRight` (3) is 1.|
+|`Value` of a TextBox|`Text`.|
+|`BorderStyle`, `fmBorderStyleNone` and `fmBorderStyleSingle`|`BorderStyle`, 0 and 1.|
+|`MultiLine`, `SelStart`, `SelLength`, `SelText`, `PasswordChar` and the other members of the same name|The same.|
+
+> [!NOTE]
+> **Not implemented.** A TextBox has no `IMEMode` and no `Copy`, `Cut`, `Paste` or `CanPaste`. A Label's and a TextBox's BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.
+
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
 
