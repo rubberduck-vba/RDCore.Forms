@@ -398,7 +398,7 @@ public static class Events
         Cancel, DroppedControl, Action, Data, X, Y, Effect, Shift);
 
     /// <summary>
-    /// A control met an error it can't return to code, such as one while it draws. A handler that sets <c>CancelDisplay</c> to True
+    /// A control met an error it cannot return to code, such as one while it draws. A handler that sets <c>CancelDisplay</c> to True
     /// keeps the error's message from being shown. Declared and not raised.
     /// </summary>
     public static readonly EventDefinition Error = new("Error",
@@ -431,7 +431,7 @@ public static class Events
     public static readonly EventDefinition PageBeforeDropOrPaste = new("BeforeDropOrPaste", [Index, .. ContainerBeforeDropOrPaste.Parameters]);
 
     /// <summary>
-    /// A MultiPage met an error it can't return to code. <c>Index</c> is the page's; a handler that sets <c>CancelDisplay</c> to True
+    /// A MultiPage met an error it cannot return to code. <c>Index</c> is the page's; a handler that sets <c>CancelDisplay</c> to True
     /// keeps the error's message from being shown. Declared and not raised.
     /// </summary>
     public static readonly EventDefinition PageError = new("Error", [Index, .. Error.Parameters]);

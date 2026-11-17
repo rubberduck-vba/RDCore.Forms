@@ -33,7 +33,7 @@ Each MSForms class reads as the RDForms class the MSForms port map gives it: a `
 |---|---|
 |`Left`, `Top`, `Width`, `Height`, in points|The same, in pixels (1/96 inch, 0.75 point). The form's size is its client area's, from the `.frm` file's `ClientWidth` and `ClientHeight` in twips (15 a pixel).|
 |`ControlTipText`|`ToolTipText`.|
-|`TextAlign`|`Alignment`, with VB's values: left 0, right 1, center 2.|
+|`TextAlign`|`Alignment`, with VB's values: left 0, right 1, centre 2.|
 |A TextBox's `Value`, a ComboBox's `Value`|`Text`.|
 |A ToggleButton|An `RDForms.ToggleButton`. Its `Value` is True where the form stores 1, and False where it stores 0 or nothing.|
 |A SpinButton|An `RDForms.SpinButton`, with its `Value`, `Min`, `Max`, `SmallChange`, `Orientation` and `Delay`.|

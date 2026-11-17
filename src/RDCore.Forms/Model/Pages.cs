@@ -150,7 +150,7 @@ public sealed class Pages : IReadOnlyList<ComponentInstance>
 // How a MultiPage's or a TabStrip's Value follows its selected page or tab as one is added or removed.
 internal static class SelectedIndexes
 {
-    // One was added at index, so there are now count: the first one added is selected, and one added at or before the selected one moves it along.
+    // One was added at index, so the collection holds count: the first one added is selected, and one added at or before the selected one moves it along.
     public static void Inserted(ComponentInstance component, int index, int count)
     {
         var selected = component.Get(Properties.SelectedIndex);
@@ -160,7 +160,7 @@ internal static class SelectedIndexes
             component.Set(Properties.SelectedIndex, selected + 1);
     }
 
-    // The one at index was removed, so there are now count: one before the selected one moves it back, and the selected one's place goes to
+    // The one at index was removed, so the collection holds count: one before the selected one moves it back, and the selected one's place goes to
     // the one after it, or the last.
     public static void Removed(ComponentInstance component, int index, int count)
     {

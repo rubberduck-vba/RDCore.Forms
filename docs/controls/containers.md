@@ -1,6 +1,6 @@
 # Containers and pictures
 
-Frame and PictureBox hold controls; PictureBox and Image draw pictures. The three controls' behaviour was measured with VB6. A MultiPage holds pages of controls, one shown at a time, and a TabStrip shows tabs over an area that holds nothing: the two are MS Forms classes, and their behaviour is RDForms' own, not measured with MS Forms.
+Frame and PictureBox hold controls; PictureBox and Image draw pictures. The three controls' behaviour was measured with VB6. A MultiPage holds pages of controls, one shown at a time, and a TabStrip shows tabs over an area that holds nothing: the two are MSForms classes, and their behaviour is RDForms' own, not measured with MSForms.
 
 ## Frame
 
@@ -98,7 +98,7 @@ A MultiPage added by a program gets two pages, named `Page` and the first free n
 [`Tabs`](../api/RDCore.Forms.Model.Tabs.yml) is a TabStrip's collection of tabs, as a program's `Tabs` is: `Count`, `Item` by index or name, `Add` (named `Tab` and the first free number by default), `Remove`, `Clear` and `SelectedItem`, as a MultiPage's `Pages` has. An index outside the tabs, a name no tab has, and a name another tab has are 5.
 
 > [!NOTE]
-> **Not implemented.** A `Value` outside the pages or the tabs raises no error 380, and a page's or a tab's index cannot be changed. A page's `Picture` is not drawn, and a page has no scroll bars. A MultiPage declares Layout, AddControl and RemoveControl and does not raise them, and it has no Scroll event. The order of the events was not measured with MS Forms.
+> **Not implemented.** A `Value` outside the pages or the tabs raises no error 380, and a page's or a tab's index cannot be changed. A page's `Picture` is not drawn, and a page has no scroll bars. A MultiPage declares Layout, AddControl and RemoveControl and does not raise them, and it has no Scroll event. The order of the events was not measured with MSForms.
 
 ## A size from the picture
 
