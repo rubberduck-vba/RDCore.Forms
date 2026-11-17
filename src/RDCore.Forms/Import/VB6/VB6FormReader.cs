@@ -122,7 +122,7 @@ public static partial class VB6FormReader
 
     // The path a cited companion is looked for at, and the file found there. A rooted name, a network path among them, is not in the
     // designer file's folder, and a name with a NUL is no file's: neither is looked for.
-    private static (string LookedFor, string? File) FindCompanion(string folder, string cited)
+    internal static (string LookedFor, string? File) FindCompanion(string folder, string cited)
     {
         if (cited.Contains('\0') || Path.IsPathRooted(cited))
         {
