@@ -26,8 +26,8 @@
 |`RDForms.Shape`|[`RDFormsShape`](../api/RDCore.Forms.Avalonia.Controls.RDFormsShape.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
 |`RDForms.Line`|[`RDFormsLine`](../api/RDCore.Forms.Avalonia.Controls.RDFormsLine.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
 |`RDForms.Data`|[`RDFormsData`](../api/RDCore.Forms.Avalonia.Controls.RDFormsData.yml)|None|[Data control](data.md)|
-|`RDForms.ToggleButton`|[`RDFormsToggleButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsToggleButton.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Buttons](buttons.md)|
-|`RDForms.SpinButton`|[`RDFormsSpinButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsSpinButton.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, SpinDown, SpinUp|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
+|`RDForms.ToggleButton`|[`RDFormsToggleButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsToggleButton.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp, Validate|[Buttons](buttons.md)|
+|`RDForms.SpinButton`|[`RDFormsSpinButton`](../api/RDCore.Forms.Avalonia.Controls.RDFormsSpinButton.yml)|Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, SpinDown, SpinUp, Validate|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
 |`RDForms.Menu`|The window's [`RDFormsMenuBar`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsMenuBar.yml)|Click|[Menus](menus.md)|
 |A placed UserControl, such as `Project1.Gauge`|[`RDFormsUserControl`](../api/RDCore.Forms.Avalonia.Controls.RDFormsUserControl.yml)|None of its own; its UserControl's root and controls raise theirs|[UserControls](usercontrols.md)|
 

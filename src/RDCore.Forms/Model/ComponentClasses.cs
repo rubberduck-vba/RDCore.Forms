@@ -308,8 +308,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ToggleButton = Control("RDForms.ToggleButton", "ToggleButton",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.MouseIcon, P.Picture, P.PicturePosition, P.ToggleButtonValue,
-         P.TripleState, P.Locked, P.AutoSize, P.BackStyle, P.WordWrap, P.ToolTipText, P.TabStop, P.TabIndex],
-        [Click, DblClick, Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
+         P.TripleState, P.Locked, P.AutoSize, P.BackStyle, P.WordWrap, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation],
+        [Click, DblClick, Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
+         AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackStyle, BackStyle.Opaque), (P.WordWrap, true)));
 
     /// <summary>
@@ -318,8 +319,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass SpinButton = Control("RDForms.SpinButton", "SpinButton",
         [P.BackColor, P.ForeColor, P.Enabled, P.MousePointer, P.MouseIcon, P.SpinButtonValue, P.SpinButtonMin, P.SpinButtonMax,
-         P.SpinButtonSmallChange, P.Orientation, P.Delay, P.ToolTipText, P.TabStop, P.TabIndex],
-        [Change, SpinUp, SpinDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp]);
+         P.SpinButtonSmallChange, P.Orientation, P.Delay, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation],
+        [Change, SpinUp, SpinDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, Validate, BeforeUpdate, AfterUpdate, BeforeDragOver,
+         BeforeDropOrPaste, Error]);
 
     /// <summary>
     /// Every class of the catalog.

@@ -46,7 +46,8 @@ public sealed class ToggleAndSpinClassTests
         Assert.AreEqual(FormColor.FromSystem(SystemColor.ButtonFace), button.Get(P.BackColor));
         Assert.AreEqual(FormColor.FromSystem(SystemColor.ButtonText), button.Get(P.ForeColor));
         CollectionAssert.AreEquivalent(
-            new[] { "Click", "DblClick", "Change", "GotFocus", "LostFocus", "KeyDown", "KeyPress", "KeyUp", "MouseDown", "MouseMove", "MouseUp" },
+            new[] { "Click", "DblClick", "Change", "GotFocus", "LostFocus", "KeyDown", "KeyPress", "KeyUp", "MouseDown", "MouseMove", "MouseUp",
+                "Validate", "BeforeUpdate", "AfterUpdate", "BeforeDragOver", "BeforeDropOrPaste", "Error" },
             ComponentClasses.ToggleButton.Events.Select(e => e.Name).ToArray());
     }
 
@@ -71,7 +72,8 @@ public sealed class ToggleAndSpinClassTests
         Assert.AreEqual(50, spin.Get(P.Delay));
         Assert.IsFalse(P.Delay.Accepts(-1));
         CollectionAssert.AreEquivalent(
-            new[] { "Change", "SpinUp", "SpinDown", "GotFocus", "LostFocus", "KeyDown", "KeyPress", "KeyUp" },
+            new[] { "Change", "SpinUp", "SpinDown", "GotFocus", "LostFocus", "KeyDown", "KeyPress", "KeyUp", "Validate", "BeforeUpdate",
+                "AfterUpdate", "BeforeDragOver", "BeforeDropOrPaste", "Error" },
             ComponentClasses.SpinButton.Events.Select(e => e.Name).ToArray());
     }
 
