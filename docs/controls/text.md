@@ -9,7 +9,7 @@ Label and TextBox. The behaviour below was measured with VB6.
 |Property|Behaviour|
 |---|---|
 |`Caption`, `UseMnemonic`|Where `UseMnemonic` is set, a single `&` marks an access key; otherwise every `&` is drawn.|
-|`Alignment`, `WordWrap`|Align and wrap the caption.|
+|`Alignment`, `WordWrap`|Align the caption. It wraps at the label's width, except where `AutoSize` is set and `WordWrap` is not: that caption stays on one line.|
 |`BackStyle`|Transparent paints no background.|
 |`BorderStyle`, `Appearance`|A single border is a sunken edge when 3-D, and one pixel when flat.|
 |`Picture`, `PicturePosition`|RD-VBA addition: a picture laid out against the caption, as MSForms' Label lays it out. See [Picture](#picture).|

@@ -167,9 +167,10 @@ public sealed class LabelPictureTests
     [TestMethod]
     public void BesideTheCaption_ThePictureLeavesItRoom_AndAboveIt_ThePictureKeepsItsHeight()
     {
-        // The label is as tall as the picture, so the gap and the caption below it do not fit, whatever the font.
+        // The label is as tall as the picture, so the gap and the caption below it do not fit, whatever the font. The caption beside it is
+        // on one line (AutoSize set, WordWrap not), so it is measured whole.
         var (beside, above) = UI.Run(() => (
-            Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Abcdefgh").Set(P.PicturePosition, PicturePosition.LeftCenter)),
+            Laid(Label(73, 53, Bitmap(64, 48, Blue, Green), "Abcdefgh").Set(P.PicturePosition, PicturePosition.LeftCenter).Set(P.AutoSize, true)),
             Laid(Label(73, 48, Bitmap(64, 48, Blue, Green), "Ab").Set(P.PicturePosition, PicturePosition.AboveCenter))));
 
         Assert.IsGreaterThan(9d, beside.Text.Width);
@@ -182,8 +183,9 @@ public sealed class LabelPictureTests
     [TestMethod]
     public void ACaptionWiderThanTheLabel_StartsTheBlockAtItsLeftEdge()
     {
+        // a caption on one line (AutoSize set, WordWrap not): one that wraps is no wider than its label.
         var (picture, text) = UI.Run(() =>
-            Laid(Label(73, 60, Bitmap(16, 12, Red, Green), new string('W', 120)).Set(P.PicturePosition, PicturePosition.AboveLeft)));
+            Laid(Label(73, 60, Bitmap(16, 12, Red, Green), new string('W', 120)).Set(P.PicturePosition, PicturePosition.AboveLeft).Set(P.AutoSize, true)));
 
         Assert.IsGreaterThan(73d, text.Width);
         Assert.AreEqual((0d, 0d), (picture.X, text.X));

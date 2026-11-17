@@ -1,6 +1,9 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
 using P = RDCore.Forms.Model.Properties;
@@ -112,6 +115,27 @@ public sealed class TextControlTests
 
         Assert.AreEqual("E_xit", with);
         Assert.AreEqual("E&xit", without);
+    }
+
+    [TestMethod]
+    [DataRow(false, false, true, DisplayName = "fixed size: wraps")]
+    [DataRow(false, true, true, DisplayName = "fixed size, WordWrap: wraps")]
+    [DataRow(true, false, false, DisplayName = "AutoSize: one line")]
+    [DataRow(true, true, true, DisplayName = "AutoSize, WordWrap: wraps")]
+    public void ALabel_WrapsItsCaptionAtItsWidth_UnlessItSizesItselfAcross(bool autoSize, bool wordWrap, bool wraps)
+    {
+        var wrapping = UI.Run(() =>
+        {
+            var instance = new ComponentInstance(ComponentClasses.Label, "Label1").Set(P.Caption, "A caption longer than its label is wide");
+            var label = new RDFormsLabel(instance);
+            var (window, _) = ControlHost.Show(label);
+            instance.Set(P.AutoSize, autoSize).Set(P.WordWrap, wordWrap);
+            var shown = label.GetVisualDescendants().OfType<TextBlock>().Single().TextWrapping;
+            window.Close();
+            return shown;
+        });
+
+        Assert.AreEqual(wraps ? TextWrapping.Wrap : TextWrapping.NoWrap, wrapping);
     }
 
     [TestMethod]
