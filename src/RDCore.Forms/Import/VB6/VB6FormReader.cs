@@ -448,7 +448,7 @@ public static partial class VB6FormReader
             }
 
             if (TryConvert(definition.ValueType, literal, out var value)
-                && instance.TryRead(definition, CodeUnits.IsExtent(definition) && value is double twips ? twips / ScaleModeExtensions.TwipsPerPixel : value))
+                && instance.TryRead(definition, CodeUnits.IsExtent(definition) && value is double twips ? Units.FromTwips(twips) : value))
             {
                 return;
             }

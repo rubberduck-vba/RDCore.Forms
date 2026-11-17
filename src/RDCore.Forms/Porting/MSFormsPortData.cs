@@ -38,7 +38,8 @@ internal static class MSFormsPortData
         ],
         handlerObjects: [("UserForm", "Form")],
         constants: MSFormsEnums.All.SelectMany(e => e.Members)
-            .Select(m => (m.Name, m.Value.ToString(CultureInfo.InvariantCulture))));
+            .Select(m => (m.Name, m.Value.ToString(CultureInfo.InvariantCulture))),
+        formWindowClass: "ThunderDFrame");
 
     private static TypePort[] Types() =>
     [

@@ -75,6 +75,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |Rule|Behaviour|
 |---|---|
 |Units|The model holds a control's `Left`, `Top`, `Width` and `Height` in pixels (1/96 inch, 15 twips), whatever its container's `ScaleMode`. A program's code reads them in its own unit: VB6 code in the container's scale (twips in a Frame, and for a form's own), VBA code in points, and code made for RDForms in pixels ([`CodeUnits`](../api/RDCore.Forms.Model.CodeUnits.yml)). A Line's ends are in its container's scale.|
+|Converting|A pixel is 15 twips and 0.75 point. [`Units`](../api/RDCore.Forms.Model.Units.yml) converts a length: `FromTwips` and `FromPoints` give pixels, `ToTwips` and `ToPoints` give the length in twips or points. A length keeps its fractions: 7 twips are 7/15 of a pixel.|
 |Containers|A control placed in a Frame or a PictureBox is shown in it. A control placed in any other component is not shown.|
 |Stacking|In each container, the first control the form holds is on top until [`ZOrder`](methods.md#zorder) moves one. A windowless control (a Label, an Image, a Shape or a Line) is under every windowed one.|
 |Tab order|One order across the whole form, by `TabIndex`, the form's order deciding a tie. A `TabIndex` past the last place takes the first free place, in the form's order.|

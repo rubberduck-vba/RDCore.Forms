@@ -23,6 +23,7 @@ public sealed class PortDiagnosticTests
         PortDiagnosticKind.UnitWrapped => PortDiagnostic.UnitWrapped("FromTwips"),
         PortDiagnosticKind.CoordinatesConverted => PortDiagnostic.CoordinatesConverted("ToPoints"),
         PortDiagnosticKind.ScrollBarTypeNameChanged => PortDiagnostic.ScrollBarTypeNameChanged("RDForms.HScrollBar"),
+        PortDiagnosticKind.FindWindowThunderDFrame => PortDiagnostic.FindWindowThunderDFrame("FindWindowA"),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
     };
 
@@ -66,6 +67,7 @@ public sealed class PortDiagnosticTests
     [DataRow(PortDiagnosticKind.UnitWrapped, PortDiagnosticSeverity.Hint)]
     [DataRow(PortDiagnosticKind.CoordinatesConverted, PortDiagnosticSeverity.Hint)]
     [DataRow(PortDiagnosticKind.ScrollBarTypeNameChanged, PortDiagnosticSeverity.Warning)]
+    [DataRow(PortDiagnosticKind.FindWindowThunderDFrame, PortDiagnosticSeverity.Warning)]
     public void EveryKind_HasItsSeverity(PortDiagnosticKind kind, PortDiagnosticSeverity severity)
     {
         Assert.AreEqual(severity, PortDiagnostic.SeverityOf(kind));
@@ -110,6 +112,23 @@ public sealed class PortDiagnosticTests
         Assert.AreEqual("4 has no RDForms value, so the port leaves it as written.", InCulture(English, () => diagnostic.Message));
         Assert.AreEqual("4 n'a pas de valeur RDForms, donc le portage le laisse tel quel.", InCulture(French, () => diagnostic.Message));
         Assert.AreEqual("RDC40002: 4 has no RDForms value, so the port leaves it as written.", InCulture(English, diagnostic.ToString));
+    }
+
+    [TestMethod]
+    public void FindWindowThunderDFrame_IsRDC40013_AWarning_NamingTheFunctionAndTheClass()
+    {
+        var diagnostic = PortDiagnostic.FindWindowThunderDFrame("FindWindowA");
+        Assert.AreEqual("RDC40013", diagnostic.Code);
+        Assert.AreEqual(PortDiagnosticSeverity.Warning, diagnostic.Severity);
+        Assert.AreEqual(
+            "FindWindowA looks for a UserForm's window by its class, ThunderDFrame. A ported form is an RDForms window, so the call finds none: "
+            + "to change the form's icon, set its Icon property.",
+            diagnostic.MessageIn(English));
+        Assert.AreEqual(
+            "FindWindowA cherche la fenêtre d'un UserForm par sa classe, ThunderDFrame. Un formulaire porté est une fenêtre RDForms, donc l'appel "
+            + "n'en trouve aucune : pour changer l'icône du formulaire, affectez sa propriété Icon.",
+            diagnostic.MessageIn(French));
+        Assert.Contains(FormsPortMap.MSForms.FormWindowClass!, diagnostic.MessageIn(English));
     }
 
     [TestMethod]

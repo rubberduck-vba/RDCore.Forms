@@ -36,10 +36,12 @@ public sealed class FormsPortMap
 
     internal FormsPortMap(string library, LegacyUnit legacyUnit, IReadOnlyList<TypePort> types, IReadOnlyList<MemberPort> members,
         IReadOnlyList<EventPort> events, IEnumerable<(string ProgId, string RDFormsName)> progIds,
-        IEnumerable<(string LegacyObject, string RDFormsObject)> handlerObjects, IEnumerable<(string Legacy, string RDForms)> constants)
+        IEnumerable<(string LegacyObject, string RDFormsObject)> handlerObjects, IEnumerable<(string Legacy, string RDForms)> constants,
+        string? formWindowClass = null)
     {
         Library = library;
         LegacyUnit = legacyUnit;
+        FormWindowClass = formWindowClass;
         Types = types;
         Members = members;
         Events = events;
@@ -94,6 +96,14 @@ public sealed class FormsPortMap
     /// <see cref="ValuePort.Constants"/>, and take precedence over these where the constant is that member's value.
     /// </summary>
     public IReadOnlyDictionary<string, string> Constants { get; }
+
+    /// <summary>
+    /// The window class of the library's forms, as code that finds a form's window gives it to user32's <c>FindWindow</c>:
+    /// <c>ThunderDFrame</c> for a UserForm; <see langword="null"/> for the VB6 map, which has none. A ported form is an RDForms window,
+    /// so the code port reports a call given this class as <see cref="PortDiagnosticKind.FindWindowThunderDFrame"/>. Windows compares
+    /// class names without regard to case.
+    /// </summary>
+    public string? FormWindowClass { get; }
 
     /// <summary>
     /// How a legacy type name ports.
