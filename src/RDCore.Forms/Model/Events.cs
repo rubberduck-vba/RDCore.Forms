@@ -66,7 +66,8 @@ public static class Events
     public static readonly EventDefinition MouseUp = new("MouseUp", Button, Shift, X, Y);
 
     /// <summary>
-    /// A TextBox's or ComboBox's text, a scroll bar's value, a DirListBox's <c>Path</c> or a DriveListBox's <c>Drive</c> changed.
+    /// A TextBox's or ComboBox's text, a scroll bar's, a ToggleButton's or a SpinButton's value, a DirListBox's <c>Path</c> or a
+    /// DriveListBox's <c>Drive</c> changed.
     /// </summary>
     public static readonly EventDefinition Change = new("Change");
 
@@ -280,4 +281,16 @@ public static class Events
     /// Another of a Data control's records became current.
     /// </summary>
     public static readonly EventDefinition Reposition = new("Reposition");
+
+    /// <summary>
+    /// The user clicked a SpinButton's up or right arrow, or holds it down. The value moves toward its <c>Max</c> after the event,
+    /// and its Change follows where the value changed.
+    /// </summary>
+    public static readonly EventDefinition SpinUp = new("SpinUp");
+
+    /// <summary>
+    /// The user clicked a SpinButton's down or left arrow, or holds it down. The value moves toward its <c>Min</c> after the event,
+    /// and its Change follows where the value changed.
+    /// </summary>
+    public static readonly EventDefinition SpinDown = new("SpinDown");
 }

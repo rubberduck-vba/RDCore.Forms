@@ -738,3 +738,22 @@ public enum NegotiatePosition
     /// </summary>
     Right = 3,
 }
+
+/// <summary>
+/// Whether a SpinButton's arrows are one above the other or side by side: its <c>Orientation</c>.
+/// </summary>
+public enum ControlOrientation
+{
+    /// <summary>
+    /// By the control's shape, the default: side by side where it is wider than it is tall, and one above the other otherwise.
+    /// </summary>
+    Auto = -1,
+    /// <summary>
+    /// One above the other.
+    /// </summary>
+    Vertical = 0,
+    /// <summary>
+    /// Side by side.
+    /// </summary>
+    Horizontal = 1,
+}

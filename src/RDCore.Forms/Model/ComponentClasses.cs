@@ -8,8 +8,9 @@ using P = RDCore.Forms.Model.Properties;
 namespace RDCore.Forms.Model;
 
 /// <summary>
-/// The component classes of the <c>RDForms</c> library that VB6's <c>VB</c> library ports to: its designer roots, its intrinsic
-/// controls and its menu. A VB6 designer file's <c>VB.TextBox</c> is an <c>RDForms.TextBox</c>.
+/// The component classes of the <c>RDForms</c> library that VB6's <c>VB</c> library and MSForms port to: the designer roots, the
+/// intrinsic controls and the menu. A VB6 designer file's <c>VB.TextBox</c> is an <c>RDForms.TextBox</c>, and an MSForms
+/// <c>ToggleButton</c> is an <c>RDForms.ToggleButton</c>.
 /// </summary>
 /// <remarks>
 /// Each class lists the properties of it that the model holds, then the ones every class of its kind has: <c>Left</c> and
@@ -51,6 +52,8 @@ public static class ComponentClasses
         ["RDForms.Timer"] = "Enabled",
         ["RDForms.Data"] = "Caption",
         ["RDForms.Menu"] = "Enabled",
+        ["RDForms.ToggleButton"] = "Value",
+        ["RDForms.SpinButton"] = "Value",
     };
 
     /// <summary>
@@ -277,11 +280,30 @@ public static class ComponentClasses
         defaultMember: DefaultMembers["RDForms.Menu"]);
 
     /// <summary>
+    /// <c>RDForms.ToggleButton</c>: a push button that stays down once clicked, and comes up at the next click. Its <c>Value</c> is
+    /// True while it is down, False while it is up, and Null where it is neither. Its caption wraps by default.
+    /// </summary>
+    public static readonly ComponentClass ToggleButton = Control("RDForms.ToggleButton", "ToggleButton",
+        [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.MouseIcon, P.Picture, P.PicturePosition, P.ToggleButtonValue,
+         P.TripleState, P.Locked, P.AutoSize, P.BackStyle, P.WordWrap, P.ToolTipText, P.TabStop, P.TabIndex],
+        [Click, DblClick, Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
+        Defaults((P.BackStyle, BackStyle.Opaque), (P.WordWrap, true)));
+
+    /// <summary>
+    /// <c>RDForms.SpinButton</c>: two arrows that move a value up and down, one above the other or side by side by its
+    /// <c>Orientation</c>.
+    /// </summary>
+    public static readonly ComponentClass SpinButton = Control("RDForms.SpinButton", "SpinButton",
+        [P.BackColor, P.ForeColor, P.Enabled, P.MousePointer, P.MouseIcon, P.SpinButtonValue, P.SpinButtonMin, P.SpinButtonMax,
+         P.SpinButtonSmallChange, P.Orientation, P.Delay, P.ToolTipText, P.TabStop, P.TabIndex],
+        [Change, SpinUp, SpinDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp]);
+
+    /// <summary>
     /// Every class of the catalog.
     /// </summary>
     public static IReadOnlyList<ComponentClass> All { get; } =
         [Form, MDIForm, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
-         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data];
+         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data, ToggleButton, SpinButton];
 
     private static readonly Dictionary<string, ComponentClass> byTypeName =
         All.ToDictionary(c => c.TypeName, StringComparer.OrdinalIgnoreCase);

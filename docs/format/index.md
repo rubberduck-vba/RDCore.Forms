@@ -47,6 +47,7 @@ A component that its parent cannot hold, such as a control written in a CommandB
 |---|---|---|
 |String|The text.|`Caption="&amp;OK"`|
 |Boolean|`True` or `False`.|`Enabled="False"`|
+|Boolean or Null, a ToggleButton's `Value`|`True`, `False` or `Null`.|`Value="Null"`|
 |Number|Invariant digits, with `.` for decimals.|`Left="120"`, `Size="8.25"`|
 |Enumeration|The member's name; a number is read too.|`BorderStyle="FixedSingle"`|
 |Colour|A system colour by its name, or `#RRGGBB`.|`BackColor="ButtonFace"`, `ForeColor="#1234AB"`|
