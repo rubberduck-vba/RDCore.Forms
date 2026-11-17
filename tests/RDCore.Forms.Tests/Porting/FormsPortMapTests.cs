@@ -23,6 +23,13 @@ public sealed class FormsPortMapTests
         Assert.AreEqual(LegacyUnit.Points, MSForms.LegacyUnit);
     }
 
+    [TestMethod]
+    public void TheMSFormsMap_NamesTheUserFormWindowClass_AndTheVB6MapNone()
+    {
+        Assert.AreEqual("ThunderDFrame", MSForms.FormWindowClass);
+        Assert.IsNull(VB6.FormWindowClass);
+    }
+
     // Types
 
     [TestMethod]

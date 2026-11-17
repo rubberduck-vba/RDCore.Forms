@@ -48,4 +48,7 @@
   <data name="ScrollBarTypeNameChanged" xml:space="preserve">
     <value>This control is a {0} after the port, so its TypeName is no longer ScrollBar: compare it with {0}.</value>
   </data>
+  <data name="FindWindowThunderDFrame" xml:space="preserve">
+    <value>{0} looks for a UserForm's window by its class, ThunderDFrame. A ported form is an RDForms window, so the call finds none: to change the form's icon, set its Icon property.</value>
+  </data>
 </root>

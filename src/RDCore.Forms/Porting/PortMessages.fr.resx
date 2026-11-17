@@ -48,4 +48,7 @@
   <data name="ScrollBarTypeNameChanged" xml:space="preserve">
     <value>Ce contrôle est un {0} après le portage, donc son TypeName n'est plus ScrollBar : comparez-le avec {0}.</value>
   </data>
+  <data name="FindWindowThunderDFrame" xml:space="preserve">
+    <value>{0} cherche la fenêtre d'un UserForm par sa classe, ThunderDFrame. Un formulaire porté est une fenêtre RDForms, donc l'appel n'en trouve aucune : pour changer l'icône du formulaire, affectez sa propriété Icon.</value>
+  </data>
 </root>
