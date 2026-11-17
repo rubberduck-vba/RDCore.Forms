@@ -24,9 +24,9 @@ namespace RDCore.Forms.Avalonia.Rendering;
 /// The window's client area is the form's: its size is the root's <c>Width</c> and <c>Height</c>, in pixels, and follows them. A user
 /// who resizes the window sets them. The client area scrolls in its <see cref="Scroller"/>, by the root's <c>ScrollLeft</c> and
 /// <c>ScrollTop</c>, over at least its <c>ScrollWidth</c> by <c>ScrollHeight</c>, and raises the root's Scroll. The form's menus are on its
-/// <see cref="MenuBar"/>, above the client area, and a menu item's shortcut chooses it before a control or the root sees the key. Enter clicks the focused CommandButton, or else the
-/// form's first CommandButton whose <c>Default</c> is True, and Esc the first whose <c>Cancel</c> is True, with no key event, the root's
-/// included: a button that is hidden or disabled takes no key, and a combo's open list keeps both keys. The button Enter clicks has the
+/// <see cref="MenuBar"/>, above the client area, and a menu item's shortcut chooses it before a control or the root sees the key. Enter clicks the
+/// focused CommandButton, or else the form's first CommandButton whose <c>Default</c> is True, and Esc the first whose <c>Cancel</c> is True, with
+/// no key event, the root's included: a button that is hidden or disabled takes no key, and a combo's open list keeps both keys. The button Enter clicks has the
 /// default look, and no other (see <see cref="RDFormsCommandButton"/>). While it is open, the window is its root's
 /// <see cref="IMenuHost"/>, registered with <see cref="MenuHosts"/>, and a right release over a component whose <c>ContextMenu</c> names
 /// one of the form's menus pops it up at the pointer, after the component's MouseUp and Click. The window follows the root's <c>Caption</c>, <c>Icon</c>,
