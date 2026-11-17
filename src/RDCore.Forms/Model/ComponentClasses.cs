@@ -13,9 +13,9 @@ namespace RDCore.Forms.Model;
 /// </summary>
 /// <remarks>
 /// Each class lists the properties of it that the model holds, then the ones every class of its kind has: <c>Left</c> and
-/// <c>Top</c> for a component with a place, <c>Width</c> and <c>Height</c> for one with a size, <c>Visible</c> for a control a
-/// running program shows, and <c>Tag</c>. A property a designer file sets that a class does not list is kept as an
-/// <see cref="UnmodelledProperty"/>. Its methods are among <see cref="Methods"/>: a control's are <c>Move</c>, <c>Refresh</c> and
+/// <c>Top</c> for a component with a place, <c>Width</c> and <c>Height</c> for one with a size, <c>Visible</c> and RD-VBA's
+/// <see cref="Properties.Opacity"/> for a control a running program shows, and <c>Tag</c>. A property a designer file sets that a class does
+/// not list is kept as an <see cref="UnmodelledProperty"/>. Its methods are among <see cref="Methods"/>: a control's are <c>Move</c>, <c>Refresh</c> and
 /// <c>ZOrder</c>, and <c>SetFocus</c> where it can take the focus.
 /// </remarks>
 public static class ComponentClasses
@@ -63,14 +63,14 @@ public static class ComponentClasses
         [M.Move, M.Refresh, M.SetFocus]);
 
     /// <summary>
-    /// <c>RDForms.MDIForm</c>: an MDI form's designer root. Its background defaults to the application workspace's colour. It has no font
-    /// and no scale of its own.
+    /// <c>RDForms.MDIForm</c>: an MDI form's designer root. Its background defaults to the application workspace's colour. It has no font,
+    /// no scale of its own and, as VB6's has none, no <c>Refresh</c>.
     /// </summary>
     public static readonly ComponentClass MDIForm = new("RDForms.MDIForm", "MDIForm", ComponentKind.Root,
         [P.Caption, P.BackColor, P.Enabled, P.Icon, P.MousePointer, P.MouseIcon, P.Picture, P.StartUpPosition, P.Appearance, P.RightToLeft,
          P.HelpContextID, P.Visible, P.Left, P.Top, P.Width, P.Height, P.Tag],
         [Click, DblClick, MouseDown, MouseMove, MouseUp, Initialize, Load, Resize, Activate, Deactivate, QueryUnload, Unload, Terminate],
-        Defaults((P.BackColor, FormColor.FromSystem(SystemColor.AppWorkspace))), isContainer: true, methods: [M.Move, M.Refresh, M.SetFocus],
+        Defaults((P.BackColor, FormColor.FromSystem(SystemColor.AppWorkspace))), isContainer: true, methods: [M.Move, M.SetFocus],
         defaultMember: DefaultMembers["RDForms.MDIForm"]);
 
     /// <summary>
@@ -157,22 +157,28 @@ public static class ComponentClasses
         [Click, DblClick, MouseDown, MouseMove, MouseUp], isContainer: true);
 
     /// <summary>
-    /// <c>RDForms.ListBox</c>. Its colours default to the window's.
+    /// <c>RDForms.ListBox</c>. Its colors default to the window's. A program reaches its items through its list members, which its window
+    /// answers: <c>AddItem</c>, <c>RemoveItem</c>, <c>Clear</c>, <c>List</c>, <c>ItemData</c>, <c>ItemIcon</c>, <c>Selected</c>,
+    /// <c>ListIndex</c>, <c>ListCount</c>, <c>NewIndex</c>, <c>SelCount</c> and <c>Text</c>.
     /// </summary>
     public static readonly ComponentClass ListBox = Control("RDForms.ListBox", "List",
         [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.IntegralHeight, P.DragIcon, P.MousePointer,
          P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
-        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
+        methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.Selected, M.ListIndex, M.ListCount, M.NewIndex, M.SelCount,
+            M.ListText]);
 
     /// <summary>
-    /// <c>RDForms.ComboBox</c>. Its colours default to the window's.
+    /// <c>RDForms.ComboBox</c>. Its colors default to the window's. A program reaches its items through the list members of a ListBox
+    /// (<see cref="ListBox"/>), except <c>Selected</c> and <c>SelCount</c>.
     /// </summary>
     public static readonly ComponentClass ComboBox = Control("RDForms.ComboBox", "Combo",
         [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.IntegralHeight,
          P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText],
         [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
-        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
+        Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
+        methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.ListIndex, M.ListCount, M.NewIndex, M.ListText]);
 
     /// <summary>
     /// <c>RDForms.DriveListBox</c>: the drives, one of which is its <c>Drive</c>. It raises no Click and no mouse events. Its colours
@@ -221,11 +227,11 @@ public static class ComponentClasses
 
     /// <summary>
     /// <c>RDForms.Timer</c>. It has a place in the designer and no size, and a running program does not show it and can neither read
-    /// nor set its <c>Left</c> and <c>Top</c>.
+    /// nor set its <c>Left</c> and <c>Top</c>. It has no <c>Container</c>.
     /// </summary>
     public static readonly ComponentClass Timer = new("RDForms.Timer", "Timer", ComponentKind.Control,
         [P.Enabled, P.Interval, P.Left, P.Top, P.Tag], [Events.Timer], hasExtent: false, notAvailableAtRunTime: [P.Left, P.Top],
-        defaultMember: DefaultMembers["RDForms.Timer"]);
+        defaultMember: DefaultMembers["RDForms.Timer"], hasContainer: false);
 
     /// <summary>
     /// <c>RDForms.HScrollBar</c>.
@@ -249,7 +255,7 @@ public static class ComponentClasses
     /// <c>Width</c> or <c>Height</c>. It raises no events, and its colour defaults to the window's text colour.
     /// </summary>
     public static readonly ComponentClass Line = new("RDForms.Line", "Line", ComponentKind.Control,
-        [P.BorderColor, P.ShapeBorderStyle, P.BorderWidth, P.DrawMode, P.X1, P.X2, P.Y1, P.Y2, P.Visible, P.Tag], [],
+        [P.BorderColor, P.ShapeBorderStyle, P.BorderWidth, P.DrawMode, P.X1, P.X2, P.Y1, P.Y2, P.Visible, P.Opacity, P.Tag], [],
         Defaults((P.BorderColor, WindowForeground)), isWindowless: true, methods: [M.Refresh, M.ZOrder],
         defaultMember: DefaultMembers["RDForms.Line"]);
 
@@ -311,7 +317,8 @@ public static class ComponentClasses
         IReadOnlyDictionary<PropertyDefinition, object?>? defaults = null, bool isContainer = false, bool isWindowless = false,
         MethodDefinition[]? methods = null) =>
         new(typeName, defaultName, ComponentKind.Control,
-            [.. properties, P.Left, P.Top, P.Width, P.Height, P.Visible, P.Tag, .. events.Contains(MouseUp) ? [P.ContextMenu] : Array.Empty<PropertyDefinition>()],
+            [.. properties, P.Left, P.Top, P.Width, P.Height, P.Visible, P.Opacity, P.Tag,
+             .. events.Contains(MouseUp) ? [P.ContextMenu] : Array.Empty<PropertyDefinition>()],
             events, defaults, isContainer, isWindowless,
             methods: [M.Move, M.Refresh, .. events.Contains(GotFocus) ? [M.SetFocus] : Array.Empty<MethodDefinition>(), M.ZOrder, .. methods ?? []],
             defaultMember: DefaultMembers.GetValueOrDefault(typeName));
