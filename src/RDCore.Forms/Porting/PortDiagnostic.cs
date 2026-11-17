@@ -75,6 +75,13 @@ public enum PortDiagnosticKind
     /// <c>RDForms.HScrollBar</c> or an <c>RDForms.VScrollBar</c>, so <c>TypeName(x) = "ScrollBar"</c> is <c>False</c> after the port.
     /// </summary>
     ScrollBarTypeNameChanged,
+
+    /// <summary>
+    /// A call of user32's <c>FindWindow</c> given the literal window class <c>"ThunderDFrame"</c>, the
+    /// <see cref="FormsPortMap.FormWindowClass"/> of a UserForm. A ported form is an RDForms window, which has no such class, so the
+    /// call finds no window. Code that finds the window to set its icon sets the form's <c>Icon</c> property instead.
+    /// </summary>
+    FindWindowThunderDFrame,
 }
 
 /// <summary>
@@ -252,6 +259,13 @@ public sealed record PortDiagnostic
     /// <returns>The diagnostic.</returns>
     public static PortDiagnostic ScrollBarTypeNameChanged(string rdFormsName) =>
         new(PortDiagnosticKind.ScrollBarTypeNameChanged, rdFormsName);
+
+    /// <summary>
+    /// A <c>FindWindow</c> call looking for a UserForm's window: <see cref="PortDiagnosticKind.FindWindowThunderDFrame"/>.
+    /// </summary>
+    /// <param name="function">The name the code calls the declared function by, such as <c>FindWindow</c> or <c>FindWindowA</c>.</param>
+    /// <returns>The diagnostic.</returns>
+    public static PortDiagnostic FindWindowThunderDFrame(string function) => new(PortDiagnosticKind.FindWindowThunderDFrame, function);
 
     /// <summary>
     /// Whether another diagnostic is of the same kind, with the same arguments.

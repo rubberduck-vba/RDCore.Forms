@@ -77,7 +77,7 @@ public readonly record struct DrawingScale(double TwipsAcross, double TwipsDown,
             var border = component.Get(P.Appearance) == Model.Appearance.Flat ? 2 : 4;
             (width, height) = (Math.Max(0, width - border), Math.Max(0, height - border));
         }
-        return (width * ScaleModeExtensions.TwipsPerPixel, height * ScaleModeExtensions.TwipsPerPixel);
+        return (Units.ToTwips(width), Units.ToTwips(height));
     }
 
     /// <summary>
