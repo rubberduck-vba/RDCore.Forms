@@ -180,6 +180,22 @@ An item matched by its start is a better match than one matched by its humps; be
 |Dropdown List|The characters typed add up into a word, which selects its best match and raises Click. A character that no item matches with the word starts a new word, which selects the next item it matches after the selected one, as a ListBox's character does. The word starts again after any other change of the selection.|
 |Simple Combo|No completion: the text stays what was typed, and the list shows every item.|
 
+## Converting from MSForms
+
+The names an MSForms ListBox and ComboBox take in RDForms (see [Converting from MSForms](index.md#converting-from-msforms)):
+
+|MSForms|RDForms|
+|---|---|
+|`TextAlign`|`Alignment`, with VB's values: `fmTextAlignLeft` (1) is 0, `fmTextAlignCenter` (2) is 2, and `fmTextAlignRight` (3) is 1.|
+|`ListWidth`, in points|`ListWidth`, in pixels.|
+|`BorderStyle`, `fmBorderStyleNone` and `fmBorderStyleSingle`|`BorderStyle`, 0 and 1.|
+|A ComboBox's `Value`|`Text`.|
+|A ListBox's `Value`|None: an RDForms ListBox has no member for it.|
+|`List`, `ListIndex`, `ListCount`, `Text` and the other members of the same name|The same.|
+
+> [!NOTE]
+> **Not implemented.** A ListBox and a ComboBox have no `IMEMode`, and a ComboBox no `Copy`, `Cut`, `Paste` or `CanPaste`. Their BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.
+
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
 

@@ -183,6 +183,22 @@ A refused picture is error 481, "Invalid picture". So is one that `LoadPicture` 
 
 The controls given the same bytes share one decode, as VB shares one picture object between the controls it is set on. The bytes are decoded once for any number of controls, and again only after none of them holds them.
 
+## Converting from MSForms
+
+The names an MSForms Frame, MultiPage, Page and TabStrip take in RDForms (see [Converting from MSForms](index.md#converting-from-msforms)):
+
+|MSForms|RDForms|
+|---|---|
+|`InsideWidth` and `InsideHeight` of a Frame or a Page|`ScaleWidth` and `ScaleHeight`, in pixels.|
+|`ScrollLeft`, `ScrollTop`, `ScrollWidth` and `ScrollHeight` of a form, a Frame or a Page, in points|The same, in pixels.|
+|`TabFixedWidth` and `TabFixedHeight` of a MultiPage or a TabStrip, in points|The same, in pixels.|
+|`ClientLeft`, `ClientTop`, `ClientWidth` and `ClientHeight` of a TabStrip, in points|The same, in pixels.|
+|`Accelerator` of a Page or a Tab|A `&` before the access key's letter in `Caption`. An assignment of `Accelerator` from code is RDC40001.|
+|Scroll, AddControl and RemoveControl of a form or a Frame|The same. Scroll's `ActionX` and `ActionY` are `RDForms.ScrollAction`, and its `ActualDx` and `ActualDy` ByRef `Single`. A MultiPage's take the page's `Index` first.|
+
+> [!NOTE]
+> **Not implemented.** A Frame and a Page have no `Zoom` and no clipboard and undo members (`Copy`, `Cut`, `Paste`, `UndoAction`, `RedoAction`, `CanPaste`, `CanUndo` and `CanRedo`), and a Frame and a MultiPage raise no Zoom event. The BeforeDragOver, BeforeDropOrPaste and Error of a Frame, a MultiPage, a TabStrip and an Image are declared and never raised.
+
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
 
