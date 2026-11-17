@@ -120,7 +120,8 @@ public sealed class MSFormsFormReaderTests
             ("Caption1", "RDForms.Label"), ("Entry", "RDForms.TextBox"), ("Choices", "RDForms.ComboBox"), ("Items", "RDForms.ListBox"),
             ("Toggle1", "RDForms.CheckBox"), ("Option1", "RDForms.OptionButton"), ("Go", "RDForms.CommandButton"),
             ("Scroller", "RDForms.VScrollBar"), ("Picture1", "RDForms.Image"), ("Outer", "RDForms.Frame"), ("Inner", "RDForms.Frame"),
-            ("Switch", "RDForms.ToggleButton"), ("Spinner", "RDForms.SpinButton"),
+            ("Switch", "RDForms.ToggleButton"), ("Spinner", "RDForms.SpinButton"), ("Tabs", "RDForms.TabStrip"), ("Pages", "RDForms.MultiPage"),
+            ("Page1", "RDForms.Page"), ("Page2", "RDForms.Page"),
         })
         {
             Assert.AreEqual(typeName, Find(import, name).Class.TypeName, name);
@@ -136,25 +137,72 @@ public sealed class MSFormsFormReaderTests
         Assert.AreEqual(new FormFont("MS Sans Serif", 8, FormFont.NormalWeight, false, false, false, 0), Find(import, "Entry").Get(P.Font));
     }
 
-    // the model has no MultiPage or TabStrip: each is kept with no text, and the controls it holds left out.
+    // every class of the form is modelled: nothing is kept as an unmodelled component, and nothing is reported.
+    [TestMethod]
+    public void AFormOfModelledClasses_KeepsNoUnmodelledComponent_AndReportsNothing()
+    {
+        var import = AllControls();
+
+        Assert.IsEmpty(import.Form!.Root.UnmodelledContents);
+        Assert.IsEmpty(import.Diagnostics, string.Join("\n", import.Diagnostics));
+    }
+
+    // a class the model lacks, such as an ActiveX control's, is kept with no text, and the controls it holds left out.
     [TestMethod]
     public void AClassTheModelLacks_IsKeptAsAnUnmodelledComponent_AndReported()
     {
-        var import = AllControls();
-        var unmodelled = import.Form!.Root.UnmodelledContents;
+        var classId = new Guid("12345678-1234-1234-1234-123456789ABC");
+        var import = AllControls(control => control.Name == "Pages" ? control with { Kind = MSFormsControlKind.Other, ClassId = classId } : control);
+        var unmodelled = import.Form!.Root.UnmodelledContents.Single();
 
-        CollectionAssert.AreEqual(new[] { "Tabs", "Pages" }, unmodelled.Select(c => c.Name).ToArray());
-        CollectionAssert.AreEqual(new[] { "MSForms.TabStrip", "MSForms.MultiPage" }, unmodelled.Select(c => c.TypeName).ToArray());
-        Assert.IsTrue(unmodelled.All(c => c.Text.Length == 0));
+        Assert.AreEqual("Pages", unmodelled.Name);
+        Assert.AreEqual("{12345678-1234-1234-1234-123456789ABC}", unmodelled.TypeName);
+        Assert.AreEqual(0, unmodelled.Text.Length);
         Assert.IsNull(import.Form.Find("Page1"));
         Assert.IsNull(import.Form.Find("FirstPageEntry"));
         Assert.IsNull(import.Form.Find("SecondPageGo"));
 
-        var reported = import.Diagnostics.Where(d => d.Kind == MSFormsImportDiagnosticKind.UnmodelledClass).ToList();
-        CollectionAssert.AreEqual(new[] { "Tabs", "Pages" }, reported.Select(d => d.Component).ToArray());
-        Assert.IsTrue(reported.All(d => d.Severity == MSFormsImportSeverity.Information));
-        StringAssert.Contains(reported[1].Message, "4");
-        Assert.HasCount(2, import.Diagnostics, string.Join("\n", import.Diagnostics));
+        var reported = import.Diagnostics.Single();
+        Assert.AreEqual(MSFormsImportDiagnosticKind.UnmodelledClass, reported.Kind);
+        Assert.AreEqual("Pages", reported.Component);
+        Assert.AreEqual(MSFormsImportSeverity.Information, reported.Severity);
+        StringAssert.Contains(reported.Message, "4");
+    }
+
+    // a MultiPage is an RDForms.MultiPage holding its pages in their tabs' order, each an RDForms.Page with its tab's caption and the
+    // controls it holds; a page fills its MultiPage, so its size is not kept.
+    [TestMethod]
+    public void AMultiPage_IsAnRDFormsMultiPage_AndEachPageHasItsCaption_AndHoldsItsControls()
+    {
+        // the first page's caption, in the MultiPage's tab row.
+        var storage = Patched(Bytes("AllControls.storage"), [0x05, 0, 0, 0x80, .. "Page1"u8], [0x05, 0, 0, 0x80, .. "First"u8]);
+        var import = MSFormsFormReader.Read(UserForm("AllControls", "Caption = \"All controls\""), MSFormsReader.Read(storage));
+        var pages = Find(import, "Pages");
+
+        Assert.AreSame(ComponentClasses.MultiPage, pages.Class);
+        CollectionAssert.AreEqual(new[] { "Page1", "Page2" }, pages.Contents.Select(page => page.Name).ToArray());
+        Assert.IsTrue(pages.Contents.All(page => page.Class == ComponentClasses.Page));
+        Assert.AreEqual("First", Find(import, "Page1").Get(P.Caption));
+        Assert.AreEqual("Page2", Find(import, "Page2").Get(P.Caption));
+        Assert.AreSame(Find(import, "Page1"), Find(import, "FirstPageEntry").Container);
+        Assert.AreSame(Find(import, "Page2"), Find(import, "SecondPageGo").Container);
+        Assert.IsFalse(Find(import, "Page1").UnmodelledProperties.Any(p => p.Name is "Width" or "Height"));
+        Assert.IsEmpty(import.Diagnostics, string.Join("\n", import.Diagnostics));
+    }
+
+    // a TabStrip is an RDForms.TabStrip with its tabs, in their order, each with its name and its caption.
+    [TestMethod]
+    public void ATabStrip_IsAnRDFormsTabStrip_WithItsTabsCaptions()
+    {
+        // the second tab's caption; its name follows the captions.
+        var storage = Patched(Bytes("AllControls.storage"), [0x04, 0, 0, 0x80, .. "Tab2"u8], [0x04, 0, 0, 0x80, .. "Last"u8]);
+        var import = MSFormsFormReader.Read(UserForm("AllControls", "Caption = \"All controls\""), MSFormsReader.Read(storage));
+        var tabs = Find(import, "Tabs");
+
+        Assert.AreSame(ComponentClasses.TabStrip, tabs.Class);
+        CollectionAssert.AreEqual(new[] { new Tab("Tab1", "Tab1"), new Tab("Tab2", "Last") }, tabs.Get(P.Tabs).ToArray());
+        Assert.IsFalse(tabs.UnmodelledProperties.Any(p => p.Name == "Tabs"));
+        Assert.IsEmpty(import.Diagnostics, string.Join("\n", import.Diagnostics));
     }
 
     // a ToggleButton is an RDForms.ToggleButton: its size in DIP, the Value "0" it stores as False, its tip as ToolTipText; the sunken edge

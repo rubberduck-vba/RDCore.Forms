@@ -25,10 +25,7 @@ Une lecture retourne un `MSFormsFormImport` :
 
 ## Les classes
 
-Chaque classe MSForms est lue comme la classe RDForms que lui donne la table de portage MSForms : un `TextBox` est un `RDForms.TextBox`, et un `UserForm` un `RDForms.Form`. Un `ScrollBar` est un `RDForms.HScrollBar` ou un `RDForms.VScrollBar` selon son `Orientation`; avec `fmOrientationAuto`, une barre de défilement plus large que haute est horizontale. Les contrôles d'un Frame y sont placés.
-
-> [!NOTE]
-> **Non implémenté.** Le modèle n'a pas de `MultiPage` ni de `TabStrip`. Chacun est laissé de côté, avec les contrôles qu'il contient, et signalé par `UnmodelledClass`.
+Chaque classe MSForms est lue comme la classe RDForms que lui donne la table de portage MSForms : un `TextBox` est un `RDForms.TextBox`, et un `UserForm` un `RDForms.Form`. Un `ScrollBar` est un `RDForms.HScrollBar` ou un `RDForms.VScrollBar` selon son `Orientation`; avec `fmOrientationAuto`, une barre de défilement plus large que haute est horizontale. Les contrôles d'un Frame ou d'une page y sont placés.
 
 ## Les valeurs
 
@@ -40,6 +37,8 @@ Chaque classe MSForms est lue comme la classe RDForms que lui donne la table de 
 |Le `Value` d'un TextBox, le `Value` d'un ComboBox|`Text`.|
 |Un ToggleButton|Un `RDForms.ToggleButton`. Son `Value` vaut True quand le formulaire enregistre 1, et False quand il enregistre 0 ou rien.|
 |Un SpinButton|Un `RDForms.SpinButton`, avec ses `Value`, `Min`, `Max`, `SmallChange`, `Orientation` et `Delay`.|
+|Un MultiPage|Un `RDForms.MultiPage`. Chacune de ses pages est un `RDForms.Page`, avec le `Caption` de son onglet et les contrôles qu'elle contient; une page remplit son MultiPage, donc sa propre taille n'est pas gardée.|
+|Un TabStrip|Un `RDForms.TabStrip`, avec ses `Tabs` dans leur ordre : le nom de chaque onglet, son `Caption` avec son `Accelerator`, son `ControlTipText` comme `ToolTipText`, son `Tag`, son `Enabled` et son `Visible`.|
 |`Caption` et `Accelerator`|`Caption`, chaque `&` littéral étant doublé et un `&` étant placé devant la première lettre qui correspond à `Accelerator`. La légende d'un formulaire est gardée telle quelle.|
 |`SpecialEffect`|Plat et enfoncé sont les valeurs Flat et 3D d'`Appearance`. Un Frame est dessiné gravé.|
 |Le `PictureSizeMode` d'une Image|Rogner et étirer sont `Stretch` à False et à True.|

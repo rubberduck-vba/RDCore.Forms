@@ -388,6 +388,14 @@ public static class MSFormsFormReader
                 case "drawbuffer":
                     return;
 
+                // a page fills its MultiPage, so its size is the MultiPage's.
+                case "width" or "height" when legacyClass == "Page":
+                    return;
+
+                case "tabs" when value is IReadOnlyList<MSFormsTab> tabs && instance.Class.Has(P.Tabs):
+                    PortTabs(instance, tabs);
+                    return;
+
                 case "zoom" when !IsNumber(value, 100):
                 case "imemode" when !IsNumber(value, 0):
                     diagnostics.Add(MSFormsImportDiagnosticKind.NotImplemented, component, name, component, name, Text(value));
@@ -552,6 +560,27 @@ public static class MSFormsFormReader
             if (key != '\0' && (withKey == '\0' || !instance.Class.Has(P.Caption)))
             {
                 Keep(instance, "Accelerator", key);
+            }
+        }
+
+        // A TabStrip's tabs, in their order: each caption takes its accelerator, as a control's does.
+        private void PortTabs(ComponentInstance instance, IReadOnlyList<MSFormsTab> tabs)
+        {
+            var ported = new List<Tab>(tabs.Count);
+            foreach (var tab in tabs)
+            {
+                var (caption, found) = WithAccessKey(tab.Caption, tab.Accelerator);
+                if (tab.Accelerator != '\0' && !found)
+                {
+                    diagnostics.Add(MSFormsImportDiagnosticKind.AcceleratorNotInCaption, instance.Name, "Tabs", tab.Name, Text(tab.Accelerator));
+                }
+
+                ported.Add(new Tab(tab.Name, caption) { ToolTipText = tab.ControlTipText, Enabled = tab.Enabled, Visible = tab.Visible, Tag = tab.Tag });
+            }
+
+            if (!ported.SequenceEqual(instance.Class.DefaultOf(P.Tabs)) && !instance.TryRead(P.Tabs, ported))
+            {
+                Invalid(instance, "Tabs", tabs);
             }
         }
 
