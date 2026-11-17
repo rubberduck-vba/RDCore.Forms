@@ -918,6 +918,18 @@ public static class Properties
     public static readonly PropertyDefinition<double> ScrollTop = new("ScrollTop", PropertyCategory.Position);
 
     /// <summary>
+    /// The data source the control's value is bound to, as an MSForms form names it, such as a worksheet cell (<c>Sheet1!A1</c>). It is
+    /// kept as text and binds nothing: nothing resolves it. Empty by default.
+    /// </summary>
+    public static readonly PropertyDefinition<string> ControlSource = new("ControlSource", PropertyCategory.Misc, "");
+
+    /// <summary>
+    /// The data source a list's items come from, as an MSForms form names it, such as a worksheet range (<c>Sheet1!A1:A10</c>). It is
+    /// kept as text and fills nothing: nothing resolves it. Empty by default.
+    /// </summary>
+    public static readonly PropertyDefinition<string> RowSource = new("RowSource", PropertyCategory.List, "");
+
+    /// <summary>
     /// Whether a MultiPage's or a TabStrip's tabs wrap onto more rows when they do not fit in one. When they do not, the tabs that do
     /// not fit are cut off.
     /// </summary>

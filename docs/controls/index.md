@@ -81,7 +81,6 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |---|---|
 |Units|The model holds a control's `Left`, `Top`, `Width` and `Height` in pixels (1/96 inch, 15 twips), whatever its container's `ScaleMode`. A program's code reads them in its own unit: VB6 code in the container's scale (twips in a Frame, and for a form's own), VBA code in points, and code made for RDForms in pixels ([`CodeUnits`](../api/RDCore.Forms.Model.CodeUnits.yml)). A Line's ends are in its container's scale.|
 |Converting|A pixel is 15 twips and 0.75 point. [`Units`](../api/RDCore.Forms.Model.Units.yml) converts a length: `FromTwips` and `FromPoints` give pixels, `ToTwips` and `ToPoints` give the length in twips or points. A length keeps its fractions: 7 twips are 7/15 of a pixel.|
-|Containers|A control placed in a Frame or a PictureBox is shown in it. A control placed in any other component is not shown.|
 |Containers|A control placed in a Frame, a PictureBox or a MultiPage's page is shown in it, and a page's controls only while its page is selected. A MultiPage holds only pages, and a page is placed only in a MultiPage. A control placed in any other component is not shown.|
 |Stacking|In each container, the first control the form holds is on top until [`ZOrder`](methods.md#zorder) moves one. A windowless control (a Label, an Image, a Shape or a Line) is under every windowed one.|
 |Tab order|One order across the whole form, by `TabIndex`, the form's order deciding a tie. A `TabIndex` past the last place takes the first free place, in the form's order.|
@@ -114,6 +113,7 @@ A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(con
 |`Font`|The control's font, held at the size VB6 draws it at: see [Fonts](fonts.md).|
 |`ToolTipText`|Shown as the control's tooltip; an empty text shows none.|
 |`MousePointer`|The pointer over the control. Custom, drawn from `MouseIcon` in VB6, shows the arrow.|
+|`ControlSource`, `RowSource`|RD-VBA addition, from MSForms. A TextBox, CheckBox, OptionButton, ListBox, ComboBox or scroll bar has a `ControlSource`, and a ListBox or a ComboBox a `RowSource`: a String, "" by default, that an [MSForms import](../import/msforms.md) sets. It is kept as text and binds and fills nothing.|
 
 ### Opacity
 

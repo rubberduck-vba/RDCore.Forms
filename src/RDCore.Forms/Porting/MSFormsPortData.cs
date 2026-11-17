@@ -90,7 +90,9 @@ internal static class MSFormsPortData
         .. new[] { "Label", "CommandButton", "CheckBox", "OptionButton", "ToggleButton", "Page", "Tab" }
             .Select(c => new MemberPort(c, "Accelerator", "Caption", None, null, Accelerator)),
 
+        // A TextBox and a ComboBox keep their text as their Value; RDForms' have Text, their default member, and no Value.
         Member("TextBox", "Value", "Text"),
+        Member("ComboBox", "Value", "Text"),
     ];
 
     private static EventPort[] Events()

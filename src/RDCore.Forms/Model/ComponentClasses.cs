@@ -128,7 +128,7 @@ public static class ComponentClasses
     public static readonly ComponentClass TextBox = Control("RDForms.TextBox", "Text",
         [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText, P.Locked, P.Alignment,
          P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText,
-         P.CausesValidation],
+         P.CausesValidation, P.ControlSource],
         [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
          AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
@@ -150,7 +150,7 @@ public static class ComponentClasses
     public static readonly ComponentClass CheckBox = Control("RDForms.CheckBox", "Check",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.CheckBoxValue, P.Appearance,
          P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor,
-         P.CausesValidation],
+         P.CausesValidation, P.ControlSource],
         [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate, AfterUpdate,
          BeforeDragOver, BeforeDropOrPaste, Error]);
 
@@ -160,7 +160,7 @@ public static class ComponentClasses
     public static readonly ComponentClass OptionButton = Control("RDForms.OptionButton", "Option",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.OptionButtonValue,
          P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor,
-         P.CausesValidation],
+         P.CausesValidation, P.ControlSource],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
          AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error]);
 
@@ -178,7 +178,7 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ListBox = Control("RDForms.ListBox", "List",
         [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.IntegralHeight, P.DragIcon, P.MousePointer,
-         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation],
+         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation, P.ControlSource, P.RowSource],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
          AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
@@ -192,7 +192,7 @@ public static class ComponentClasses
     public static readonly ComponentClass ComboBox = Control("RDForms.ComboBox", "Combo",
         [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.IntegralHeight,
          P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText,
-         P.CausesValidation],
+         P.CausesValidation, P.ControlSource, P.RowSource],
         [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, Validate, BeforeUpdate, AfterUpdate,
          BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
@@ -310,7 +310,8 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ToggleButton = Control("RDForms.ToggleButton", "ToggleButton",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.MouseIcon, P.Picture, P.PicturePosition, P.ToggleButtonValue,
-         P.TripleState, P.Locked, P.AutoSize, P.BackStyle, P.WordWrap, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation],
+         P.TripleState, P.Locked, P.AutoSize, P.BackStyle, P.WordWrap, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation,
+         P.ControlSource],
         [Click, DblClick, Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
          AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackStyle, BackStyle.Opaque), (P.WordWrap, true)));
@@ -321,7 +322,7 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass SpinButton = Control("RDForms.SpinButton", "SpinButton",
         [P.BackColor, P.ForeColor, P.Enabled, P.MousePointer, P.MouseIcon, P.SpinButtonValue, P.SpinButtonMin, P.SpinButtonMax,
-         P.SpinButtonSmallChange, P.Orientation, P.Delay, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation],
+         P.SpinButtonSmallChange, P.Orientation, P.Delay, P.ToolTipText, P.TabStop, P.TabIndex, P.CausesValidation, P.ControlSource],
         [Change, SpinUp, SpinDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, Validate, BeforeUpdate, AfterUpdate, BeforeDragOver,
          BeforeDropOrPaste, Error]);
 
@@ -384,7 +385,8 @@ public static class ComponentClasses
         container.IsContainer && ReferenceEquals(control, Page) == ReferenceEquals(container, MultiPage);
 
     private static PropertyDefinition[] ScrollBarProperties =>
-        [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];
+        [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex,
+         P.ControlSource];
 
     private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll, Validate,
     BeforeUpdate, AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error];

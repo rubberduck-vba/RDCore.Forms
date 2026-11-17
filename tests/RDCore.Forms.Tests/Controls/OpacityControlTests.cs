@@ -96,6 +96,16 @@ public sealed class OpacityControlTests
         Assert.IsNull(solid);
     }
 
+    // a MultiPage's page fades the controls it holds, as a Frame does.
+    [TestMethod]
+    public void APagesOpacity_IsAMaskOverIt()
+    {
+        var masked = UI.Run(() =>
+            new RDFormsPage(new ComponentInstance(ComponentClasses.Page, "Page1").Set(P.Opacity, 0.25)).OpacityMask is ISolidColorBrush { Opacity: 0.25 });
+
+        Assert.IsTrue(masked);
+    }
+
     // Only Visible False takes a control out of the mouse's way.
     [TestMethod]
     public void AControlAtOpacity0_StillRaisesItsMouseEvents()
