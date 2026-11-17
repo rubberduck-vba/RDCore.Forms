@@ -27,6 +27,9 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- nuget.org wants a PNG or a JPEG for a package's icon, not an .ico: the ducky of logo.ico, at 256 x 256. -->
     <PackageIcon>ducky.png</PackageIcon>
+    <!-- what nuget.org shows on the package's page: assets/nuget-readme.md, written for the package's readers and packed as README.md at the package's root.
+         The repository's own README.md is not packed. -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -50,6 +53,7 @@
     <!-- the licence's text and the notice in each package, beside PackageLicenseExpression. -->
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Visible="false" />
     <None Include="$(MSBuildThisFileDirectory)NOTICE.md" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)assets/nuget-readme.md" Pack="true" PackagePath="README.md" Visible="false" />
   </ItemGroup>
 
 </Project>
