@@ -225,10 +225,10 @@ public sealed class RDFormsPage : Control, IRDFormsContainer
     /// <inheritdoc/>
     public Canvas ChildHost { get; } = new() { Background = Brushes.Transparent };
 
-    // Its caption, tip and visibility are its tab's, which its MultiPage shows.
+    // Its caption, tip and visibility are its tab's, which its MultiPage shows; its Enabled and its Opacity are its own.
     private void Apply(ComponentPropertyChangedEventArgs e)
     {
-        if (e.Property.Name is nameof(P.Enabled))
-            IsEnabled = (bool)e.After!;
+        if (e.Property.Name is nameof(P.Enabled) or nameof(P.Opacity))
+            ComponentBinding.ApplyCommon(this, e.Property, e.After);
     }
 }

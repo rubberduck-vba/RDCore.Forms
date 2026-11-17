@@ -342,7 +342,7 @@ public static class ComponentClasses
     /// no place or size of its own, and it holds the controls shown while it is selected. Its MultiPage raises the events about it.
     /// </summary>
     public static readonly ComponentClass Page = new("RDForms.Page", "Page", ComponentKind.Control,
-        [P.Caption, P.ToolTipText, P.Picture, P.PicturePosition, P.Enabled, P.Visible, P.Tag], [], isContainer: true, hasExtent: false);
+        [P.Caption, P.ToolTipText, P.Picture, P.PicturePosition, P.Enabled, P.Visible, P.Tag, P.Opacity], [], isContainer: true, hasExtent: false);
 
     /// <summary>
     /// <c>RDForms.TabStrip</c>: a row of tabs, one selected, which holds no controls: a program shows what the selected tab stands for.
