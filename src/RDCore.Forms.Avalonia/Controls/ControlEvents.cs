@@ -135,10 +135,16 @@ internal static class ControlEvents
 
     private static void RaiseMouse(Control control, PointerEventArgs e, EventDefinition definition, bool inScale)
     {
-        if (!RDFormsControl.Owns(control, e.Source))
-            return;
+        if (RDFormsControl.Owns(control, e.Source) && MouseArguments(control, e, moved: ReferenceEquals(definition, Events.MouseMove), inScale) is { } arguments)
+            RDFormsControl.Raise(control, definition, arguments);
+    }
+
+    // The Button, Shift, X and Y of a mouse event over the control, as AttachMouse raises them: none for a press or a release of a
+    // button VB has no event for. A MultiPage and a TabStrip raise theirs with the tab's index before them.
+    public static FormValue[]? MouseArguments(Control control, PointerEventArgs e, bool moved, bool inScale = false)
+    {
         var point = e.GetCurrentPoint(control);
-        var button = ReferenceEquals(definition, Events.MouseMove)
+        var button = moved
             ? (point.Properties.IsLeftButtonPressed ? 1 : 0) | (point.Properties.IsRightButtonPressed ? 2 : 0)
               | (point.Properties.IsMiddleButtonPressed ? 4 : 0)
             : point.Properties.PointerUpdateKind switch
@@ -149,13 +155,13 @@ internal static class ControlEvents
                 _ => 0,
             };
         // VB has no event for the other buttons.
-        if (button == 0 && !ReferenceEquals(definition, Events.MouseMove))
-            return;
+        if (button == 0 && !moved)
+            return null;
         double x = Twips(point.Position.X), y = Twips(point.Position.Y);
         if (inScale)
             (x, y) = RDFormsDrawingLayer.ScaleOf(RDFormsControl.GetInstance(control)).FromTwips(x, y);
-        RDFormsControl.Raise(control, definition, FormValue.FromInteger((short)button), FormValue.FromInteger(ShiftOf(e.KeyModifiers)),
-            FormValue.FromSingle((float)x), FormValue.FromSingle((float)y));
+        return [FormValue.FromInteger((short)button), FormValue.FromInteger(ShiftOf(e.KeyModifiers)), FormValue.FromSingle((float)x),
+            FormValue.FromSingle((float)y)];
     }
 
     private static float Twips(double pixels) => (float)(Math.Floor(pixels) * ScaleModeExtensions.TwipsPerPixel);

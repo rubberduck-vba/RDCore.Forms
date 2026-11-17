@@ -759,6 +759,48 @@ public enum ControlOrientation
 }
 
 /// <summary>
+/// How a MultiPage or a TabStrip shows its tabs: its <c>Style</c>.
+/// </summary>
+public enum TabStyle
+{
+    /// <summary>
+    /// As tabs, the default.
+    /// </summary>
+    Tabs = 0,
+    /// <summary>
+    /// As buttons, the selected one pressed.
+    /// </summary>
+    Buttons = 1,
+    /// <summary>
+    /// Not shown: a program selects a page or a tab through <c>Value</c>.
+    /// </summary>
+    None = 2,
+}
+
+/// <summary>
+/// Which side of a MultiPage or a TabStrip its tabs are on: its <c>TabOrientation</c>.
+/// </summary>
+public enum TabOrientation
+{
+    /// <summary>
+    /// Along the top, the default.
+    /// </summary>
+    Top = 0,
+    /// <summary>
+    /// Along the bottom.
+    /// </summary>
+    Bottom = 1,
+    /// <summary>
+    /// Down the left side.
+    /// </summary>
+    Left = 2,
+    /// <summary>
+    /// Down the right side.
+    /// </summary>
+    Right = 3,
+}
+
+/// <summary>
 /// Where a drag is, as a <c>BeforeDragOver</c> gives it.
 /// </summary>
 public enum DragState

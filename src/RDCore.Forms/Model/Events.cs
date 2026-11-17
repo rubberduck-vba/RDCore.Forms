@@ -288,6 +288,51 @@ public static class Events
     /// </summary>
     public static readonly EventDefinition Reposition = new("Reposition");
 
+    // The page or tab a MultiPage's or a TabStrip's event is about, from 0; -1 where it is about none. Declared before the events that
+    // take it, as the class's fields are set in their order.
+    private static readonly EventParameter Index = new("Index", "Long");
+
+    /// <summary>
+    /// The user clicked a MultiPage's or a TabStrip's tab, or chose it with the keyboard. <c>Index</c> is the tab's.
+    /// </summary>
+    public static readonly EventDefinition TabClick = new("Click", Index);
+
+    /// <summary>
+    /// The user double-clicked a MultiPage's or a TabStrip's tab. <c>Index</c> is the tab's; a handler that sets <c>Cancel</c> to
+    /// <see langword="true"/> says it handled the double click.
+    /// </summary>
+    public static readonly EventDefinition TabDblClick = new("DblClick", Index, new EventParameter("Cancel", "Boolean"));
+
+    /// <summary>
+    /// The user pressed a mouse button over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseDown = new("MouseDown", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// The user moved the pointer over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseMove = new("MouseMove", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// The user released a mouse button over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseUp = new("MouseUp", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// A page of a MultiPage changed size, or a control on it moved. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageLayout = new("Layout", Index);
+
+    /// <summary>
+    /// A control was added to a page of a MultiPage. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageAddControl = new("AddControl", Index, DroppedControl);
+
+    /// <summary>
+    /// A control was taken off a page of a MultiPage. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageRemoveControl = new("RemoveControl", Index, DroppedControl);
+
     /// <summary>
     /// The user clicked a SpinButton's up or right arrow, or holds it down. The value moves toward its <c>Max</c> after the event,
     /// and its Change follows where the value changed.
@@ -351,4 +396,34 @@ public static class Events
         new EventParameter("Number", "Integer"), new EventParameter("Description", "String"), new EventParameter("SCode", "Long"),
         new EventParameter("Source", "String"), new EventParameter("HelpFile", "String"), new EventParameter("HelpContext", "Long"),
         new EventParameter("CancelDisplay", "Boolean"));
+
+    /// <summary>
+    /// Something is dragged over a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none. Declared and not raised:
+    /// RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition TabBeforeDragOver = new("BeforeDragOver", [Index, .. BeforeDragOver.Parameters]);
+
+    /// <summary>
+    /// Something is about to be dropped or pasted on a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none. Declared
+    /// and not raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition TabBeforeDropOrPaste = new("BeforeDropOrPaste", [Index, .. BeforeDropOrPaste.Parameters]);
+
+    /// <summary>
+    /// Something is dragged over a page of a MultiPage or a control on it, which <c>Control</c> names. <c>Index</c> is the page's.
+    /// Declared and not raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition PageBeforeDragOver = new("BeforeDragOver", [Index, .. ContainerBeforeDragOver.Parameters]);
+
+    /// <summary>
+    /// Something is about to be dropped or pasted on a page of a MultiPage or a control on it, which <c>Control</c> names. <c>Index</c>
+    /// is the page's. Declared and not raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition PageBeforeDropOrPaste = new("BeforeDropOrPaste", [Index, .. ContainerBeforeDropOrPaste.Parameters]);
+
+    /// <summary>
+    /// A MultiPage met an error it can't return to code. <c>Index</c> is the page's; a handler that sets <c>CancelDisplay</c> to True
+    /// keeps the error's message from being shown. Declared and not raised.
+    /// </summary>
+    public static readonly EventDefinition PageError = new("Error", [Index, .. Error.Parameters]);
 }

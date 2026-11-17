@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using RDCore.Forms.Menus;
 using RDCore.Forms.Model;
+using RDCore.Forms.Porting;
 
 namespace RDCore.Forms.Import.VB6;
 
@@ -166,9 +167,12 @@ public static partial class VB6FormReader
 
         public List<UnmodelledProperty> UnmodelledHeader { get; } = [];
 
-        // The RDForms class a class of VB6's VB library ports to: VB.TextBox is RDForms.TextBox. A class of another library has none.
+        // The RDForms class a class of VB6's VB library ports to: VB.TextBox is RDForms.TextBox. A class of another library has none, and
+        // nor has a name VB's library does not have, such as VB.MultiPage: RDForms has a MultiPage, which MSForms' ports to.
         private static ComponentClass? PortedClass(string typeName) =>
-            typeName.StartsWith("VB.", StringComparison.OrdinalIgnoreCase) ? ComponentClasses.ByTypeName("RDForms." + typeName[3..]) : null;
+            typeName.StartsWith("VB.", StringComparison.OrdinalIgnoreCase) && FormsPortMap.VB6.TypeOf(typeName) is { Kind: TypePortKind.Class } port
+                ? ComponentClasses.ByTypeName(port.RDFormsName)
+                : null;
 
         public FormDefinition? Import(DesignerFile file, DesignerBlock root)
         {
