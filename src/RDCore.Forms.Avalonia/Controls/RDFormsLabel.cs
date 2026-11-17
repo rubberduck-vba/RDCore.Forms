@@ -83,7 +83,7 @@ public sealed class RDFormsLabel : Control
     {
         switch (e.Property.Name)
         {
-            case nameof(P.Caption) or nameof(P.UseMnemonic) or nameof(P.Alignment) or nameof(P.WordWrap):
+            case nameof(P.Caption) or nameof(P.UseMnemonic) or nameof(P.Alignment) or nameof(P.WordWrap) or nameof(P.AutoSize):
                 ShowCaption();
                 break;
             case nameof(P.BorderStyle) or nameof(P.Appearance):
@@ -109,6 +109,8 @@ public sealed class RDFormsLabel : Control
         }
     }
 
+    private static bool Wraps(ComponentInstance label) => !label.Get(P.AutoSize) || label.Get(P.WordWrap);
+
     // An AccessText only where UseMnemonic is set and the caption has a key one can carry; plain text otherwise, so that an
     // underscore in the caption does not become a key VB never gave it.
     private void ShowCaption()
@@ -117,7 +119,8 @@ public sealed class RDFormsLabel : Control
         var parsed = instance.Get(P.UseMnemonic) ? RDFormsCaption.Parse(caption) : (RDFormsCaption.Parsed?)null;
         var text = parsed is { FitsAccessText: true } ? new AccessText { Text = parsed.Value.ForAccessText }
             : new TextBlock { Text = parsed?.Shown ?? caption };
-        text.TextWrapping = instance.Get(P.WordWrap) ? TextWrapping.Wrap : TextWrapping.NoWrap;
+        // A label of a fixed size wraps its caption at its width; WordWrap decides only whether one that sizes itself grows down or across.
+        text.TextWrapping = Wraps(instance) ? TextWrapping.Wrap : TextWrapping.NoWrap;
         text.TextAlignment = RDFormsTextBox.ToAvalonia(instance.Get(P.Alignment));
         face.Text = text;
         if ((parsed?.Shown ?? caption) is { Length: > 0 } shown)
