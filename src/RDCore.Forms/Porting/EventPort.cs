@@ -12,8 +12,9 @@ namespace RDCore.Forms.Porting;
 /// <param name="Parameters">The handler's parameters, in order, each with its legacy and its RDForms declaration.</param>
 /// <param name="CoordinatesInLegacyUnit">
 /// Whether the event's <c>X</c> and <c>Y</c> are in the legacy unit: <see cref="FormsPortMap.LegacyUnit"/> for MSForms, the
-/// container's scale for VB6. RDForms passes them in DIP, so the code port gives the handler two first lines that convert them
-/// back, and its body runs as written.
+/// container's scale for VB6. RDForms raises them in twips, and a form's own in its scale. Where the legacy code expects another
+/// unit, as MSForms code expects points, the code port gives the handler two first lines that convert them, and its body runs as
+/// written.
 /// </param>
 /// <param name="Note">
 /// What the code port reports at each handler it ports, where RDForms raises the event differently, or <see langword="null"/>.

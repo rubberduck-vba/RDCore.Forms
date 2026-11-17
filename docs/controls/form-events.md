@@ -127,7 +127,7 @@ The handlers of an MSForms form and its controls take these names and parameters
 |`BeforeUpdate(ByVal Cancel As MSForms.ReturnBoolean)`, `AfterUpdate()`|`BeforeUpdate(Cancel As Boolean)`, `AfterUpdate()`.|
 |`DblClick(ByVal Cancel As MSForms.ReturnBoolean)`|`DblClick(Cancel As Boolean)`.|
 |`KeyPress(ByVal KeyAscii As MSForms.ReturnInteger)`, and KeyDown's and KeyUp's `KeyCode`|`KeyAscii As Integer`, `KeyCode As Integer`.|
-|MouseDown, MouseMove and MouseUp, `X` and `Y` in points|The same, `X` and `Y` in pixels.|
+|MouseDown, MouseMove and MouseUp, `X` and `Y` in points|The same, `X` and `Y` in twips (20 to a point), and a form's own in its scale.|
 |BeforeDragOver, BeforeDropOrPaste and Error|The same, with `RDForms.DataObject`, `RDForms.ReturnEffect`, `RDForms.DragState` and `RDForms.Action`, and ByRef values for the Return* wrappers.|
 
 ---

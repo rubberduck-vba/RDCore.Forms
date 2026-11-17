@@ -3,8 +3,8 @@ using static RDCore.Forms.Porting.PortUnit;
 
 namespace RDCore.Forms.Porting;
 
-// The port map of the MSForms library, from its FM20 type library: the classes take RDForms' names, places and mouse coordinates
-// convert from points to DIP, the Return* wrappers become ByRef values, and the members MSForms names differently take the RDForms
+// The port map of the MSForms library, from its FM20 type library: the classes take RDForms' names, places convert from points
+// to DIP and mouse coordinates from points to twips, the Return* wrappers become ByRef values, and the members MSForms names differently take the RDForms
 // member of their concept.
 internal static class MSFormsPortData
 {

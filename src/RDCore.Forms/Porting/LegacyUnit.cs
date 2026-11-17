@@ -4,7 +4,8 @@ namespace RDCore.Forms.Porting;
 /// The unit a legacy library's code uses for the places and sizes of controls and for mouse coordinates.
 /// </summary>
 /// <remarks>
-/// RDForms uses the device-independent pixel (DIP, 1/96 inch) for both. One DIP is 15 twips, and 0.75 point.
+/// RDForms places and sizes controls in device-independent pixels (DIP, 1/96 inch): one DIP is 15 twips, and 0.75 point. Its mouse
+/// events give <c>X</c> and <c>Y</c> in twips, and a form's own mouse events in the form's scale.
 /// </remarks>
 public enum LegacyUnit
 {
