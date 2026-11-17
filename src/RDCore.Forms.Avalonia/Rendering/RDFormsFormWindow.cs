@@ -95,6 +95,13 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
     // ActiveControl, which takes the focus again as the form is activated again. The root has the focus itself where the form had
     // no control to take it.
     private Control? focused;
+
+    // The control a Validate or a BeforeUpdate kept the focus on, while the focus goes back to it: the moves to the other control and
+    // back raise nothing.
+    private Control? keeping;
+
+    // The control a SetFocus gives the focus to, while it takes it: that move raises no Validate.
+    private Control? setFocusTo;
     private Control? activeControl;
     private bool rootFocused;
 
@@ -411,7 +418,18 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
         if (!ReferenceEquals(active, this))
             Dispatcher.UIThread.Post(Activate);
         else if (!ReferenceEquals(control, focused))
-            Dispatcher.UIThread.Post(() => control.Focus());
+            Dispatcher.UIThread.Post(() =>
+            {
+                setFocusTo = control;
+                try
+                {
+                    control.Focus();
+                }
+                finally
+                {
+                    setFocusTo = null;
+                }
+            });
     }
 
     private static bool ToFront(FormValue position) =>
@@ -631,11 +649,17 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
     // The window system moves the focus as it activates and deactivates windows, the program's or another application's, taking it
     // to no element and giving it back; VB raises nothing for that. Between the controls of the active form, the focus raises
     // LostFocus and GotFocus as it moves.
-    void IFormFocus.FocusMoved(Control control, bool got, bool toNone)
+    void IFormFocus.FocusMoved(Control control, bool got, bool toNone, Control? to)
     {
         ShowTheDefault();
         if (got)
         {
+            if (keeping is not null)
+            {
+                if (ReferenceEquals(control, keeping))
+                    keeping = null;
+                return;
+            }
             activeControl = control;
             if (!ReferenceEquals(active, this) || ReferenceEquals(control, focused))
                 return;
@@ -646,9 +670,33 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
         }
         else if (ReferenceEquals(control, focused) && !toNone && IsActive)
         {
+            if (to is not null && !Leaves(control, to))
+            {
+                keeping = control;
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (!control.Focus())
+                        keeping = null;
+                });
+                return;
+            }
             focused = null;
             RDFormsControl.Raise(control, Events.LostFocus);
         }
+    }
+
+    // Whether the focus leaves a control for another of the form: its edit is kept, with BeforeUpdate and AfterUpdate, then it raises
+    // Validate where the other control's CausesValidation is True, unless a SetFocus moves the focus. A handler that cancels either
+    // keeps the focus on the control.
+    private bool Leaves(Control control, Control to)
+    {
+        if (control is IKeepsEdits edits && !edits.KeepEdit())
+            return false;
+        if (ReferenceEquals(to, setFocusTo) || RDFormsControl.GetInstance(control) is not { } instance
+            || !instance.Class.Events.Contains(Events.Validate) || RDFormsControl.GetInstance(to) is not { } next
+            || !next.Class.Has(P.CausesValidation) || !next.Get(P.CausesValidation))
+            return true;
+        return !ControlEvents.Cancelled(RDFormsControl.Raise(control, Events.Validate, FormValue.FromBoolean(false)));
     }
 
     // VB's UnloadMode for a close the user or the system asks for: none for a close VB has no mode for.

@@ -4,12 +4,18 @@
 namespace RDCore.Forms.Model;
 
 /// <summary>
-/// The events of VB's intrinsic forms and controls, with their parameters as a handler declares them.
+/// The events of RDForms' forms and controls, with their parameters as a handler declares them. An argument the handler can change,
+/// such as a <c>Cancel</c>, is a value of its own type, which the handler assigns.
 /// </summary>
 public static class Events
 {
     private static readonly EventParameter KeyCode = new("KeyCode", "Integer");
     private static readonly EventParameter Shift = new("Shift", "Integer");
+    private static readonly EventParameter Cancel = new("Cancel", "Boolean");
+    private static readonly EventParameter DroppedControl = new("Control", "RDForms.Control");
+    private static readonly EventParameter Data = new("Data", "RDForms.DataObject");
+    private static readonly EventParameter Effect = new("Effect", "RDForms.ReturnEffect");
+    private static readonly EventParameter Action = new("Action", "RDForms.Action");
     private static readonly EventParameter Button = new("Button", "Integer");
     private static readonly EventParameter X = new("X", "Single");
     private static readonly EventParameter Y = new("Y", "Single");
@@ -268,16 +274,68 @@ public static class Events
     /// A Data control is about to leave its current record, for the reason <c>Action</c> gives; <c>Save</c> says whether a bound
     /// control's data changed.
     /// </summary>
-    public static readonly EventDefinition Validate = new("Validate", new EventParameter("Action", "Integer"), new EventParameter("Save", "Integer"));
+    public static readonly EventDefinition DataValidate = new("Validate", new EventParameter("Action", "Integer"), new EventParameter("Save", "Integer"));
 
     /// <summary>
     /// A Data control met a data access error while no code of the program was running. The handler's <c>Response</c> says whether
     /// the error's message is shown.
     /// </summary>
-    public static readonly EventDefinition Error = new("Error", new EventParameter("DataErr", "Integer"), new EventParameter("Response", "Integer"));
+    public static readonly EventDefinition DataError = new("Error", new EventParameter("DataErr", "Integer"), new EventParameter("Response", "Integer"));
 
     /// <summary>
     /// Another of a Data control's records became current.
     /// </summary>
     public static readonly EventDefinition Reposition = new("Reposition");
+
+    /// <summary>
+    /// The focus is about to leave a control for another control of its form whose <c>CausesValidation</c> is True. A handler that sets
+    /// <c>Cancel</c> to True keeps the focus on the control, and the control raises no LostFocus.
+    /// </summary>
+    public static readonly EventDefinition Validate = new("Validate", Cancel);
+
+    /// <summary>
+    /// The user changed a control's value, and the change is about to be kept: for a TextBox, as the focus leaves it after an edit. A
+    /// handler that sets <c>Cancel</c> to True keeps the focus on the control with its value as the user left it, and raises the event
+    /// again as the focus next leaves it.
+    /// </summary>
+    public static readonly EventDefinition BeforeUpdate = new("BeforeUpdate", Cancel);
+
+    /// <summary>
+    /// The user's change to a control's value was kept, after its BeforeUpdate.
+    /// </summary>
+    public static readonly EventDefinition AfterUpdate = new("AfterUpdate");
+
+    /// <summary>
+    /// Something is dragged over a control. Declared and not raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition BeforeDragOver = new("BeforeDragOver",
+        Cancel, Data, X, Y, new EventParameter("DragState", "RDForms.DragState"), Effect, Shift);
+
+    /// <summary>
+    /// Something is dragged over a form, a Frame or a control in it, which <c>Control</c> names. Declared and not raised: RDForms does
+    /// not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition ContainerBeforeDragOver = new("BeforeDragOver",
+        Cancel, DroppedControl, Data, X, Y, new EventParameter("State", "RDForms.DragState"), Effect, Shift);
+
+    /// <summary>
+    /// Something is about to be dropped or pasted on a control. Declared and not raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition BeforeDropOrPaste = new("BeforeDropOrPaste", Cancel, Action, Data, X, Y, Effect, Shift);
+
+    /// <summary>
+    /// Something is about to be dropped or pasted on a form, a Frame or a control in it, which <c>Control</c> names. Declared and not
+    /// raised: RDForms does not implement drag and drop.
+    /// </summary>
+    public static readonly EventDefinition ContainerBeforeDropOrPaste = new("BeforeDropOrPaste",
+        Cancel, DroppedControl, Action, Data, X, Y, Effect, Shift);
+
+    /// <summary>
+    /// A control met an error it can't return to code, such as one while it draws. A handler that sets <c>CancelDisplay</c> to True
+    /// keeps the error's message from being shown. Declared and not raised.
+    /// </summary>
+    public static readonly EventDefinition Error = new("Error",
+        new EventParameter("Number", "Integer"), new EventParameter("Description", "String"), new EventParameter("SCode", "Long"),
+        new EventParameter("Source", "String"), new EventParameter("HelpFile", "String"), new EventParameter("HelpContext", "Long"),
+        new EventParameter("CancelDisplay", "Boolean"));
 }
