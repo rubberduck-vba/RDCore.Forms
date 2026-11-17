@@ -21,6 +21,10 @@ namespace RDCore.Forms.Drawing;
 /// <c>ScaleLeft</c> and <c>ScaleTop</c> stay.
 /// </para>
 /// <para>
+/// A Line the component holds keeps its place when one of the five properties changes the scale: its <c>X1</c>, <c>Y1</c>, <c>X2</c>
+/// and <c>Y2</c> are given again in the new scale. A change of the inside leaves them as they are.
+/// </para>
+/// <para>
 /// A designer file's values are read as it holds them, so a form follows these rules only once <see cref="Follow"/> is called on it.
 /// </para>
 /// </remarks>
@@ -49,6 +53,8 @@ public static class ScaleRules
         private readonly ComponentInstance component;
         // The last inside that was not empty, across and down, in twips: a user scale's unit is ScaleWidth over it.
         private (double Width, double Height) inside;
+        // The scale a held Line's ends are given in.
+        private DrawingScale scale;
         private bool applying;
 
         public Follower(ComponentInstance component)
@@ -61,6 +67,7 @@ public static class ScaleRules
                 if (component.Get(P.ScaleWidth) != width || component.Get(P.ScaleHeight) != height)
                     Apply(() => component.Set(P.ScaleWidth, width).Set(P.ScaleHeight, height));
             }
+            scale = DrawingScale.Of(component);
             component.PropertyChanged += OnChanged;
         }
 
@@ -75,6 +82,7 @@ public static class ScaleRules
             {
                 if (mode != ScaleMode.User)
                     Apply(() => component.Set(P.ScaleMode, ScaleMode.User));
+                Rescaled();
             }
             else if (ReferenceEquals(property, P.ScaleMode))
             {
@@ -83,12 +91,31 @@ public static class ScaleRules
                     var (width, height) = InUnits();
                     Apply(() => component.Set(P.ScaleLeft, 0d).Set(P.ScaleTop, 0d).Set(P.ScaleWidth, width).Set(P.ScaleHeight, height));
                 }
+                Rescaled();
             }
             else if (ReferenceEquals(property, P.Width) || ReferenceEquals(property, P.Height)
                 || ReferenceEquals(property, P.BorderStyle) || ReferenceEquals(property, P.Appearance))
             {
                 Resized(mode);
+                scale = DrawingScale.Of(component);
             }
+        }
+
+        // The Lines held, at the same place, given in the scale the component has now.
+        private void Rescaled()
+        {
+            var now = DrawingScale.Of(component);
+            if (now == scale)
+                return;
+            foreach (var line in component.Contents.Where(content => ReferenceEquals(content.Class, ComponentClasses.Line)).ToList())
+            {
+                var (x1, y1) = scale.ToTwips(line.Get(P.X1), line.Get(P.Y1));
+                var (x2, y2) = scale.ToTwips(line.Get(P.X2), line.Get(P.Y2));
+                (x1, y1) = now.FromTwips(x1, y1);
+                (x2, y2) = now.FromTwips(x2, y2);
+                line.Set(P.X1, x1).Set(P.Y1, y1).Set(P.X2, x2).Set(P.Y2, y2);
+            }
+            scale = now;
         }
 
         private void Resized(ScaleMode mode)
