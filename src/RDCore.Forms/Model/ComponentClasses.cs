@@ -51,6 +51,8 @@ public static class ComponentClasses
         ["RDForms.Timer"] = "Enabled",
         ["RDForms.Data"] = "Caption",
         ["RDForms.Menu"] = "Enabled",
+        ["RDForms.MultiPage"] = "Value",
+        ["RDForms.TabStrip"] = "Value",
     };
 
     /// <summary>
@@ -277,11 +279,40 @@ public static class ComponentClasses
         defaultMember: DefaultMembers["RDForms.Menu"]);
 
     /// <summary>
+    /// <c>RDForms.MultiPage</c>: pages, one shown at a time, chosen by their tabs. It holds only <see cref="Page"/>s, and a page holds the
+    /// controls shown while it is selected. Its <c>Value</c> is the selected page's index, and a program reaches its pages through
+    /// <see cref="Pages"/>. Its events name the page they are about first.
+    /// </summary>
+    public static readonly ComponentClass MultiPage = Control("RDForms.MultiPage", "MultiPage",
+        [P.BackColor, P.ForeColor, P.Font, P.MultiRow, P.TabStyle, P.TabOrientation, P.Enabled, P.SelectedIndex, P.TabFixedWidth, P.TabFixedHeight,
+         P.TabStop, P.TabIndex, P.ToolTipText],
+        [Change, TabClick, TabDblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, TabMouseDown, TabMouseMove, TabMouseUp, PageLayout, PageAddControl,
+         PageRemoveControl],
+        isContainer: true);
+
+    /// <summary>
+    /// <c>RDForms.Page</c>: a page of a <see cref="MultiPage"/>, and nothing else holds one. It fills its MultiPage's client area, so it has
+    /// no place or size of its own, and it holds the controls shown while it is selected. Its MultiPage raises the events about it.
+    /// </summary>
+    public static readonly ComponentClass Page = new("RDForms.Page", "Page", ComponentKind.Control,
+        [P.Caption, P.ToolTipText, P.Picture, P.PicturePosition, P.Enabled, P.Visible, P.Tag], [], isContainer: true, hasExtent: false);
+
+    /// <summary>
+    /// <c>RDForms.TabStrip</c>: a row of tabs, one selected, which holds no controls: a program shows what the selected tab stands for.
+    /// Its tabs are its <c>Tabs</c>, which a program reaches through <see cref="Model.Tabs"/>, and its <c>Value</c> is the selected tab's
+    /// index. Its events name the tab they are about first.
+    /// </summary>
+    public static readonly ComponentClass TabStrip = Control("RDForms.TabStrip", "TabStrip",
+        [P.BackColor, P.ForeColor, P.Font, P.Enabled, P.MouseIcon, P.MousePointer, P.MultiRow, P.TabStyle, P.TabOrientation, P.Tabs, P.SelectedIndex,
+         P.TabFixedWidth, P.TabFixedHeight, P.TabStop, P.TabIndex, P.ToolTipText],
+        [Change, TabClick, TabDblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, TabMouseDown, TabMouseMove, TabMouseUp]);
+
+    /// <summary>
     /// Every class of the catalog.
     /// </summary>
     public static IReadOnlyList<ComponentClass> All { get; } =
         [Form, MDIForm, UserControl, PropertyPage, CommandButton, TextBox, Label, CheckBox, OptionButton, Frame, ListBox, ComboBox, PictureBox, Image,
-         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data];
+         Timer, HScrollBar, VScrollBar, Shape, Line, Menu, DriveListBox, DirListBox, FileListBox, Data, MultiPage, Page, TabStrip];
 
     private static readonly Dictionary<string, ComponentClass> byTypeName =
         All.ToDictionary(c => c.TypeName, StringComparer.OrdinalIgnoreCase);
@@ -292,6 +323,17 @@ public static class ComponentClasses
     /// <param name="typeName">The class's qualified type name.</param>
     /// <returns>The class, or <see langword="null"/> when the catalog has none of that name.</returns>
     public static ComponentClass? ByTypeName(string typeName) => byTypeName.GetValueOrDefault(typeName);
+
+    /// <summary>
+    /// Whether a container of class <paramref name="container"/> holds a control of class <paramref name="control"/>, as far as their
+    /// classes go: a <see cref="Page"/> goes in a <see cref="MultiPage"/> only, and a MultiPage holds pages only. A class that holds no
+    /// controls (<see cref="ComponentClass.IsContainer"/>) holds none of any class.
+    /// </summary>
+    /// <param name="container">The container's class.</param>
+    /// <param name="control">The control's class.</param>
+    /// <returns><see langword="true"/> when the container's class holds the control's.</returns>
+    public static bool CanHold(ComponentClass container, ComponentClass control) =>
+        container.IsContainer && ReferenceEquals(control, Page) == ReferenceEquals(container, MultiPage);
 
     private static PropertyDefinition[] ScrollBarProperties =>
         [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];

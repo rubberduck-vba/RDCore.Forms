@@ -280,4 +280,50 @@ public static class Events
     /// Another of a Data control's records became current.
     /// </summary>
     public static readonly EventDefinition Reposition = new("Reposition");
+
+    // The page or tab a MultiPage's or a TabStrip's event is about, from 0; -1 where it is about none. Declared before the events that
+    // take it, as the class's fields are set in their order.
+    private static readonly EventParameter Index = new("Index", "Long");
+    private static readonly EventParameter Control = new("Control", "Control");
+
+    /// <summary>
+    /// The user clicked a MultiPage's or a TabStrip's tab, or chose it with the keyboard. <c>Index</c> is the tab's.
+    /// </summary>
+    public static readonly EventDefinition TabClick = new("Click", Index);
+
+    /// <summary>
+    /// The user double-clicked a MultiPage's or a TabStrip's tab. <c>Index</c> is the tab's; a handler that sets <c>Cancel</c> to
+    /// <see langword="true"/> says it handled the double click.
+    /// </summary>
+    public static readonly EventDefinition TabDblClick = new("DblClick", Index, new EventParameter("Cancel", "Boolean"));
+
+    /// <summary>
+    /// The user pressed a mouse button over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseDown = new("MouseDown", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// The user moved the pointer over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseMove = new("MouseMove", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// The user released a mouse button over a MultiPage or a TabStrip. <c>Index</c> is the tab under the pointer's, or -1 over none.
+    /// </summary>
+    public static readonly EventDefinition TabMouseUp = new("MouseUp", Index, Button, Shift, X, Y);
+
+    /// <summary>
+    /// A page of a MultiPage changed size, or a control on it moved. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageLayout = new("Layout", Index);
+
+    /// <summary>
+    /// A control was added to a page of a MultiPage. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageAddControl = new("AddControl", Index, Control);
+
+    /// <summary>
+    /// A control was taken off a page of a MultiPage. <c>Index</c> is the page's.
+    /// </summary>
+    public static readonly EventDefinition PageRemoveControl = new("RemoveControl", Index, Control);
 }

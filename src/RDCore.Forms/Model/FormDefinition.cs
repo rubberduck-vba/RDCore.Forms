@@ -1,6 +1,7 @@
 ﻿// Derived from HexIDE (https://github.com/hexide-io/HexIDE), commit ae17f1db.
 // Copyright (c) 2024 Bartosz Korczyński. Copyright (c) 2026 The HexIDE Authors. MIT License; see NOTICE.md.
 
+using System.Globalization;
 using RDCore.Forms.Model;
 
 namespace RDCore.Forms.Model;
@@ -148,7 +149,8 @@ public sealed class FormDefinition
     /// <exception cref="FormErrorException">
     /// <paramref name="type"/> is a menu's or a root's class: 720, not a valid control type. <paramref name="name"/> is empty or
     /// white space: 728, not a legal control name. A component of the form other than its root has the name, compared without regard
-    /// to case: 727. <paramref name="container"/> holds no controls: 721, not a valid control container.
+    /// to case: 727. <paramref name="container"/> holds no controls, or none of the class: 721, not a valid control container. A page goes in
+    /// a MultiPage only, and a MultiPage holds pages only (<see cref="ComponentClasses.CanHold"/>).
     /// </exception>
     /// <exception cref="ArgumentException"><paramref name="container"/> is not a component of this form.</exception>
     /// <remarks>
@@ -158,10 +160,19 @@ public sealed class FormDefinition
     /// after the form's others. Its other properties have their class's defaults, so that a caption or a text is "".
     /// </para>
     /// <para>
+    /// A page is shown, as a MultiPage shows its selected page. A MultiPage starts with two pages, captioned as they are named:
+    /// <c>Page1</c> and <c>Page2</c>, or the next names no component of the form has.
+    /// </para>
+    /// <para>
     /// Any other name is accepted, even one that starts with a digit, holds a space, is a keyword, or is the form's own name.
     /// </para>
     /// </remarks>
-    public ComponentInstance AddControl(ComponentClass type, string name, ComponentInstance? container = null)
+    public ComponentInstance AddControl(ComponentClass type, string name, ComponentInstance? container = null) =>
+        AddControl(type, name, container, -1);
+
+    // AddControl, at index among the container's contents (last where it is negative). A page is shown, and a MultiPage starts with two
+    // of them, Page1 and Page2 or the next names the form has free, as MSForms gives one; they are among the controls added.
+    internal ComponentInstance AddControl(ComponentClass type, string name, ComponentInstance? container, int index)
     {
         ArgumentNullException.ThrowIfNull(type);
         ArgumentNullException.ThrowIfNull(name);
@@ -172,20 +183,48 @@ public sealed class FormDefinition
             throw new FormErrorException(FormError.NotAValidControlType(type.ClassName));
         if (string.IsNullOrWhiteSpace(name))
             throw new FormErrorException(FormError.NotALegalControlName(name));
-        if (Root.Descendants().Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)))
+        if (IsNameTaken(name))
             throw new FormErrorException(FormError.ControlNameTaken(name));
-        if (!container.Class.IsContainer)
+        if (!ComponentClasses.CanHold(container.Class, type))
             throw new FormErrorException(FormError.NotAValidControlContainer(container.Class.ClassName));
+        var control = New(type, name);
+        control.SetContainer(container, index);
+        added.Add(control);
+        if (ReferenceEquals(type, ComponentClasses.MultiPage))
+        {
+            foreach (var _ in Enumerable.Range(0, 2))
+            {
+                var page = New(ComponentClasses.Page, FreeName(ComponentClasses.Page.DefaultName));
+                page.Set(Properties.Caption, page.Name).SetContainer(control);
+                added.Add(page);
+            }
+        }
+
+        ControlAdded?.Invoke(this, new FormControlEventArgs(control, container));
+        return control;
+    }
+
+    // Whether a component of the form other than its root has the name, compared without regard to case.
+    internal bool IsNameTaken(string name) => Root.Descendants().Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    // The first of stem1, stem2, ... that no component of the form has.
+    internal string FreeName(string stem)
+    {
+        var number = 1;
+        while (IsNameTaken(stem + number.ToString(CultureInfo.InvariantCulture)))
+            number++;
+        return stem + number.ToString(CultureInfo.InvariantCulture);
+    }
+
+    private ComponentInstance New(ComponentClass type, string name)
+    {
         var control = new ComponentInstance(type, name);
-        if (type.Has(Properties.Visible))
+        if (type.Has(Properties.Visible) && !ReferenceEquals(type, ComponentClasses.Page))
             control.Set(Properties.Visible, false);
         if (type.HasExtent)
             control.Set(Properties.Width, 80d).Set(Properties.Height, 32d);
         if (type.Has(Properties.TabIndex))
             control.Set(Properties.TabIndex, (short)Root.Descendants().Count(c => c.Class.Has(Properties.TabIndex)));
-        control.SetContainer(container);
-        added.Add(control);
-        ControlAdded?.Invoke(this, new FormControlEventArgs(control, container));
         return control;
     }
 
@@ -239,6 +278,17 @@ public sealed class FormDefinition
                 other.Set(Properties.TabIndex, (short)(tabIndex - below));
         }
         ControlRemoved?.Invoke(this, new FormControlEventArgs(control, container));
+    }
+
+    // Takes a page out of its MultiPage, with the controls on it, as Pages.Remove does: unlike Controls.Remove, a page placed at design
+    // time goes too, and the controls on it with it.
+    internal void RemovePage(ComponentInstance page)
+    {
+        if (!ReferenceEquals(page.Class, ComponentClasses.Page) || !Root.Descendants().Contains(page))
+            throw new FormErrorException(FormError.ControlNotFound(page.Name));
+        foreach (var component in page.Descendants().Prepend(page).Where(c => !added.Contains(c)))
+            added.Add(component);
+        RemoveControl(page);
     }
 }
 

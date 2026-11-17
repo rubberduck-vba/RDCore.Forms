@@ -87,7 +87,7 @@ internal static class FormXamlWriter
         }
     }
 
-    // The font, the list, and the properties the model does not have.
+    // The font, the list, the tabs, and the properties the model does not have.
     private static void WritePropertyElements(XmlWriter writer, ComponentInstance component)
     {
         var owner = component.Class.ClassName;
@@ -114,6 +114,9 @@ internal static class FormXamlWriter
 
         if (component.Class.Has(P.List) && (component.IsSet(P.List) || component.IsSet(P.ItemData) || component.IsSet(P.ItemIcon)))
             WriteList(writer, component, owner);
+
+        if (component.Class.Has(P.Tabs) && component.IsSet(P.Tabs))
+            WriteTabs(writer, component, owner);
 
         if (component.UnmodelledProperties.Count > 0)
         {
@@ -144,6 +147,29 @@ internal static class FormXamlWriter
                 writer.WriteAttributeString("ItemData", data[i].ToString(CultureInfo.InvariantCulture));
             if (i < icons.Count && icons[i] is { } icon)
                 writer.WriteAttributeString("ItemIcon", Convert.ToBase64String(icon));
+            writer.WriteEndElement();
+        }
+
+        writer.WriteEndElement();
+    }
+
+    // One Tab for each tab, with its Name and Caption, and its other properties where they are not a tab's defaults.
+    private static void WriteTabs(XmlWriter writer, ComponentInstance component, string owner)
+    {
+        writer.WriteStartElement($"{owner}.Tabs", Ns);
+        foreach (var tab in component.Get(P.Tabs))
+        {
+            writer.WriteStartElement("Tab", Ns);
+            writer.WriteAttributeString("Name", tab.Name);
+            writer.WriteAttributeString("Caption", tab.Caption);
+            if (tab.ToolTipText.Length > 0)
+                writer.WriteAttributeString("ToolTipText", tab.ToolTipText);
+            if (!tab.Enabled)
+                writer.WriteAttributeString("Enabled", "False");
+            if (!tab.Visible)
+                writer.WriteAttributeString("Visible", "False");
+            if (tab.Tag.Length > 0)
+                writer.WriteAttributeString("Tag", tab.Tag);
             writer.WriteEndElement();
         }
 

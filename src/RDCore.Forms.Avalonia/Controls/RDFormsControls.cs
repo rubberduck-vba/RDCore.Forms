@@ -18,7 +18,7 @@ public static class RDFormsControls
     /// <param name="instance">The component.</param>
     /// <returns>
     /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, a UserControl that is invisible at run
-    /// time, and a class that is neither VB's nor one <see cref="UserControlClasses.Of"/> made.
+    /// time, and a class that is neither one of <see cref="ComponentClasses"/> nor one <see cref="UserControlClasses.Of"/> made.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> is <see langword="null"/>.</exception>
     /// <remarks>
@@ -37,7 +37,7 @@ public static class RDFormsControls
     /// </param>
     /// <returns>
     /// The control, or <see langword="null"/> where its class has none: a menu, a form's root, a UserControl that is invisible at run
-    /// time, and a class that is neither VB's nor one <see cref="UserControlClasses.Of"/> made.
+    /// time, and a class that is neither one of <see cref="ComponentClasses"/> nor one <see cref="UserControlClasses.Of"/> made.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="instance"/> or <paramref name="fileSystem"/> is <see langword="null"/>.</exception>
     public static Control? Create(ComponentInstance instance, IFileSystem fileSystem)
@@ -81,6 +81,12 @@ public static class RDFormsControls
             return new RDFormsLine(instance);
         if (ReferenceEquals(type, ComponentClasses.Data))
             return new RDFormsData(instance);
+        if (ReferenceEquals(type, ComponentClasses.MultiPage))
+            return new RDFormsMultiPage(instance);
+        if (ReferenceEquals(type, ComponentClasses.Page))
+            return new RDFormsPage(instance);
+        if (ReferenceEquals(type, ComponentClasses.TabStrip))
+            return new RDFormsTabStrip(instance);
         if (UserControlClasses.DefinitionOf(type) is not null)
             return type.HasExtent ? new RDFormsUserControl(instance, fileSystem) : null;
         return null;

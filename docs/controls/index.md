@@ -4,7 +4,7 @@
 
 ## Catalogue
 
-[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes the control for a component of an RDForms class: the classes Visual Basic 6.0's intrinsic controls port to.
+[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes the control for a component of an RDForms class: the classes Visual Basic 6.0's intrinsic controls port to, and the MultiPage, Page and TabStrip that MS Forms' classes port to.
 
 |Class|Control|Events raised|Page|
 |---|---|---|---|
@@ -27,6 +27,9 @@
 |`RDForms.Line`|[`RDFormsLine`](../api/RDCore.Forms.Avalonia.Controls.RDFormsLine.yml)|None|[Timers, scroll bars and shapes](timers-scrollbars-shapes.md)|
 |`RDForms.Data`|[`RDFormsData`](../api/RDCore.Forms.Avalonia.Controls.RDFormsData.yml)|None|[Data control](data.md)|
 |`RDForms.Menu`|The window's [`RDFormsMenuBar`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsMenuBar.yml)|Click|[Menus](menus.md)|
+|`RDForms.MultiPage`|[`RDFormsMultiPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsMultiPage.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md#multipage)|
+|`RDForms.Page`|[`RDFormsPage`](../api/RDCore.Forms.Avalonia.Controls.RDFormsPage.yml)|None; its MultiPage raises its tab's|[Containers and pictures](containers.md#multipage)|
+|`RDForms.TabStrip`|[`RDFormsTabStrip`](../api/RDCore.Forms.Avalonia.Controls.RDFormsTabStrip.yml)|Change, Click, DblClick, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, MouseDown, MouseMove, MouseUp|[Containers and pictures](containers.md#tabstrip)|
 |A placed UserControl, such as `Project1.Gauge`|[`RDFormsUserControl`](../api/RDCore.Forms.Avalonia.Controls.RDFormsUserControl.yml)|None of its own; its UserControl's root and controls raise theirs|[UserControls](usercontrols.md)|
 
 A `RDForms.Menu` has no control of its own, and `Create` returns `null` for it: a form's window shows its menus on its [menu bar](menus.md). It returns `null` for a UserControl that is invisible at run time too.
@@ -75,7 +78,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |Rule|Behaviour|
 |---|---|
 |Units|The model holds a control's `Left`, `Top`, `Width` and `Height` in pixels (1/96 inch, 15 twips), whatever its container's `ScaleMode`. A program's code reads them in its own unit: VB6 code in the container's scale (twips in a Frame, and for a form's own), VBA code in points, and code made for RDForms in pixels ([`CodeUnits`](../api/RDCore.Forms.Model.CodeUnits.yml)). A Line's ends are in its container's scale.|
-|Containers|A control placed in a Frame or a PictureBox is shown in it. A control placed in any other component is not shown.|
+|Containers|A control placed in a Frame, a PictureBox or a MultiPage's page is shown in it, and a page's controls only while its page is selected. A MultiPage holds only pages, and a page is placed only in a MultiPage. A control placed in any other component is not shown.|
 |Stacking|In each container, the first control the form holds is on top until [`ZOrder`](methods.md#zorder) moves one. A windowless control (a Label, an Image, a Shape or a Line) is under every windowed one.|
 |Tab order|One order across the whole form, by `TabIndex`, the form's order deciding a tie. A `TabIndex` past the last place takes the first free place, in the form's order.|
 |Focus|Tab skips a control that takes no focus (a Label, a Frame, an Image, a Timer, a Shape, a Line or a Data control), one whose `TabStop` is False, and one that is hidden or disabled or in a hidden or disabled container.|
@@ -98,7 +101,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |---|---|
 |Class|Named by its ProgID, such as `RDForms.CommandButton`, without regard to case. A menu's or a form's class is refused.|
 |Name|Any name that no other control has, compared without regard to case, even one that starts with a digit, holds a space, is a keyword, or is the form's own name. An empty name is refused, and so is a name of white space only (RDForms' own).|
-|Container|The form, or a Frame or a PictureBox of the form.|
+|Container|The form, or a Frame, a PictureBox or a MultiPage's page of the form. A page's container is a MultiPage, which takes no other control.|
 |Defaults|Hidden, at 0, 0, and 80 by 32 pixels (1200 by 480 twips) where the class has an extent. The next `TabIndex` after the form's others. A caption or a text is "".|
 |Stacking|Under the controls already in its container, windowed or windowless.|
 |Order|`FormDefinition.Controls` holds the controls of the form's file depth first, then those added, in the order added, whatever their container.|
@@ -109,7 +112,7 @@ The window follows the root's `Caption`, `Icon`, `Width`, `Height`, `MaxButton`,
 |---|---|
 |711|No VB class has the ProgID.|
 |720|The class is a menu's or a form's.|
-|721|The container holds no controls, such as a CommandButton.|
+|721|The container holds no controls, such as a CommandButton, or not that class: a page outside a MultiPage, or another control in one.|
 |727|The name is taken.|
 |728|The name is empty, or white space only.|
 |729|The control to remove was not added at run time.|

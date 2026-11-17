@@ -62,6 +62,7 @@ A property element is named for its component's element and the property, such a
 |---|---|
 |`<Class>.Font`|One `Font` element: `Name` and `Size`, and where they differ from the default, `Weight` (400 normal, 700 bold), `Italic`, `Underline`, `Strikethrough` and `Charset`.|
 |`<Class>.List`|One `Item` for each item of a ListBox or ComboBox: its `Text`, and its `ItemData` and `ItemIcon` where it has them. An item with no `ItemData` has 0, and one with no `ItemIcon` has none.|
+|`<Class>.Tabs`|One `Tab` for each tab of a TabStrip: its `Name` and `Caption`, and its `ToolTipText`, `Enabled`, `Visible` and `Tag` where they differ from a tab's default. A TabStrip with no `Tabs` element has the two default tabs, and an empty one has none.|
 |`<Root>.ControlLibraries`|One `ControlLibrary` for each control library the form lists: its `Id`, `Version` and `FileName`.|
 |`<Class>.UnmodelledProperties`|One `UnmodelledProperty` for each property the model does not have: its `Name` and `Text`.|
 |`<Class>.<Property>`|Any other property's value as text, such as a caption of several lines.|
