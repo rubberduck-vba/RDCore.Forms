@@ -163,7 +163,7 @@ public sealed class ComboStyleTests
             return result;
         });
 
-        Expect.Lines(["Text1.LostFocus", "Combo1.GotFocus", "Combo1.Click"], raised);
+        Expect.Lines(["Text1.Validate(Boolean False)", "Text1.LostFocus", "Combo1.GotFocus", "Combo1.Click"], raised);
     }
 
     [TestMethod]
@@ -420,6 +420,7 @@ public sealed class ComboStyleTests
         });
 
         var before = typed ? "typed" : "apple";
-        Expect.Lines([$"Text1.LostFocus 2 {before} {before}", $"Combo1.GotFocus 2 {before} {before}", "Combo1.Click 2 cherry cherry"], log);
+        Expect.Lines([$"Text1.Validate 2 {before} {before}", $"Text1.LostFocus 2 {before} {before}", $"Combo1.GotFocus 2 {before} {before}",
+            "Combo1.Click 2 cherry cherry"], log);
     }
 }
