@@ -833,6 +833,18 @@ public static class Properties
     /// </summary>
     public static readonly PropertyDefinition<string> ContextMenu = new("ContextMenu", PropertyCategory.Behavior, "");
 
+    /// <summary>
+    /// The data source the control's value is bound to, as an MSForms form names it, such as a worksheet cell (<c>Sheet1!A1</c>). It is
+    /// kept as text and binds nothing: nothing resolves it. Empty by default.
+    /// </summary>
+    public static readonly PropertyDefinition<string> ControlSource = new("ControlSource", PropertyCategory.Misc, "");
+
+    /// <summary>
+    /// The data source a list's items come from, as an MSForms form names it, such as a worksheet range (<c>Sheet1!A1:A10</c>). It is
+    /// kept as text and fills nothing: nothing resolves it. Empty by default.
+    /// </summary>
+    public static readonly PropertyDefinition<string> RowSource = new("RowSource", PropertyCategory.List, "");
+
     private static IReadOnlyList<IReadOnlyList<(PropertyDefinition, object?)>> TextAssigned(ComponentInstance component, string text) =>
         component.Class.Has(SelStart) && text != component.Get(Text)
             ? [[(Text, text), (SelStart, 0), (SelLength, 0)]]

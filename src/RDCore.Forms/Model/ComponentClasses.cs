@@ -118,7 +118,8 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass TextBox = Control("RDForms.TextBox", "Text",
         [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText, P.Locked, P.Alignment,
-         P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText],
+         P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText,
+         P.ControlSource],
         [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
 
@@ -138,7 +139,7 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass CheckBox = Control("RDForms.CheckBox", "Check",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.CheckBoxValue, P.Appearance,
-         P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
+         P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor, P.ControlSource],
         [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
@@ -146,7 +147,8 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass OptionButton = Control("RDForms.OptionButton", "Option",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.OptionButtonValue,
-         P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
+         P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor,
+         P.ControlSource],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
 
     /// <summary>
@@ -163,7 +165,7 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ListBox = Control("RDForms.ListBox", "List",
         [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.IntegralHeight, P.DragIcon, P.MousePointer,
-         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
+         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.ControlSource, P.RowSource],
         [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
         methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.Selected, M.ListIndex, M.ListCount, M.NewIndex, M.SelCount,
@@ -175,7 +177,8 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ComboBox = Control("RDForms.ComboBox", "Combo",
         [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.IntegralHeight,
-         P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText],
+         P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText,
+         P.ControlSource, P.RowSource],
         [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
         methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.ListIndex, M.ListCount, M.NewIndex, M.ListText]);
@@ -300,7 +303,8 @@ public static class ComponentClasses
     public static ComponentClass? ByTypeName(string typeName) => byTypeName.GetValueOrDefault(typeName);
 
     private static PropertyDefinition[] ScrollBarProperties =>
-        [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];
+        [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex,
+         P.ControlSource];
 
     private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll];
 
