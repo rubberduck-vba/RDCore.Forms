@@ -335,10 +335,12 @@ public sealed class FormsPortMapTests
     }
 
     [TestMethod]
-    public void AnMSFormsTextBoxsValue_IsItsText_AndAComboBoxsIsKept()
+    public void AnMSFormsTextBoxsAndAComboBoxsValue_IsItsText_AndAListBoxsIsKept()
     {
         Assert.AreEqual("Text", MSForms.MemberOf("MSForms.TextBox", "Value")?.RDFormsName);
-        Assert.IsNull(MSForms.MemberOf("ComboBox", "Value"));
+        Assert.AreEqual("Text", MSForms.MemberOf("MSForms.ComboBox", "Value")?.RDFormsName);
+        Assert.AreEqual("Text", MSForms.MemberOf("ComboBox", "value")?.RDFormsName);
+        Assert.IsNull(MSForms.MemberOf("ListBox", "Value"));
         Assert.IsNull(MSForms.MemberOf("CheckBox", "Value"));
     }
 

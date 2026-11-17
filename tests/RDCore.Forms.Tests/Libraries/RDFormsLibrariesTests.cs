@@ -18,16 +18,27 @@ public sealed class RDFormsLibrariesTests
     [
         "PictureBox.Opacity", "PictureBox.ContextMenu",
         "Label.Picture", "Label.PicturePosition", "Label.Opacity", "Label.ContextMenu",
+        "Label.BeforeDragOver", "Label.BeforeDropOrPaste", "Label.Error",
         "TextBox.ControlSource", "TextBox.Opacity", "TextBox.ContextMenu",
+        "TextBox.BeforeUpdate", "TextBox.AfterUpdate", "TextBox.BeforeDragOver", "TextBox.BeforeDropOrPaste", "TextBox.Error",
         "Frame.Opacity", "Frame.ContextMenu",
+        "Frame.BeforeDragOver", "Frame.BeforeDropOrPaste", "Frame.Error",
         "CommandButton.Opacity", "CommandButton.ContextMenu",
+        "CommandButton.Validate", "CommandButton.BeforeDragOver", "CommandButton.BeforeDropOrPaste", "CommandButton.Error",
         "CheckBox.ControlSource", "CheckBox.Opacity", "CheckBox.ContextMenu",
+        "CheckBox.BeforeUpdate", "CheckBox.AfterUpdate", "CheckBox.BeforeDragOver", "CheckBox.BeforeDropOrPaste", "CheckBox.Error",
         "OptionButton.ControlSource", "OptionButton.Opacity", "OptionButton.ContextMenu",
+        "OptionButton.BeforeUpdate", "OptionButton.AfterUpdate", "OptionButton.BeforeDragOver", "OptionButton.BeforeDropOrPaste", "OptionButton.Error",
         "ComboBox.ItemIcon", "ComboBox.ControlSource", "ComboBox.RowSource", "ComboBox.Opacity",
+        "ComboBox.BeforeUpdate", "ComboBox.AfterUpdate", "ComboBox.BeforeDragOver", "ComboBox.BeforeDropOrPaste", "ComboBox.Error",
         "ListBox.ItemIcon", "ListBox.ControlSource", "ListBox.RowSource", "ListBox.Opacity", "ListBox.ContextMenu",
+        "ListBox.BeforeUpdate", "ListBox.AfterUpdate", "ListBox.BeforeDragOver", "ListBox.BeforeDropOrPaste", "ListBox.Error",
         "HScrollBar.ControlSource", "HScrollBar.Opacity",
+        "HScrollBar.BeforeUpdate", "HScrollBar.AfterUpdate", "HScrollBar.BeforeDragOver", "HScrollBar.BeforeDropOrPaste", "HScrollBar.Error",
         "VScrollBar.ControlSource", "VScrollBar.Opacity",
+        "VScrollBar.BeforeUpdate", "VScrollBar.AfterUpdate", "VScrollBar.BeforeDragOver", "VScrollBar.BeforeDropOrPaste", "VScrollBar.Error",
         "Form.ContextMenu",
+        "Form.BeforeDragOver", "Form.BeforeDropOrPaste", "Form.Error",
         "DriveListBox.Opacity",
         "DirListBox.Opacity", "DirListBox.ContextMenu",
         "FileListBox.Opacity", "FileListBox.ContextMenu",
@@ -36,6 +47,7 @@ public sealed class RDFormsLibrariesTests
         "Shape.Opacity",
         "Line.Opacity",
         "Image.Opacity", "Image.ContextMenu",
+        "Image.BeforeDragOver", "Image.BeforeDropOrPaste", "Image.Error",
         "Data.Opacity", "Data.ContextMenu",
         "VBControlExtender.Opacity",
     ];
@@ -204,7 +216,8 @@ public sealed class RDFormsLibrariesTests
         var vb = VB();
         var written = LibraryJson.Write(vb);
 
-        Assert.AreEqual(vb.Classes.Sum(declared => declared.Members.Count(member => member.IsAddition)), written.Split("\"isAddition\"").Length - 1);
+        Assert.AreEqual(vb.Classes.Sum(declared => declared.Members.Count(member => member.IsAddition) + declared.Events.Count(raised => raised.IsAddition)),
+            written.Split("\"isAddition\"").Length - 1);
         var label = vb.Classes.Single(declared => declared.Name == "Label");
         var read = LibraryJson.Read(written).Classes.Single(declared => declared.Name == "Label");
         Assert.AreEqual(Json(label.Members, label.Events), Json(read.Members, read.Events));

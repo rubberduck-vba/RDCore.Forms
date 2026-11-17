@@ -28,7 +28,7 @@ A read returns an `MSFormsFormImport`:
 Each MSForms class reads as the RDForms class the MSForms port map gives it: a `TextBox` is an `RDForms.TextBox`, and a `UserForm` an `RDForms.Form`. A `ScrollBar` is an `RDForms.HScrollBar` or an `RDForms.VScrollBar` by its `Orientation`; with `fmOrientationAuto`, a scroll bar wider than it is tall is horizontal. The controls a Frame holds are placed in it.
 
 > [!NOTE]
-> **Not implemented.** The model has no `ToggleButton`, `SpinButton`, `MultiPage` or `TabStrip`. Each one is left out, with the controls it holds, and reported as `UnmodelledClass`.
+> **Not implemented.** The model has no `MultiPage` or `TabStrip`. Each one is left out, with the controls it holds, and reported as `UnmodelledClass`.
 
 ## Values
 
@@ -38,6 +38,8 @@ Each MSForms class reads as the RDForms class the MSForms port map gives it: a `
 |`ControlTipText`|`ToolTipText`.|
 |`TextAlign`|`Alignment`, with VB's values: left 0, right 1, center 2.|
 |A TextBox's `Value`, a ComboBox's `Value`|`Text`.|
+|A ToggleButton|An `RDForms.ToggleButton`. Its `Value` is True where the form stores 1, and False where it stores 0 or nothing.|
+|A SpinButton|An `RDForms.SpinButton`, with its `Value`, `Min`, `Max`, `SmallChange`, `Orientation` and `Delay`.|
 |`Caption` and `Accelerator`|`Caption`, with each literal `&` doubled and a `&` before the first letter that matches the `Accelerator`. A form's caption is kept as it is.|
 |`SpecialEffect`|Flat and sunken are `Appearance` Flat and 3D. A Frame is drawn etched.|
 |An Image's `PictureSizeMode`|Clip and stretch are `Stretch` False and True.|

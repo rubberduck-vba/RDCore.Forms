@@ -15,12 +15,6 @@ namespace RDCore.Forms.Import.MSForms;
 /// </summary>
 public static class MSFormsFormReader
 {
-    // Points per DIP, until RDForms.Units is on this line: 1 DIP is 0.75 point.
-    private const double PointsPerDip = 0.75;
-
-    // Twips per DIP: the .frm writes a UserForm's client rectangle in twips.
-    private const double TwipsPerDip = 15;
-
     /// <summary>
     /// Reads a UserForm's text and its companion file.
     /// </summary>
@@ -189,7 +183,7 @@ public static class MSFormsFormReader
             return form;
         }
 
-        // The designer block's own properties: the caption, the client rectangle in twips, the start-up position.
+        // The designer block's own properties: the caption, the client rectangle in twips (the .frm writes it so), the start-up position.
         private void ReadDesignerBlock(ComponentInstance root, DesignerBlock block)
         {
             foreach (var property in block.Properties)
@@ -202,7 +196,7 @@ public static class MSFormsFormReader
                     ("startupposition", ValueLiteral.Number { IsIntegral: true } position) =>
                         Enum.IsDefined((StartUpPosition)(int)position.Value) && root.TryRead(P.StartUpPosition, (StartUpPosition)(int)position.Value),
                     (_, ValueLiteral.Number twips) when Array.FindIndex(ClientRectangle, c => c.Equals(name, StringComparison.OrdinalIgnoreCase)) is >= 0 and var axis =>
-                        root.TryRead(axis switch { 0 => P.Left, 1 => P.Top, 2 => P.Width, _ => P.Height }, twips.Value / TwipsPerDip),
+                        root.TryRead(axis switch { 0 => P.Left, 1 => P.Top, 2 => P.Width, _ => P.Height }, Units.FromTwips(twips.Value)),
                     ("oleobjectblob", _) => true,
                     _ => false,
                 };
@@ -278,8 +272,8 @@ public static class MSFormsFormReader
         private void PortSite(ComponentInstance instance, string legacyClass, MSFormsSite site, MSFormsProperties properties)
         {
             var component = instance.Name;
-            SetIfChanged(instance, P.Left, site.Left / PointsPerDip);
-            SetIfChanged(instance, P.Top, site.Top / PointsPerDip);
+            SetIfChanged(instance, P.Left, Units.FromPoints(site.Left));
+            SetIfChanged(instance, P.Top, Units.FromPoints(site.Top));
 
             // a page's Visible is its tab's, among its properties.
             if (!properties.TryGet<bool>("Visible", out _))
@@ -361,7 +355,7 @@ public static class MSFormsFormReader
         {
             if (properties.TryGet<double>(name, out var points))
             {
-                SetIfChanged(instance, property, points / PointsPerDip);
+                SetIfChanged(instance, property, Units.FromPoints(points));
             }
         }
 
@@ -401,7 +395,7 @@ public static class MSFormsFormReader
                     return;
 
                 case "specialeffect":
-                    PortSpecialEffect(instance, legacyClass, value);
+                    PortSpecialEffect(instance, legacyClass, value, stored);
                     return;
 
                 case "picturesizemode":
@@ -419,10 +413,7 @@ public static class MSFormsFormReader
             }
 
             var member = Map.MemberOf(legacyClass, name);
-
-            // a ComboBox persists its text as its Value.
-            var rdformsName = legacyClass == "ComboBox" && name.Equals("Value", StringComparison.OrdinalIgnoreCase) ? "Text" : member?.RDFormsName ?? name;
-            if (instance.Class.Property(rdformsName) is not { RunTimeOnly: false } definition)
+            if (instance.Class.Property(member?.RDFormsName ?? name) is not { RunTimeOnly: false } definition)
             {
                 if (stored)
                 {
@@ -461,15 +452,17 @@ public static class MSFormsFormReader
             }
         }
 
-        // MSForms' edge to RDForms': flat and sunken are Appearance's two; a Frame is drawn etched. Any other has no equivalent.
-        private void PortSpecialEffect(ComponentInstance instance, string legacyClass, object value)
+        // MSForms' edge to RDForms': flat and sunken are Appearance's two; a Frame is drawn etched. Any other has no equivalent. A class with
+        // no Appearance reports only an edge its form stores: a ToggleButton has the format's default sunken edge, though MSForms gives it no
+        // SpecialEffect.
+        private void PortSpecialEffect(ComponentInstance instance, string legacyClass, object value, bool stored)
         {
             const int Flat = 0, Sunken = 2, Etched = 3;
             if (instance.Class.Has(P.Appearance) && value is Flat or Sunken)
             {
                 SetIfChanged(instance, P.Appearance, value is Flat ? Appearance.Flat : Appearance.ThreeD);
             }
-            else if (legacyClass == "Frame" ? value is not Etched : value is not Flat)
+            else if ((stored || instance.Class.Has(P.Appearance)) && (legacyClass == "Frame" ? value is not Etched : value is not Flat))
             {
                 diagnostics.Add(MSFormsImportDiagnosticKind.ValueNotPorted, instance.Name, "SpecialEffect", instance.Name, "SpecialEffect", Text(value));
                 Keep(instance, "SpecialEffect", value);
@@ -603,9 +596,14 @@ public static class MSFormsFormReader
         {
             converted = (type, value) switch
             {
-                _ when type == typeof(double) && value is double length => isLength ? length / PointsPerDip : length,
-                _ when type == typeof(bool) && value is bool flag => flag,
-                _ when type == typeof(bool) && value is string text => text switch { "1" => true, "0" or "" => false, _ => null },
+                _ when type == typeof(double) && value is double length => isLength ? Units.FromPoints(length) : length,
+                _ when type == typeof(bool) || type == typeof(bool?) => value switch
+                {
+                    bool flag => flag,
+                    // a CheckBox's or a ToggleButton's Value, as the form stores it.
+                    string text => text switch { "1" => true, "0" or "" => false, _ => null },
+                    _ => null,
+                },
                 _ when type == typeof(string) && value is string text => text,
                 _ when type == typeof(string) && value is char character => character == '\0' ? "" : character.ToString(),
                 _ when type == typeof(short) && value is int number and >= short.MinValue and <= short.MaxValue => (short)number,

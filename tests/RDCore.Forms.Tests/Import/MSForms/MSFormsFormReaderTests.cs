@@ -120,6 +120,7 @@ public sealed class MSFormsFormReaderTests
             ("Caption1", "RDForms.Label"), ("Entry", "RDForms.TextBox"), ("Choices", "RDForms.ComboBox"), ("Items", "RDForms.ListBox"),
             ("Toggle1", "RDForms.CheckBox"), ("Option1", "RDForms.OptionButton"), ("Go", "RDForms.CommandButton"),
             ("Scroller", "RDForms.VScrollBar"), ("Picture1", "RDForms.Image"), ("Outer", "RDForms.Frame"), ("Inner", "RDForms.Frame"),
+            ("Switch", "RDForms.ToggleButton"), ("Spinner", "RDForms.SpinButton"),
         })
         {
             Assert.AreEqual(typeName, Find(import, name).Class.TypeName, name);
@@ -135,26 +136,54 @@ public sealed class MSFormsFormReaderTests
         Assert.AreEqual(new FormFont("MS Sans Serif", 8, FormFont.NormalWeight, false, false, false, 0), Find(import, "Entry").Get(P.Font));
     }
 
-    // the model has no ToggleButton, SpinButton, MultiPage or TabStrip: each is kept with no text, and the controls it holds left out.
+    // the model has no MultiPage or TabStrip: each is kept with no text, and the controls it holds left out.
     [TestMethod]
     public void AClassTheModelLacks_IsKeptAsAnUnmodelledComponent_AndReported()
     {
         var import = AllControls();
         var unmodelled = import.Form!.Root.UnmodelledContents;
 
-        CollectionAssert.AreEqual(new[] { "Switch", "Tabs", "Spinner", "Pages" }, unmodelled.Select(c => c.Name).ToArray());
-        CollectionAssert.AreEqual(new[] { "MSForms.ToggleButton", "MSForms.TabStrip", "MSForms.SpinButton", "MSForms.MultiPage" },
-            unmodelled.Select(c => c.TypeName).ToArray());
+        CollectionAssert.AreEqual(new[] { "Tabs", "Pages" }, unmodelled.Select(c => c.Name).ToArray());
+        CollectionAssert.AreEqual(new[] { "MSForms.TabStrip", "MSForms.MultiPage" }, unmodelled.Select(c => c.TypeName).ToArray());
         Assert.IsTrue(unmodelled.All(c => c.Text.Length == 0));
         Assert.IsNull(import.Form.Find("Page1"));
         Assert.IsNull(import.Form.Find("FirstPageEntry"));
         Assert.IsNull(import.Form.Find("SecondPageGo"));
 
         var reported = import.Diagnostics.Where(d => d.Kind == MSFormsImportDiagnosticKind.UnmodelledClass).ToList();
-        CollectionAssert.AreEqual(new[] { "Switch", "Tabs", "Spinner", "Pages" }, reported.Select(d => d.Component).ToArray());
+        CollectionAssert.AreEqual(new[] { "Tabs", "Pages" }, reported.Select(d => d.Component).ToArray());
         Assert.IsTrue(reported.All(d => d.Severity == MSFormsImportSeverity.Information));
-        StringAssert.Contains(reported[3].Message, "4");
-        Assert.HasCount(4, import.Diagnostics, string.Join("\n", import.Diagnostics));
+        StringAssert.Contains(reported[1].Message, "4");
+        Assert.HasCount(2, import.Diagnostics, string.Join("\n", import.Diagnostics));
+    }
+
+    // a ToggleButton is an RDForms.ToggleButton: its size in DIP, the Value "0" it stores as False, its tip as ToolTipText; the sunken edge
+    // the format gives it by default is not reported.
+    [TestMethod]
+    public void AToggleButton_IsAnRDFormsToggleButton()
+    {
+        var import = AllControls(Site("Switch", s => s with { ControlTipText = "Flip" }));
+        var toggle = Find(import, "Switch");
+
+        Assert.AreSame(ComponentClasses.ToggleButton, toggle.Class);
+        Assert.AreEqual(36 / 0.75, toggle.Get(P.Width), Delta);
+        Assert.AreEqual("Flip", toggle.Get(P.ToolTipText));
+        Assert.AreEqual<bool?>(false, toggle.Get(P.ToggleButtonValue));
+        Assert.IsEmpty(import.Diagnostics.Where(d => d.Component == "Switch"), string.Join("\n", import.Diagnostics));
+    }
+
+    // a SpinButton is an RDForms.SpinButton: its size in DIP, its stored automatic Orientation, its tip as ToolTipText.
+    [TestMethod]
+    public void ASpinButton_IsAnRDFormsSpinButton()
+    {
+        var import = AllControls(Site("Spinner", s => s with { ControlTipText = "Step" }));
+        var spinner = Find(import, "Spinner");
+
+        Assert.AreSame(ComponentClasses.SpinButton, spinner.Class);
+        Assert.AreEqual(25.511811023622048 / 0.75, spinner.Get(P.Height), Delta);
+        Assert.AreEqual("Step", spinner.Get(P.ToolTipText));
+        Assert.AreEqual(ControlOrientation.Auto, spinner.Get(P.Orientation));
+        Assert.IsEmpty(import.Diagnostics.Where(d => d.Component == "Spinner"), string.Join("\n", import.Diagnostics));
     }
 
     [TestMethod]
@@ -217,6 +246,59 @@ public sealed class MSFormsFormReaderTests
         Assert.IsTrue(reported.All(d => d.Severity == MSFormsImportSeverity.Warning && d.Port!.Code == "RDC40007"));
         StringAssert.StartsWith(reported[0].Message, "The ControlSource of Entry is kept as text. ");
         StringAssert.EndsWith(reported[0].Message, reported[0].Port!.MessageIn(CultureInfo.CurrentUICulture));
+    }
+
+    // each class with a ControlSource keeps it as text, and reports it with the port's diagnostic.
+    [TestMethod]
+    [DataRow("Entry", DisplayName = "TextBox")]
+    [DataRow("Choices", DisplayName = "ComboBox")]
+    [DataRow("Items", DisplayName = "ListBox")]
+    [DataRow("Toggle1", DisplayName = "CheckBox")]
+    [DataRow("Option1", DisplayName = "OptionButton")]
+    [DataRow("Switch", DisplayName = "ToggleButton")]
+    [DataRow("Spinner", DisplayName = "SpinButton")]
+    [DataRow("Scroller", DisplayName = "ScrollBar")]
+    public void AControlSource_IsKeptAsText_AndReportedAsUnresolved(string name)
+    {
+        var import = AllControls(Site(name, s => s with { ControlSource = "Sheet1!A1" }));
+
+        Assert.AreEqual("Sheet1!A1", Find(import, name).Get(P.ControlSource));
+        var reported = import.Diagnostics.Single(d => d.Kind == MSFormsImportDiagnosticKind.UnresolvedDataSource);
+        Assert.AreEqual(name + ".ControlSource", reported.Component + "." + reported.Property);
+        Assert.AreEqual(MSFormsImportSeverity.Warning, reported.Severity);
+        Assert.AreEqual("RDC40007", reported.Port!.Code);
+    }
+
+    // a ListBox's and a ComboBox's RowSource is kept as text, and reported with the port's diagnostic.
+    [TestMethod]
+    [DataRow("Items", DisplayName = "ListBox")]
+    [DataRow("Choices", DisplayName = "ComboBox")]
+    public void ARowSource_IsKeptAsText_AndReportedAsUnresolved(string name)
+    {
+        var import = AllControls(Site(name, s => s with { RowSource = "Sheet1!C1:C9" }));
+
+        Assert.AreEqual("Sheet1!C1:C9", Find(import, name).Get(P.RowSource));
+        var reported = import.Diagnostics.Single(d => d.Kind == MSFormsImportDiagnosticKind.UnresolvedDataSource);
+        Assert.AreEqual(name + ".RowSource", reported.Component + "." + reported.Property);
+        Assert.AreEqual(MSFormsImportSeverity.Warning, reported.Severity);
+        Assert.AreEqual("RDC40007", reported.Port!.Code);
+    }
+
+    // a TextBox and a ComboBox keep their text as their Value, which the port map gives to Text. No fixture's TextBox or ComboBox stores
+    // one, so each is given the properties of the CheckBox, which shares their structure ([MS-OFORMS] 2.2.5) and stores its Value.
+    [TestMethod]
+    [DataRow("Entry", DisplayName = "TextBox")]
+    [DataRow("Choices", DisplayName = "ComboBox")]
+    public void AValue_IsTheText(string name)
+    {
+        var checkBox = MSFormsReader.Read(Bytes("AllControls.storage")).Form.DescendantsAndSelf().Single(control => control.Name == "Toggle1");
+        Assert.AreEqual("0", checkBox.Properties.Get<string>("Value"));
+
+        var import = AllControls(control => control.Name == name ? control with { Properties = checkBox.Properties } : control);
+
+        var instance = Find(import, name);
+        Assert.AreEqual("0", instance.Get(P.Text));
+        Assert.IsFalse(instance.UnmodelledProperties.Any(p => p.Name == "Value"));
     }
 
     [TestMethod]
