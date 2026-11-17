@@ -27,10 +27,12 @@ The package targets .NET 11 (`net11.0`). It depends on Avalonia and on RDCore.SD
 - [API reference](https://rubberduck-vba.github.io/RDCore.Forms/api/RDCore.Forms.Model.html), generated from the xmldocs of the package's assemblies.
 - [Source and issues](https://github.com/rubberduck-vba/RDCore.Forms).
 
-## License
+## Licence
 
-MIT. The license text is in the package and in the [repository](https://github.com/rubberduck-vba/RDCore.Forms/blob/main/LICENSE). A French version of the license is available on request. The package's NOTICE.md names the third-party code it includes, with its license.
+MIT. The licence text is in the package and in the [repository](https://github.com/rubberduck-vba/RDCore.Forms/blob/main/LICENSE). A French version of the licence is available on request. The package's NOTICE.md names the third-party code it includes, with its licence.
+
+The RDCore platform that hosts RDForms, the RD-VBA runtime included, is licensed under the GNU GPL v3 or later, in the [RDCore](https://github.com/rubberduck-vba/RDCore) repository.
 
 ## Contributing
 
-Contributions are open to individuals, under the [RDCore CLA](https://github.com/rubberduck-vba/RDCore/blob/main/CLA.md). One signature covers every repository of the RDCore platform.
+Contributions are open to individuals, under the [CLA](https://github.com/rubberduck-vba/RDCore.Forms/blob/main/CLA.md). One signature covers every repository of the RDCore platform.
