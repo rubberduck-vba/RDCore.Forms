@@ -22,7 +22,8 @@ namespace RDCore.Forms.Avalonia.Rendering;
 /// <remarks>
 /// <para>
 /// The window's client area is the form's: its size is the root's <c>Width</c> and <c>Height</c>, in pixels, and follows them. A user
-/// who resizes the window sets them. The form's menus are on its <see cref="MenuBar"/>, above the client area, and a menu item's shortcut
+/// who resizes the window sets them. The client area scrolls in its <see cref="Scroller"/>, by the root's <c>ScrollLeft</c> and
+/// <c>ScrollTop</c>, over at least its <c>ScrollWidth</c> by <c>ScrollHeight</c>, and raises the root's Scroll. The form's menus are on its <see cref="MenuBar"/>, above the client area, and a menu item's shortcut
 /// chooses it before a control or the root sees the key. Enter clicks the focused CommandButton, or else the
 /// form's first CommandButton whose <c>Default</c> is True, and Esc the first whose <c>Cancel</c> is True, with no key event, the root's
 /// included: a button that is hidden or disabled takes no key, and a combo's open list keeps both keys. The button Enter clicks has the
@@ -128,8 +129,10 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
         View = new RDFormsFormView(form, fileSystem);
         MenuBar = new RDFormsMenuBar(form.Root);
         DockPanel.SetDock(MenuBar, Dock.Top);
+        // The client area scrolls by the form's ScrollLeft and ScrollTop, and keeps the form's size.
+        Scroller = new RDFormsScroller(form.Root, View, View, followsSize: true);
         // A window of no pixels has no surface to draw: closing it fails as it renders a last frame. The window takes its content's size.
-        Content = new DockPanel { MinWidth = 1, MinHeight = 1, Children = { MenuBar, View } };
+        Content = new DockPanel { MinWidth = 1, MinHeight = 1, Children = { MenuBar, Scroller } };
         SizeToContent = SizeToContent.WidthAndHeight;
         WindowStartupLocation = form.Root.Get(P.StartUpPosition) switch
         {
@@ -154,6 +157,12 @@ public sealed class RDFormsFormWindow : Window, IMenuHost, IFormFocus
     /// The form's client area.
     /// </summary>
     public RDFormsFormView View { get; }
+
+    /// <summary>
+    /// The scroll viewer the client area is in: its size is the form's <c>Width</c> and <c>Height</c>, and its offset the form's
+    /// <c>ScrollLeft</c> and <c>ScrollTop</c>.
+    /// </summary>
+    public ScrollViewer Scroller { get; }
 
     /// <summary>
     /// The form's menu bar, above its client area: hidden while none of the bar's items is visible.
