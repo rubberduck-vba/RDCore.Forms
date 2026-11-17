@@ -35,8 +35,16 @@ internal enum DblClick
 internal interface IFormFocus
 {
     // A control of the window took the focus, or lost it, in the window system: to no element, where toNone is true, as the window
-    // system takes the focus from the window.
-    void FocusMoved(Control control, bool got, bool toNone);
+    // system takes the focus from the window, or to the control `to`, where the element that took it is one.
+    void FocusMoved(Control control, bool got, bool toNone, Control? to = null);
+}
+
+// A control whose user edit is kept as the focus leaves it, with a BeforeUpdate and an AfterUpdate.
+internal interface IKeepsEdits
+{
+    // Raises BeforeUpdate, then AfterUpdate, where the user changed the control's value since it was last kept, and answers false
+    // where the BeforeUpdate's handler cancelled: the focus stays on the control, and the edit stays to keep.
+    bool KeepEdit();
 }
 
 // The focus, click and mouse events VB raises for a control, as measured with VB6: native and p-code builds agree.
@@ -62,14 +70,18 @@ internal static class ControlEvents
         {
             if (e is FocusChangedEventArgs moved
                 && RDFormsControl.Owns(control, moved.OldFocusedElement) && !RDFormsControl.Owns(control, moved.NewFocusedElement))
-                FocusMoved(control, got: false, toNone: moved.NewFocusedElement is null);
+                FocusMoved(control, got: false, toNone: moved.NewFocusedElement is null, to: ControlKeys.Owner(moved.NewFocusedElement));
         }, handledEventsToo: true);
     }
 
-    private static void FocusMoved(Control control, bool got, bool toNone = false)
+    // Whether an event's handler set its Cancel, the argument of the given place, to True.
+    public static bool Cancelled(FormValue[]? after, int place = 0) =>
+        after is { } arguments && arguments[place] is { Kind: FormValueKind.Boolean } cancel && cancel.AsBoolean();
+
+    private static void FocusMoved(Control control, bool got, bool toNone = false, Control? to = null)
     {
         if (TopLevel.GetTopLevel(control) is IFormFocus form)
-            form.FocusMoved(control, got, toNone);
+            form.FocusMoved(control, got, toNone, to);
         else
             RDFormsControl.Raise(control, got ? Events.GotFocus : Events.LostFocus);
     }

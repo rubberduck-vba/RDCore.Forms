@@ -61,7 +61,8 @@ public static class ComponentClasses
     public static readonly ComponentClass Form = Root("RDForms.Form", "Form",
         [P.Caption, P.BackColor, P.Enabled, P.ForeColor, P.Icon, P.Picture, P.MousePointer, P.ShowInTaskbar, P.Font, P.FontTransparent, P.StartUpPosition, P.KeyPreview,
          P.MaxButton, P.MinButton, P.Visible, P.AutoRedraw, P.DrawMode, P.DrawStyle, P.DrawWidth, P.FillColor, P.FillStyle, P.ContextMenu],
-        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate],
+        [.. KeyAndMouse, Initialize, Load, Resize, Activate, Deactivate, GotFocus, LostFocus, Paint, QueryUnload, Unload, Terminate,
+         ContainerBeforeDragOver, ContainerBeforeDropOrPaste, Error],
         [M.Move, M.Refresh, M.SetFocus]);
 
     /// <summary>
@@ -111,8 +112,10 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass CommandButton = Control("RDForms.CommandButton", "Command",
         [P.Caption, P.BackColor, P.Appearance, P.Font, P.MousePointer, P.Picture, P.Enabled, P.TabStop, P.TabIndex, P.ToolTipText,
-         P.Default, P.Cancel, P.ButtonStyle, P.DownPicture, P.DisabledPicture, P.CommandButtonValue, P.MaskColor, P.UseMaskColor],
-        [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
+         P.Default, P.Cancel, P.ButtonStyle, P.DownPicture, P.DisabledPicture, P.CommandButtonValue, P.MaskColor, P.UseMaskColor,
+         P.CausesValidation],
+        [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeDragOver, BeforeDropOrPaste,
+         Error]);
 
     /// <summary>
     /// <c>RDForms.TextBox</c>. Its colours default to the window's (<c>Window</c>, <c>WindowText</c>), where most controls default to the
@@ -120,8 +123,10 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass TextBox = Control("RDForms.TextBox", "Text",
         [P.Text, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.TabStop, P.MousePointer, P.TabIndex, P.ToolTipText, P.Locked, P.Alignment,
-         P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText],
-        [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp],
+         P.Appearance, P.BorderStyle, P.MultiLine, P.ScrollBars, P.PasswordChar, P.MaxLength, P.SelStart, P.SelLength, P.SelText,
+         P.CausesValidation],
+        [KeyDown, KeyPress, KeyUp, Change, Click, DblClick, GotFocus, LostFocus, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
+         AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.BorderStyle, BorderStyle.FixedSingle)));
 
     /// <summary>
@@ -132,7 +137,7 @@ public static class ComponentClasses
         [P.Caption, P.Enabled, P.Font, P.BackColor, P.BackStyle, P.Alignment, P.Appearance, P.AutoSize, P.BorderStyle, P.ForeColor,
          P.MousePointer, P.RightToLeft, P.ToolTipText, P.UseMnemonic, P.WhatsThisHelpID, P.WordWrap, P.TabIndex, P.Picture,
          P.PicturePosition],
-        [Click, DblClick, MouseDown, MouseMove, MouseUp],
+        [Click, DblClick, MouseDown, MouseMove, MouseUp, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackStyle, BackStyle.Opaque)), isWindowless: true);
 
     /// <summary>
@@ -140,23 +145,27 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass CheckBox = Control("RDForms.CheckBox", "Check",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.CheckBoxValue, P.Appearance,
-         P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
-        [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
+         P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor,
+         P.CausesValidation],
+        [Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate, AfterUpdate,
+         BeforeDragOver, BeforeDropOrPaste, Error]);
 
     /// <summary>
     /// <c>RDForms.OptionButton</c>.
     /// </summary>
     public static readonly ComponentClass OptionButton = Control("RDForms.OptionButton", "Option",
         [P.BackColor, P.Caption, P.Enabled, P.Font, P.ForeColor, P.MousePointer, P.RightToLeft, P.ToolTipText, P.OptionButtonValue,
-         P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor],
-        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp]);
+         P.Appearance, P.TabStop, P.TabIndex, P.ButtonStyle, P.Picture, P.DownPicture, P.DisabledPicture, P.MaskColor, P.UseMaskColor,
+         P.CausesValidation],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
+         AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error]);
 
     /// <summary>
     /// <c>RDForms.Frame</c>, a container.
     /// </summary>
     public static readonly ComponentClass Frame = Control("RDForms.Frame", "Frame",
         [P.Caption, P.Enabled, P.BackColor, P.ForeColor, P.Font, P.MousePointer, P.TabIndex, P.ToolTipText],
-        [Click, DblClick, MouseDown, MouseMove, MouseUp], isContainer: true);
+        [Click, DblClick, MouseDown, MouseMove, MouseUp, ContainerBeforeDragOver, ContainerBeforeDropOrPaste, Error], isContainer: true);
 
     /// <summary>
     /// <c>RDForms.ListBox</c>. Its colors default to the window's. A program reaches its items through its list members, which its window
@@ -165,8 +174,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ListBox = Control("RDForms.ListBox", "List",
         [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.MultiSelect, P.IntegralHeight, P.DragIcon, P.MousePointer,
-         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
-        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
+         P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate, BeforeUpdate,
+         AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
         methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.Selected, M.ListIndex, M.ListCount, M.NewIndex, M.SelCount,
             M.ListText]);
@@ -177,8 +187,10 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass ComboBox = Control("RDForms.ComboBox", "Combo",
         [P.Text, P.Enabled, P.Font, P.ForeColor, P.BackColor, P.List, P.ItemData, P.ItemIcon, P.Locked, P.ComboBoxStyle, P.IntegralHeight,
-         P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText],
-        [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
+         P.MousePointer, P.RightToLeft, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.SelStart, P.SelLength, P.SelText,
+         P.CausesValidation],
+        [Change, Click, DblClick, DropDown, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, Validate, BeforeUpdate, AfterUpdate,
+         BeforeDragOver, BeforeDropOrPaste, Error],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)),
         methods: [M.AddItem, M.RemoveItem, M.Clear, M.List, M.ItemData, M.ItemIcon, M.ListIndex, M.ListCount, M.NewIndex, M.ListText]);
 
@@ -187,8 +199,9 @@ public static class ComponentClasses
     /// default to the window's.
     /// </summary>
     public static readonly ComponentClass DriveListBox = Control("RDForms.DriveListBox", "Drive",
-        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
-        [Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp],
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText,
+         P.CausesValidation],
+        [Change, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, Validate],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
 
     /// <summary>
@@ -196,8 +209,9 @@ public static class ComponentClasses
     /// default to the window's.
     /// </summary>
     public static readonly ComponentClass DirListBox = Control("RDForms.DirListBox", "Dir",
-        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
-        [Change, Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp],
+        [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText,
+         P.CausesValidation],
+        [Change, Click, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Validate],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
 
     /// <summary>
@@ -206,8 +220,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass FileListBox = Control("RDForms.FileListBox", "File",
         [P.Enabled, P.Font, P.ForeColor, P.BackColor, P.Pattern, P.Archive, P.Hidden, P.Normal, P.ReadOnly, P.SystemFiles, P.MultiSelect,
-         P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText],
-        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, PathChange, PatternChange],
+         P.DragIcon, P.MousePointer, P.Appearance, P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, PathChange, PatternChange,
+         Validate],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground)));
 
     /// <summary>
@@ -217,7 +232,7 @@ public static class ComponentClasses
         [P.Align, P.Appearance, P.AutoRedraw, P.AutoSize, P.BackColor, P.BorderStyle, P.CausesValidation, P.Enabled, P.FillColor, P.FillStyle,
          P.Font, P.FontTransparent, P.ForeColor, P.MousePointer, P.TabIndex, P.TabStop, P.ToolTipText, P.Picture, P.DrawMode, P.DrawStyle, P.DrawWidth,
          .. ScaleProperties],
-        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Paint, Resize],
+        [Click, DblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, MouseDown, MouseMove, MouseUp, Paint, Resize, Validate],
         Defaults((P.BorderStyle, BorderStyle.FixedSingle)), isContainer: true);
 
     /// <summary>
@@ -225,7 +240,7 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass Image = Control("RDForms.Image", "Image",
         [P.Picture, P.Stretch, P.BorderStyle, P.MousePointer, P.MouseIcon, P.DragIcon, P.Enabled, P.ToolTipText],
-        [Click, DblClick, MouseDown, MouseMove, MouseUp], isWindowless: true);
+        [Click, DblClick, MouseDown, MouseMove, MouseUp, BeforeDragOver, BeforeDropOrPaste, Error], isWindowless: true);
 
     /// <summary>
     /// <c>RDForms.Timer</c>. It has a place in the designer and no size, and a running program does not show it and can neither read
@@ -270,7 +285,8 @@ public static class ComponentClasses
         [P.Caption, P.Align, P.Appearance, P.BackColor, P.ForeColor, P.Font, P.Enabled, P.MousePointer, P.MouseIcon, P.DragIcon, P.RightToLeft,
          P.ToolTipText, P.WhatsThisHelpID, P.Connect, P.DatabaseName, P.RecordSource, P.RecordsetType, P.DefaultType, P.DefaultCursorType,
          P.BOFAction, P.EOFAction, P.Exclusive, P.ReadOnly, P.Options, P.Negotiate],
-        [Validate, Error, Reposition, Resize, DragDrop, DragOver, MouseDown, MouseMove, MouseUp, OLECompleteDrag, OLEDragDrop, OLEDragOver,
+        [DataValidate, DataError, Reposition, Resize, DragDrop, DragOver, MouseDown, MouseMove, MouseUp, OLECompleteDrag, OLEDragDrop,
+         OLEDragOver,
          OLEGiveFeedback, OLESetData, OLEStartDrag],
         Defaults((P.BackColor, WindowBackground), (P.ForeColor, WindowForeground), (P.ReadOnly, false)),
         methods: [M.UpdateRecord, M.UpdateControls]);
@@ -291,9 +307,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass MultiPage = Control("RDForms.MultiPage", "MultiPage",
         [P.BackColor, P.ForeColor, P.Font, P.MultiRow, P.TabStyle, P.TabOrientation, P.Enabled, P.SelectedIndex, P.TabFixedWidth, P.TabFixedHeight,
-         P.TabStop, P.TabIndex, P.ToolTipText],
+         P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation],
         [Change, TabClick, TabDblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, TabMouseDown, TabMouseMove, TabMouseUp, PageLayout, PageAddControl,
-         PageRemoveControl],
+         PageRemoveControl, Validate, BeforeUpdate, AfterUpdate, PageBeforeDragOver, PageBeforeDropOrPaste, PageError],
         isContainer: true);
 
     /// <summary>
@@ -310,8 +326,9 @@ public static class ComponentClasses
     /// </summary>
     public static readonly ComponentClass TabStrip = Control("RDForms.TabStrip", "TabStrip",
         [P.BackColor, P.ForeColor, P.Font, P.Enabled, P.MouseIcon, P.MousePointer, P.MultiRow, P.TabStyle, P.TabOrientation, P.Tabs, P.SelectedIndex,
-         P.TabFixedWidth, P.TabFixedHeight, P.TabStop, P.TabIndex, P.ToolTipText],
-        [Change, TabClick, TabDblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, TabMouseDown, TabMouseMove, TabMouseUp]);
+         P.TabFixedWidth, P.TabFixedHeight, P.TabStop, P.TabIndex, P.ToolTipText, P.CausesValidation],
+        [Change, TabClick, TabDblClick, GotFocus, LostFocus, KeyDown, KeyPress, KeyUp, TabMouseDown, TabMouseMove, TabMouseUp, Validate, BeforeUpdate,
+         AfterUpdate, TabBeforeDragOver, TabBeforeDropOrPaste, Error]);
 
     /// <summary>
     /// Every class of the catalog.
@@ -344,7 +361,8 @@ public static class ComponentClasses
     private static PropertyDefinition[] ScrollBarProperties =>
         [P.CausesValidation, P.Enabled, P.SmallChange, P.MousePointer, P.LargeChange, P.Min, P.ScrollBarValue, P.Max, P.TabStop, P.TabIndex];
 
-    private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll];
+    private static EventDefinition[] ScrollBarEvents => [Change, GotFocus, KeyDown, KeyPress, KeyUp, LostFocus, Scroll, Validate,
+    BeforeUpdate, AfterUpdate, BeforeDragOver, BeforeDropOrPaste, Error];
 
     private static PropertyDefinition[] ScaleProperties => [P.ScaleMode, P.ScaleLeft, P.ScaleTop, P.ScaleWidth, P.ScaleHeight];
 

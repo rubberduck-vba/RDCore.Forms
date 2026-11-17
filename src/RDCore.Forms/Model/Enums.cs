@@ -780,3 +780,69 @@ public enum TabOrientation
     /// </summary>
     Right = 3,
 }
+
+/// <summary>
+/// Where a drag is, as a <c>BeforeDragOver</c> gives it.
+/// </summary>
+public enum DragState
+{
+    /// <summary>
+    /// 0: it entered the control.
+    /// </summary>
+    Enter = 0,
+    /// <summary>
+    /// 1: it left the control.
+    /// </summary>
+    Leave = 1,
+    /// <summary>
+    /// 2: it moved over the control.
+    /// </summary>
+    Over = 2,
+}
+
+/// <summary>
+/// What a drop or a paste does with its data: a <see cref="ReturnEffect"/>'s <c>Value</c>.
+/// </summary>
+public enum DropEffect
+{
+    /// <summary>
+    /// 0: nothing.
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// 1: it copies the data.
+    /// </summary>
+    Copy = 1,
+    /// <summary>
+    /// 2: it moves the data.
+    /// </summary>
+    Move = 2,
+    /// <summary>
+    /// 3: it copies or moves the data.
+    /// </summary>
+    CopyOrMove = 3,
+}
+
+/// <summary>
+/// What a <c>BeforeDropOrPaste</c> is about to do: the <c>RDForms.Action</c> of a program's code. Its C# name keeps it apart from
+/// <see cref="System.Action"/>.
+/// </summary>
+public enum DropAction
+{
+    /// <summary>
+    /// 0: a cut.
+    /// </summary>
+    Cut = 0,
+    /// <summary>
+    /// 1: a copy.
+    /// </summary>
+    Copy = 1,
+    /// <summary>
+    /// 2: a paste.
+    /// </summary>
+    Paste = 2,
+    /// <summary>
+    /// 3: a drop.
+    /// </summary>
+    DragDrop = 3,
+}

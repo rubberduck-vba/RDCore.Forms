@@ -26,6 +26,21 @@ Once its window has been shown, the root raises Resize for a change of size whet
 
 Each form keeps the control that last had the focus on it: that control takes the focus again, with a GotFocus, when the form is activated again. A form with no control that can take the focus raises its own GotFocus after its Activate, and its own LostFocus before its Deactivate. That LostFocus was not measured with VB6: its place before the Deactivate is RDForms' own.
 
+## Leaving a control
+
+As the focus moves from a control of the active form to another of its controls, by the keyboard or the mouse, the control it leaves raises these events in order:
+
+1. BeforeUpdate, then AfterUpdate, where the control is a TextBox whose text the user changed since the focus last left it. A change from code raises neither.
+2. Validate, where the control that takes the focus has `CausesValidation` True, the default.
+3. LostFocus, then the other control's GotFocus.
+
+A handler that sets `Cancel` to True, in BeforeUpdate or in Validate, keeps the focus on the control: nothing else is raised, and the edit stays. The next move raises the events again. A move made by `SetFocus` raises no Validate.
+
+The order of BeforeUpdate, AfterUpdate and Validate is RDForms' own: an MSForms UserForm raises BeforeUpdate and AfterUpdate before its Exit, which ports to Validate.
+
+> [!NOTE]
+> **Not implemented.** The other controls with a value (ComboBox, ListBox, CheckBox, OptionButton, the scroll bars, MultiPage and TabStrip) declare BeforeUpdate and AfterUpdate and raise neither. BeforeDragOver, BeforeDropOrPaste and Error are declared on the controls and containers MSForms gives them, with `RDForms.DataObject` and `RDForms.ReturnEffect` arguments, and never raised. A MultiPage's and a TabStrip's take the page's or the tab's `Index` first, and a MultiPage's Error does too.
+
 ## Unloading
 
 |Situation|Raised|
