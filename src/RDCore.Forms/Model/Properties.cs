@@ -880,6 +880,43 @@ public static class Properties
     /// </summary>
     public static readonly PropertyDefinition<int> Delay = new("Delay", PropertyCategory.Behavior, 50) { Valid = delay => delay >= 0 };
 
+    /// <summary>
+    /// The scroll bars a form or a Frame shows, named <c>ScrollBars</c>: none by default. A bar shows where its direction has more
+    /// to scroll than the inside shows, and always where <see cref="KeepScrollBarsVisible"/> keeps it.
+    /// </summary>
+    public static readonly PropertyDefinition<ScrollBars> ContainerScrollBars =
+        new("ScrollBars", PropertyCategory.Appearance, Model.ScrollBars.None);
+
+    /// <summary>
+    /// The scroll bars of <see cref="ContainerScrollBars"/> a form or a Frame shows even with nothing to scroll: both by default.
+    /// </summary>
+    public static readonly PropertyDefinition<ScrollBars> KeepScrollBarsVisible =
+        new("KeepScrollBarsVisible", PropertyCategory.Appearance, Model.ScrollBars.Both);
+
+    /// <summary>
+    /// The height of the area a form or a Frame scrolls, in pixels. At 0, the default, or at no more than the inside's height, it
+    /// has nothing to scroll down.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScrollHeight = new("ScrollHeight", PropertyCategory.Position);
+
+    /// <summary>
+    /// The width of the area a form or a Frame scrolls, in pixels. At 0, the default, or at no more than the inside's width, it has
+    /// nothing to scroll across.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScrollWidth = new("ScrollWidth", PropertyCategory.Position);
+
+    /// <summary>
+    /// How far a form or a Frame is scrolled across, in pixels: the left edge of the area it shows. Setting it scrolls the view, no
+    /// further than the area's end, and raises <see cref="Events.ContainerScroll"/> where the view moves; the user's scroll sets it.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScrollLeft = new("ScrollLeft", PropertyCategory.Position);
+
+    /// <summary>
+    /// How far a form or a Frame is scrolled down, in pixels: the top edge of the area it shows. Setting it scrolls the view, no
+    /// further than the area's end, and raises <see cref="Events.ContainerScroll"/> where the view moves; the user's scroll sets it.
+    /// </summary>
+    public static readonly PropertyDefinition<double> ScrollTop = new("ScrollTop", PropertyCategory.Position);
+
     private static IReadOnlyList<IReadOnlyList<(PropertyDefinition, object?)>> TextAssigned(ComponentInstance component, string text) =>
         component.Class.Has(SelStart) && text != component.Get(Text)
             ? [[(Text, text), (SelStart, 0), (SelLength, 0)]]

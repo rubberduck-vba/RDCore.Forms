@@ -19,7 +19,8 @@ public sealed class RDFormsLibrariesTests
         "PictureBox.Opacity", "PictureBox.ContextMenu",
         "Label.Picture", "Label.PicturePosition", "Label.Opacity", "Label.ContextMenu",
         "TextBox.Opacity", "TextBox.ContextMenu",
-        "Frame.Opacity", "Frame.ContextMenu",
+        "Frame.ScrollBars", "Frame.KeepScrollBarsVisible", "Frame.ScrollHeight", "Frame.ScrollWidth", "Frame.ScrollLeft", "Frame.ScrollTop",
+        "Frame.Opacity", "Frame.ContextMenu", "Frame.Scroll",
         "CommandButton.Opacity", "CommandButton.ContextMenu",
         "CheckBox.Opacity", "CheckBox.ContextMenu",
         "OptionButton.Opacity", "OptionButton.ContextMenu",
@@ -27,7 +28,8 @@ public sealed class RDFormsLibrariesTests
         "ListBox.ItemIcon", "ListBox.Opacity", "ListBox.ContextMenu",
         "HScrollBar.Opacity",
         "VScrollBar.Opacity",
-        "Form.ContextMenu",
+        "Form.ContextMenu", "Form.ScrollBars", "Form.KeepScrollBarsVisible", "Form.ScrollHeight", "Form.ScrollWidth", "Form.ScrollLeft",
+        "Form.ScrollTop", "Form.Scroll",
         "DriveListBox.Opacity",
         "DirListBox.Opacity", "DirListBox.ContextMenu",
         "FileListBox.Opacity", "FileListBox.ContextMenu",
@@ -92,7 +94,8 @@ public sealed class RDFormsLibrariesTests
 
     [TestMethod]
     public void TheAdditions_AreRDFormsList()
-        => CollectionAssert.AreEqual(Additions, RDFormsLibraries.Instance.Additions.ToArray());
+        // as text, so that a failure shows the list the library has
+        => Assert.AreEqual(string.Join("\n", Additions), string.Join("\n", RDFormsLibraries.Instance.Additions));
 
     // The step test: a member a running program reaches on a modelled class is in the description, an addition where VB6.OLB lacks it.
     [TestMethod]
@@ -204,7 +207,8 @@ public sealed class RDFormsLibrariesTests
         var vb = VB();
         var written = LibraryJson.Write(vb);
 
-        Assert.AreEqual(vb.Classes.Sum(declared => declared.Members.Count(member => member.IsAddition)), written.Split("\"isAddition\"").Length - 1);
+        Assert.AreEqual(vb.Classes.Sum(declared => declared.Members.Count(member => member.IsAddition) + declared.Events.Count(raised => raised.IsAddition)),
+            written.Split("\"isAddition\"").Length - 1);
         var label = vb.Classes.Single(declared => declared.Name == "Label");
         var read = LibraryJson.Read(written).Classes.Single(declared => declared.Name == "Label");
         Assert.AreEqual(Json(label.Members, label.Events), Json(read.Members, read.Events));

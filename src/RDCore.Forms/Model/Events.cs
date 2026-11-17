@@ -293,4 +293,13 @@ public static class Events
     /// and its Change follows where the value changed.
     /// </summary>
     public static readonly EventDefinition SpinDown = new("SpinDown");
+
+    /// <summary>
+    /// A form or a Frame scrolled, named <c>Scroll</c>. <c>ActionX</c> and <c>ActionY</c> say what scrolled it across and down
+    /// (<see cref="ScrollAction"/>), <c>RequestDx</c> and <c>RequestDy</c> how far it was asked to scroll, and <c>ActualDx</c> and
+    /// <c>ActualDy</c> how far it scrolled, in pixels, to the right and down.
+    /// </summary>
+    public static readonly EventDefinition ContainerScroll = new("Scroll",
+        new EventParameter("ActionX", "ScrollAction"), new EventParameter("ActionY", "ScrollAction"), new EventParameter("RequestDx", "Single"),
+        new EventParameter("RequestDy", "Single"), new EventParameter("ActualDx", "Single"), new EventParameter("ActualDy", "Single"));
 }
