@@ -187,7 +187,9 @@ The names an MSForms ListBox and ComboBox take in RDForms (see [Converting from 
 |`TextAlign`|`Alignment`, with VB's values: `fmTextAlignLeft` (1) is 0, `fmTextAlignCenter` (2) is 2, and `fmTextAlignRight` (3) is 1.|
 |`ListWidth`, in points|`ListWidth`, in pixels.|
 |`BorderStyle`, `fmBorderStyleNone` and `fmBorderStyleSingle`|`BorderStyle`, 0 and 1.|
-|`List`, `ListIndex`, `ListCount`, `Value`, `Text` and the other members of the same name|The same.|
+|A ComboBox's `Value`|`Text`.|
+|A ListBox's `Value`|None: an RDForms ListBox has no member for it.|
+|`List`, `ListIndex`, `ListCount`, `Text` and the other members of the same name|The same.|
 
 > [!NOTE]
 > **Not implemented.** A ListBox and a ComboBox have no `IMEMode`, and a ComboBox no `Copy`, `Cut`, `Paste` or `CanPaste`. Their BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.
