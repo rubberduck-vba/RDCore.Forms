@@ -20,7 +20,7 @@ public sealed class FormXamlDocumentReader : IFormDocumentReader
     }
 
     /// <summary>
-    /// The reader.
+    /// The one instance of the reader, which keeps no state.
     /// </summary>
     public static FormXamlDocumentReader Instance { get; } = new();
 
