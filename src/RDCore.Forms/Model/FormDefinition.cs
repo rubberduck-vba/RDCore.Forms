@@ -282,7 +282,7 @@ public sealed class FormDefinition
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="control"/> or <paramref name="name"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// The control is found by its new name, and no longer by its old one.
+    /// The control is then found by its new name, not by its old one.
     /// </remarks>
     public void RenameControl(ComponentInstance control, string name)
     {
