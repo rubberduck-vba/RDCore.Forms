@@ -39,7 +39,7 @@ Choosing an item leaves its `Checked` as the program set it.
 
 ## UI Automation
 
-Screen readers and automation tools see the menus as a Win32 program's. Each pattern raises the Click the pointer would.
+Screen readers and automation tools see the menus as a Win32 program's. Each pattern does what the pointer does to the item, and raises the same Click, or none where the pointer raises none.
 
 |Item|Patterns|
 |---|---|
