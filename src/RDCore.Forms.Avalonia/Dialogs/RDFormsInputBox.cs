@@ -11,8 +11,8 @@ using RDCore.Forms.Model;
 namespace RDCore.Forms.Avalonia.Dialogs;
 
 /// <summary>
-/// The dialog of an <c>InputBox</c> (<strong>MS-VBAL §6.1.2.8.1.12</strong>) in an RDForms application, laid out as Windows lays out VBA's: the message at the
-/// top left, the <em>OK</em> and <em>Cancel</em> buttons stacked on its right, and the text box across the bottom.
+/// The dialog of an <c>InputBox</c> (<strong>MS-VBAL §6.1.2.8.1.12</strong>) in an RDForms application, laid out as Windows lays out VBA's: the message
+/// at the top left, the <em>OK</em> and <em>Cancel</em> buttons stacked on its right, and the text box across the bottom.
 /// </summary>
 /// <remarks>
 /// <kbd>Enter</kbd> and <em>OK</em> answer what is in the text box; <kbd>Esc</kbd>, <em>Cancel</em> and the close button cancel it. The dialog has a
@@ -36,7 +36,7 @@ public sealed class RDFormsInputBox : Window
     /// <param name="prompt">The message. Its lines are separated by a carriage return, a line feed, or both.</param>
     /// <param name="title">The title of the dialog: the project's name when the program gives none, which is the caller's to give.</param>
     /// <param name="defaultText">The text the text box starts with, selected.</param>
-    /// <param name="xPos">Where the dialog's left edge is, in twips from the left of the screen; <see langword="null"/> to center it across.</param>
+    /// <param name="xPos">Where the dialog's left edge is, in twips from the left of the screen; <see langword="null"/> to centre it across.</param>
     /// <param name="yPos">
     /// Where the dialog's top edge is, in twips from the top of the screen; <see langword="null"/> to put it a third of the way down.
     /// </param>
@@ -192,9 +192,9 @@ public sealed class RDFormsInputBox : Window
 
     /// <summary>
     /// Where a dialog of a size is placed on a screen, as <c>InputBox</c> places it: its left edge <paramref name="xPos"/> twips from the screen's left, or
-    /// centered across it; its top edge <paramref name="yPos"/> twips from the screen's top, or a third of the way down what the screen leaves below it.
+    /// centred across it; its top edge <paramref name="yPos"/> twips from the screen's top, or a third of the way down what the screen leaves below it.
     /// </summary>
-    /// <param name="xPos">The left edge, in twips from the left of the screen; <see langword="null"/> to center the dialog across.</param>
+    /// <param name="xPos">The left edge, in twips from the left of the screen; <see langword="null"/> to centre the dialog across.</param>
     /// <param name="yPos">The top edge, in twips from the top of the screen; <see langword="null"/> to put the dialog a third of the way down.</param>
     /// <param name="screen">The screen's bounds, in its pixels.</param>
     /// <param name="scaling">How many of the screen's pixels a device-independent pixel is.</param>

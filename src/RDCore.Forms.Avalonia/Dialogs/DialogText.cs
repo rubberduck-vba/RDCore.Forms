@@ -11,7 +11,7 @@ internal static class DialogText
     public const double ButtonWidth = 88;
     public const double ButtonSpacing = 8;
 
-    // A prompt's lines are separated by Chr(13), Chr(10) or both (MS-VBAL 6.1.2.8.1.13): a text block breaks a line at each.
+    // A prompt's lines are separated by Chr(13), Chr(10) or both (MS-VBAL §6.1.2.8.1.13): a text block breaks a line at each.
     public static string Lines(string prompt) => prompt.Replace("\r\n", "\n").Replace('\r', '\n');
 
     // A caption's access key is shown underlined, and copied without its marker.
