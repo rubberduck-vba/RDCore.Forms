@@ -9,8 +9,8 @@ namespace RDCore.Forms.Libraries;
 
 /// <summary>
 /// The libraries RDForms describes: <c>VB</c>, the library of the VB6 forms and controls the RDForms model implements,
-/// <c>MSComctlLib</c>, the library of the Windows Common Controls 6.0 (MSCOMCTL.OCX), and <c>RDForms</c>, the library of RDForms' own forms
-/// and controls.
+/// <c>MSComctlLib</c>, the library of the Windows Common Controls 6.0 (MSCOMCTL.OCX), <c>MSForms</c>, the Microsoft Forms 2.0 Object
+/// Library (FM20.DLL), and <c>RDForms</c>, the library of RDForms' own forms and controls.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -30,12 +30,28 @@ namespace RDCore.Forms.Libraries;
 /// a project's reference to MSCOMCTL.OCX finds it, and it has no additions.
 /// </para>
 /// <para>
-/// <c>RDForms</c> has a class for each of the model's forms and controls, named as the model names it: <c>RDForms.Form</c>,
-/// <c>RDForms.TextBox</c>. A class that VB6's port map ports a class of <c>VB</c> to has that class's members and events as <c>VB</c>
-/// describes them, its additions included; any other class, such as a ToggleButton, has the model's methods, the properties a program
-/// reaches, and the model's events, typed as <c>VB</c> types its additions. A type of <c>VB</c> whose name <c>RDForms</c> does not declare
-/// is qualified with its library (<c>VB.Control</c>), and <c>RDForms</c> depends on <c>VB</c> and on what <c>VB</c> depends on. No type library describes
-/// <c>RDForms</c>, so it has no GUID, and nothing in it is marked an addition.
+/// <c>MSForms</c> is what <c>rdc export-library</c> reads from FM20.DLL, as exported: it keeps its GUID and version, so a project's
+/// reference to FM20.DLL finds it, and it has no additions.
+/// </para>
+/// <para>
+/// <c>RDForms</c> has a class for each of the model's forms and controls, named as the model names it (<c>RDForms.Form</c>,
+/// <c>RDForms.TextBox</c>), and one for each other class a port map ports a legacy class to, such as <c>RDForms.Control</c> and
+/// <c>RDForms.DataObject</c>. A class has, in this order and each only where a member of its name is not there already:
+/// </para>
+/// <list type="bullet">
+/// <item>the members and events of the class of <c>VB</c> that VB6's port map ports to it, as <c>VB</c> describes them, its additions
+/// included;</item>
+/// <item>those of each class of <c>MSForms</c> that MSForms' port map ports to it, under the names that map gives them, and, for a control
+/// a form's <c>Controls.Add</c> creates, those of MSForms' <c>Control</c>, where a control's extender members are;</item>
+/// <item>the model's methods, the properties a program reaches and the model's events, typed as <c>VB</c> types its additions.</item>
+/// </list>
+/// <para>
+/// A class that no legacy class ports to takes the model's default member as its own. <c>RDForms</c> declares MSForms' enumerations by
+/// their names and values (<c>fmScrollAction</c>, <c>fmScrollActionNoChange</c>), so their members are constants a program names as it names
+/// MSForms'. A type of MSForms takes the type that MSForms' port map ports it to: a class of RDForms, or the type of a wrapper's value, as
+/// <c>ReturnBoolean</c>'s <c>Boolean</c>. A type of <c>VB</c> or of <c>MSForms</c> whose name <c>RDForms</c> does not declare is qualified with
+/// its library (<c>MSForms.IFont</c>), and <c>RDForms</c> depends on <c>VB</c>, on <c>MSForms</c>, and on what they depend on. No type library
+/// describes <c>RDForms</c>, so it has no GUID, and nothing in it is marked an addition.
 /// </para>
 /// </remarks>
 public sealed class RDFormsLibraries : ILibrarySource
@@ -49,6 +65,11 @@ public sealed class RDFormsLibraries : ILibrarySource
     /// The name of the library of the Windows Common Controls 6.0 (MSCOMCTL.OCX).
     /// </summary>
     public const string MSComctlLib = "MSComctlLib";
+
+    /// <summary>
+    /// The name of the Microsoft Forms 2.0 Object Library (FM20.DLL).
+    /// </summary>
+    public const string MSForms = "MSForms";
 
     /// <summary>
     /// The name of the library of RDForms' own forms and controls.
@@ -66,22 +87,25 @@ public sealed class RDFormsLibraries : ILibrarySource
 
     private readonly Lazy<LibraryDescription> commonControls = new(() => Exported(MSComctlLib));
 
+    private readonly Lazy<LibraryDescription> msforms = new(() => Exported(MSForms));
+
     private readonly Lazy<LibraryDescription> rdforms;
 
     private RDFormsLibraries()
     {
         vb = new(() => DescribeVB(exportedVB.Value));
-        rdforms = new(() => DescribeRDForms(vb.Value, exportedVB.Value));
+        rdforms = new(() => DescribeRDForms(vb.Value, exportedVB.Value, msforms.Value));
     }
 
     /// <inheritdoc/>
-    public IEnumerable<string> Names => [VB, MSComctlLib, RDForms];
+    public IEnumerable<string> Names => [VB, MSComctlLib, MSForms, RDForms];
 
     /// <inheritdoc/>
     public bool TryGet(string name, [NotNullWhen(true)] out LibraryDescription? description)
     {
         description = string.Equals(name, VB, StringComparison.OrdinalIgnoreCase) ? vb.Value
             : string.Equals(name, MSComctlLib, StringComparison.OrdinalIgnoreCase) ? commonControls.Value
+            : string.Equals(name, MSForms, StringComparison.OrdinalIgnoreCase) ? msforms.Value
             : string.Equals(name, RDForms, StringComparison.OrdinalIgnoreCase) ? rdforms.Value
             : null;
         return description is not null;
@@ -112,12 +136,19 @@ public sealed class RDFormsLibraries : ILibrarySource
         Classes = [.. exported.Classes.Select(declared => WithAdditions(declared, exported))],
     };
 
-    private static LibraryDescription DescribeRDForms(LibraryDescription vb, LibraryDescription exported)
+    private static LibraryDescription DescribeRDForms(LibraryDescription vb, LibraryDescription exported, LibraryDescription msforms)
     {
-        var own = ComponentClasses.All.Select(modelled => modelled.ClassName).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var vbTypes = vb.Classes.Select(declared => declared.Name).Concat(vb.Enums.Select(declared => declared.Name))
-            .Where(name => !own.Contains(name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        string Qualified(string type) => !type.Contains('.') && vbTypes.Contains(type) ? $"{VB}.{type}" : type;
+        var classNames = ComponentClasses.All.Select(modelled => modelled.ClassName)
+            .Concat(new[] { FormsPortMap.VB6, FormsPortMap.MSForms }.SelectMany(map => map.Types).SelectMany(TargetsOf))
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var own = classNames.Concat(msforms.Enums.Select(declared => declared.Name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // A legacy type RDForms declares none of the name of, by its library: VB's where both have one.
+        var legacyTypes = vb.Classes.Select(declared => (declared.Name, Library: VB)).Concat(vb.Enums.Select(declared => (declared.Name, Library: VB)))
+            .Concat(msforms.Classes.Select(declared => (declared.Name, Library: MSForms)))
+            .Where(type => !own.Contains(type.Name))
+            .DistinctBy(type => type.Name, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(type => type.Name, type => type.Library, StringComparer.OrdinalIgnoreCase);
+        string Qualified(string type) => !type.Contains('.') && legacyTypes.TryGetValue(type, out var library) ? $"{library}.{type}" : type;
         ParameterDescription QualifiedParameter(ParameterDescription parameter) => parameter with { Type = Qualified(parameter.Type) };
         ClassDescription Owned(ClassDescription declared) => declared with
         {
@@ -135,39 +166,126 @@ public sealed class RDFormsLibraries : ILibrarySource
         {
             Name = RDForms,
             Description = "RDForms forms and controls",
-            DependsOn = [LibraryIdentity.Of(vb), .. vb.DependsOn],
-            Classes = [.. ComponentClasses.All.Select(modelled => Owned(OwnClass(modelled, vb, exported)))],
+            DependsOn = [.. new[] { LibraryIdentity.Of(vb) }.Concat(vb.DependsOn).Append(LibraryIdentity.Of(msforms)).Concat(msforms.DependsOn)
+                .DistinctBy(dependency => dependency.Name, StringComparer.OrdinalIgnoreCase)],
+            Enums = [.. msforms.Enums.Select(declared => declared with { IsAddition = false })],
+            Classes = [.. classNames.Select(name => Owned(OwnClass(name, vb, exported, msforms)))],
         };
     }
 
-    // A class of RDForms: the class of VB that VB6's port map ports to the model's class, under the model's name, or else the model's class,
-    // described as VB describes its additions. Neither has VB's default interface, which RDForms does not declare.
-    private static ClassDescription OwnClass(ComponentClass modelled, LibraryDescription vb, LibraryDescription exported)
+    // The RDForms classes a port map ports a legacy class to, by their names in RDForms: both scroll bars, for MSForms' ScrollBar.
+    private static IEnumerable<string> TargetsOf(TypePort port) => port.Kind != TypePortKind.Class ? []
+        : port.ByOrientation is { } byOrientation ? [Unqualified(byOrientation.Horizontal), Unqualified(byOrientation.Vertical)]
+        : [Unqualified(port.RDFormsName)];
+
+    private static string Unqualified(string rdformsName) =>
+        rdformsName.StartsWith(RDForms + ".", StringComparison.OrdinalIgnoreCase) ? rdformsName[(RDForms.Length + 1)..] : rdformsName;
+
+    private static ClassDescription? ClassOf(LibraryDescription library, string name) =>
+        library.Classes.FirstOrDefault(declared => string.Equals(declared.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    // A class of RDForms: what VB's class has, then what MSForms' classes have under the names the port gives them, then what the model's class
+    // has; neither legacy library's default interface, which RDForms does not declare.
+    private static ClassDescription OwnClass(string name, LibraryDescription vb, LibraryDescription exported, LibraryDescription msforms)
     {
-        var ported = FormsPortMap.VB6.Types.Where(port => port.Kind == TypePortKind.Class && string.Equals(port.RDFormsName, modelled.TypeName, StringComparison.OrdinalIgnoreCase))
-            .Select(port => vb.Classes.FirstOrDefault(declared => string.Equals(declared.Name, port.LegacyName, StringComparison.OrdinalIgnoreCase)))
-            .FirstOrDefault(declared => declared is not null);
-        if (ported is not null)
-            return ported with { Name = modelled.ClassName, DefaultInterface = null, IsDefaultInterfaceHidden = false };
+        bool PortsTo(TypePort port) => TargetsOf(port).Contains(name, StringComparer.OrdinalIgnoreCase);
+        var fromVB = FormsPortMap.VB6.Types.Where(PortsTo).Select(port => ClassOf(vb, port.LegacyName)).OfType<ClassDescription>().FirstOrDefault();
+        var fromMSForms = FormsPortMap.MSForms.Types.Where(PortsTo).Select(port => ClassOf(msforms, port.LegacyName)).OfType<ClassDescription>().ToList();
+        var extender = ClassOf(msforms, FormsPortMap.ExtenderClass);
+        var modelled = ComponentClasses.All.FirstOrDefault(candidate => string.Equals(candidate.ClassName, name, StringComparison.OrdinalIgnoreCase));
 
-        var members = new List<MemberDescription>();
-        bool Declared(string name) => members.Any(member => string.Equals(member.Name, name, StringComparison.OrdinalIgnoreCase));
-        foreach (var method in modelled.Methods.Where(method => !Declared(method.Name)))
-            members.AddRange(MethodMembers(method, exported));
-        foreach (var property in modelled.Properties.Where(property => !modelled.IsNotAvailableAtRunTime(property) && !Declared(property.Name)))
-            members.AddRange(PropertyAccessors(property, modelled.IsReadOnlyAtRunTime(property), exported));
+        var head = fromVB ?? fromMSForms.FirstOrDefault();
+        var members = fromVB?.Members.ToList() ?? [];
+        var events = fromVB?.Events.ToList() ?? [];
+        // A control Controls.Add creates has its extender's members, which MSForms declares on Control.
+        var legacy = fromMSForms.SelectMany(declared => extender is not null && IsCreated(declared.Name) ? new[] { declared, extender } : [declared]).Distinct();
+        foreach (var declared in legacy)
+            AddFromMSForms(declared, keepsDispIds: ReferenceEquals(declared, head), members, events);
 
-        // The model's default member is the class's, as a type library marks it.
-        return new ClassDescription
+        if (modelled is not null)
+            AddFromModel(modelled, members, events, exported, defaultMember: head is null);
+
+        var described = head ?? new ClassDescription();
+        return described with { Name = name, DefaultInterface = null, IsDefaultInterfaceHidden = false, Members = [.. members], Events = [.. events] };
+    }
+
+    private static bool IsCreated(string msformsClass) => FormsPortMap.MSForms.ProgIdOf($"Forms.{msformsClass}.1") is not null;
+
+    // A class of MSForms' members and events, under the names MSForms' port map gives them, each where its class has none of the name; a member's
+    // dispatch identifier where the class takes its default member from this one.
+    private static void AddFromMSForms(ClassDescription declared, bool keepsDispIds, List<MemberDescription> members, List<EventDescription> events)
+    {
+        var known = members.Select(member => member.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var accessors in declared.Members.GroupBy(member => member.Name, StringComparer.OrdinalIgnoreCase))
         {
-            Name = modelled.ClassName,
-            Members = [.. members.Select(member => string.Equals(member.Name, modelled.DefaultMember, StringComparison.OrdinalIgnoreCase) ? member with { DispId = 0 } : member)],
-            Events = [.. modelled.Events.Select(raised => new EventDescription
+            var name = FormsPortMap.MSForms.MemberOf(declared.Name, accessors.Key)?.RDFormsName ?? accessors.Key;
+            if (!known.Add(name))
+                continue;
+
+            members.AddRange(accessors.Select(member => member with
             {
-                Name = raised.Name,
-                Parameters = [.. raised.Parameters.Select(parameter => Parameter(parameter.Name, parameter.TypeName))],
-            })],
+                Name = name,
+                DispId = keepsDispIds ? member.DispId : null,
+                Type = member.Type is { } type ? MSFormsType(type) : null,
+                Parameters = [.. member.Parameters.Select(parameter => parameter with { Type = MSFormsType(parameter.Type) })],
+            }));
+        }
+
+        var raised = events.Select(known => known.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var legacyEvent in declared.Events)
+        {
+            var ported = FormsPortMap.MSForms.EventOf(declared.Name, legacyEvent.Name);
+            var portedEvent = ported is null
+                ? legacyEvent with { Parameters = [.. legacyEvent.Parameters.Select(parameter => parameter with { Type = MSFormsType(parameter.Type) })] }
+                : legacyEvent with
+                {
+                    Name = ported.RDFormsName,
+                    Parameters = [.. ported.Parameters.Select(parameter => Parameter(parameter.Name, Unqualified(parameter.RDFormsType), byVal: !parameter.ByRef))],
+                };
+            if (raised.Add(portedEvent.Name))
+                events.Add(portedEvent);
+        }
+    }
+
+    // A type of MSForms, as RDForms has it: the type MSForms' port map ports it to; an enumeration, RDForms' of its name; another, as MSForms names it.
+    private static string MSFormsType(string type)
+    {
+        var name = type.StartsWith(MSForms + ".", StringComparison.OrdinalIgnoreCase) ? type[(MSForms.Length + 1)..] : type;
+        if (name.Contains('.'))
+            return type;
+
+        return FormsPortMap.MSForms.TypeOf(name) switch
+        {
+            { Kind: TypePortKind.Class, ByOrientation: not null } => FormsPortMap.ExtenderClass,
+            { } port => Unqualified(port.RDFormsName),
+            null => name,
         };
+    }
+
+    // What the model's class has that the class has none of the name of: its methods first, as a running program reaches one where a property
+    // has its name, then the properties a program reaches, then its events. A class that no legacy class ports to takes the model's default
+    // member as its own, as a type library marks it.
+    private static void AddFromModel(ComponentClass modelled, List<MemberDescription> members, List<EventDescription> events, LibraryDescription exported,
+        bool defaultMember)
+    {
+        var known = members.Select(member => member.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var settings = DesignerSettings.GetValueOrDefault(modelled.ClassName) ?? [];
+        var added = new List<MemberDescription>();
+        foreach (var method in modelled.Methods.Where(method => known.Add(method.Name)))
+            added.AddRange(MethodMembers(method, exported));
+        foreach (var property in modelled.Properties.Where(property => !modelled.IsNotAvailableAtRunTime(property)
+            && !settings.Contains(property.Name, StringComparer.OrdinalIgnoreCase) && known.Add(property.Name)))
+            added.AddRange(PropertyAccessors(property, modelled.IsReadOnlyAtRunTime(property), exported));
+        members.AddRange(defaultMember
+            ? added.Select(member => string.Equals(member.Name, modelled.DefaultMember, StringComparison.OrdinalIgnoreCase) ? member with { DispId = 0 } : member)
+            : added);
+
+        var raised = events.Select(known => known.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        events.AddRange(modelled.Events.Where(modelledEvent => raised.Add(modelledEvent.Name)).Select(modelledEvent => new EventDescription
+        {
+            Name = modelledEvent.Name,
+            Parameters = [.. modelledEvent.Parameters.Select(parameter => Parameter(parameter.Name, parameter.TypeName))],
+        }));
     }
 
     // A class with what its modelled classes have and VB6.OLB does not declare, then what RD-VBA adds to it; any other class is as exported.

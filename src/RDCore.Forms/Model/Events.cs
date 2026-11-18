@@ -15,7 +15,7 @@ public static class Events
     private static readonly EventParameter DroppedControl = new("Control", "RDForms.Control");
     private static readonly EventParameter Data = new("Data", "RDForms.DataObject");
     private static readonly EventParameter Effect = new("Effect", "RDForms.ReturnEffect");
-    private static readonly EventParameter Action = new("Action", "RDForms.Action");
+    private static readonly EventParameter Action = new("Action", "RDForms.fmAction");
     private static readonly EventParameter Button = new("Button", "Integer");
     private static readonly EventParameter X = new("X", "Single");
     private static readonly EventParameter Y = new("Y", "Single");
@@ -351,7 +351,7 @@ public static class Events
     /// <c>ActualDy</c> how far it scrolled, in pixels, to the right and down.
     /// </summary>
     public static readonly EventDefinition ContainerScroll = new("Scroll",
-        new EventParameter("ActionX", "ScrollAction"), new EventParameter("ActionY", "ScrollAction"), new EventParameter("RequestDx", "Single"),
+        new EventParameter("ActionX", "fmScrollAction"), new EventParameter("ActionY", "fmScrollAction"), new EventParameter("RequestDx", "Single"),
         new EventParameter("RequestDy", "Single"), new EventParameter("ActualDx", "Single"), new EventParameter("ActualDy", "Single"));
 
     /// <summary>
@@ -376,14 +376,14 @@ public static class Events
     /// Something is dragged over a control. Declared and not raised: RDForms does not implement drag and drop.
     /// </summary>
     public static readonly EventDefinition BeforeDragOver = new("BeforeDragOver",
-        Cancel, Data, X, Y, new EventParameter("DragState", "RDForms.DragState"), Effect, Shift);
+        Cancel, Data, X, Y, new EventParameter("DragState", "RDForms.fmDragState"), Effect, Shift);
 
     /// <summary>
     /// Something is dragged over a form, a Frame or a control in it, which <c>Control</c> names. Declared and not raised: RDForms does
     /// not implement drag and drop.
     /// </summary>
     public static readonly EventDefinition ContainerBeforeDragOver = new("BeforeDragOver",
-        Cancel, DroppedControl, Data, X, Y, new EventParameter("State", "RDForms.DragState"), Effect, Shift);
+        Cancel, DroppedControl, Data, X, Y, new EventParameter("State", "RDForms.fmDragState"), Effect, Shift);
 
     /// <summary>
     /// Something is about to be dropped or pasted on a control. Declared and not raised: RDForms does not implement drag and drop.
