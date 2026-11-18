@@ -31,6 +31,10 @@ La palette sombre de `FormPalette` (`src/RDCore.Forms.Avalonia/Controls/FormPale
 
 Le fichier `src/RDCore.Forms/Libraries/VB.json` est la sortie de `rdc export-library` pour VB6.OLB : il décrit les classes, les membres et les événements que déclare cette bibliothèque de types. Il est distribué sous la licence MIT, comme le reste de RDCore.Forms. VB6.OLB lui-même n'est pas inclus.
 
+## Description de MSCOMCTL.OCX
+
+Le fichier `src/RDCore.Forms/Libraries/MSComctlLib.json` est la sortie de `rdc export-library` pour MSCOMCTL.OCX (Microsoft Windows Common Controls 6.0) : il décrit les classes, les membres, les événements et les énumérations que déclare sa bibliothèque de types. Il est distribué sous la licence MIT, comme le reste de RDCore.Forms. MSCOMCTL.OCX lui-même n'est pas inclus.
+
 ## Marques de commerce
 
 Seul, "Rubberduck" est utilisé pour fins de référence au projet open-source legacy **utilisé publiquement ainsi depuis 2015** et sans lien ni affiliation avec tout tiers détenteur d'une marque semblable dans quelque juridiction que ce soit.  
@@ -72,6 +76,10 @@ The dark palette of `FormPalette` (`src/RDCore.Forms.Avalonia/Controls/FormPalet
 ## Description of VB6.OLB
 
 The file `src/RDCore.Forms/Libraries/VB.json` is `rdc export-library` output from VB6.OLB: it describes the classes, members and events that type library declares. It is licensed under the MIT licence, like the rest of RDCore.Forms. VB6.OLB itself is not included.
+
+## Description of MSCOMCTL.OCX
+
+The file `src/RDCore.Forms/Libraries/MSComctlLib.json` is `rdc export-library` output from MSCOMCTL.OCX (Microsoft Windows Common Controls 6.0): it describes the classes, members, events and enumerations its type library declares. It is licensed under the MIT licence, like the rest of RDCore.Forms. MSCOMCTL.OCX itself is not included.
 
 ## Trademarks
 
