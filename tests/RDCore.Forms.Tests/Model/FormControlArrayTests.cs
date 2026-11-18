@@ -108,7 +108,7 @@ public sealed class FormControlArrayTests
         Expect(["picCell(1) in Form1"], events);
     }
 
-    // an element keeps its array's name, even one a program loaded: assigning its Name is 382, as a control of the form's file's is.
+    // An element keeps its array's name, even one a program loaded: assigning its Name is 382, as a control of the form's file's is.
     [TestMethod]
     public void AnElementLoaded_KeepsItsArraysName_382()
     {

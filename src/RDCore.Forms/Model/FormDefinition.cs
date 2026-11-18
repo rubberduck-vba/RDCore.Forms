@@ -271,8 +271,8 @@ public sealed class FormDefinition
     }
 
     /// <summary>
-    /// Names a control again, as a program's assignment of its <c>Name</c> does on an RDForms form, where Microsoft Forms 2.0 lets a program name a
-    /// control it added (<see cref="AddControl(ComponentClass, string, ComponentInstance?)"/>) again.
+    /// Renames a control, as a program's assignment of its <c>Name</c> does on an RDForms form. Microsoft Forms 2.0 lets a program rename a control it
+    /// added (<see cref="AddControl(ComponentClass, string, ComponentInstance?)"/>), and no other.
     /// </summary>
     /// <param name="control">The control.</param>
     /// <param name="name">Its new name. Any name, as Microsoft Forms 2.0 takes it: one taken, one that is not a legal control name, or none.</param>
@@ -280,8 +280,9 @@ public sealed class FormDefinition
     /// The control is not one of the form's: 730, Control not found. It is one of the form's file, or an element of a control array: 382, "Could not set the
     /// Name property. Can not set property at runtime.", as Microsoft Forms 2.0 says it. Its name stays.
     /// </exception>
+    /// <exception cref="ArgumentNullException"><paramref name="control"/> or <paramref name="name"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// The control is found by its new name, and no longer by its old one.
+    /// The control is then found by its new name, not by its old one.
     /// </remarks>
     public void RenameControl(ComponentInstance control, string name)
     {
