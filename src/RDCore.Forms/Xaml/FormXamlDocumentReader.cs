@@ -50,7 +50,7 @@ public sealed class FormXamlDocumentReader : IFormDocumentReader
     /// where it has them, and the controls it holds;</item>
     /// <item>the document's text, as its <see cref="FormDescriptor.DesignerText"/>.</item>
     /// </list>
-    /// A component the model cannot hold, kept as text (<see cref="UnmodelledComponent"/>), is no control of it.
+    /// A component the model cannot hold, kept as text (<see cref="UnmodelledComponent"/>), is not one of its controls.
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="document"/> is <see langword="null"/>.</exception>
     /// <exception cref="FormDesignerFormatException">The document holds no form (<see cref="FormDesignerFormatProblem.InvalidDocument"/>).</exception>
