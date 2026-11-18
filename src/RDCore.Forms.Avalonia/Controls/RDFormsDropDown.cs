@@ -66,7 +66,7 @@ internal sealed class RDFormsDropDown
             combo.SetCurrentValue(ComboBox.IsDropDownOpenProperty, false);
             return;
         }
-        // An editable combo takes the focus as its list closes.
+        // An editable combo would take the focus as its list closes: it is held from it while the list closes.
         using (Hold(combo))
             combo.SetCurrentValue(ComboBox.IsDropDownOpenProperty, false);
     }
