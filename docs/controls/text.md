@@ -59,9 +59,6 @@ A Label's `Picture` and `PicturePosition` are an RD-VBA addition: VB6's Label ha
 |A text longer than `MaxLength`|A lower `MaxLength` keeps it, and so does a form's file that holds it, until the `Text` is set again.|
 |A default button|In a multi-line box, the form's default button takes Enter, as in a single-line one, and Ctrl+Enter types a new line (RDForms' own).|
 
-> [!NOTE]
-> **Not implemented.** The runtime does not refuse a program's assignment to `MultiLine` and `ScrollBars` with 382 (see [Properties set only at design time](index.md#properties-set-only-at-design-time)).
-
 ### Selection
 
 `SelStart`, `SelLength` and `SelText` are the box's selection. A program reads and sets them on a loaded form as on a shown one, and reads back a selection the user makes. The component holds them, with or without a control to show them, and only a running program sets them ([`PropertyDefinition.RunTimeOnly`](../api/RDCore.Forms.Model.PropertyDefinition.yml)): a form's file does not hold them.

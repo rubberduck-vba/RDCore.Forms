@@ -400,7 +400,7 @@ public sealed class RDFormsLibrariesTests
             .Any(candidate => candidate.Name == member && candidate.Kind == MemberKind.PropertyLet));
     }
 
-    // A control's Name Let names only a control a program added again; the description says so, as Microsoft Forms 2.0 refuses it (382) on a control of
+    // A control's Name Let renames only a control a program added; the description says so, as Microsoft Forms 2.0 refuses it (382) on a control of
     // the form's file.
     [TestMethod]
     [DataRow("TextBox")]
