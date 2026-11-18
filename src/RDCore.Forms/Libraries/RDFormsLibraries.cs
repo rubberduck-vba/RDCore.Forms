@@ -142,7 +142,7 @@ public sealed class RDFormsLibraries : ILibrarySource
             .Concat(new[] { FormsPortMap.VB6, FormsPortMap.MSForms }.SelectMany(map => map.Types).SelectMany(TargetsOf))
             .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var own = classNames.Concat(msforms.Enums.Select(declared => declared.Name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        // A legacy type RDForms declares none of the name of, by its library: VB's where both have one.
+        // A legacy type whose name RDForms does not declare, by its library: VB's where both have one.
         var legacyTypes = vb.Classes.Select(declared => (declared.Name, Library: VB)).Concat(vb.Enums.Select(declared => (declared.Name, Library: VB)))
             .Concat(msforms.Classes.Select(declared => (declared.Name, Library: MSForms)))
             .Where(type => !own.Contains(type.Name))
@@ -211,7 +211,7 @@ public sealed class RDFormsLibraries : ILibrarySource
 
     private static bool IsCreated(string msformsClass) => FormsPortMap.MSForms.ProgIdOf($"Forms.{msformsClass}.1") is not null;
 
-    // A class of MSForms' members and events, under the names MSForms' port map gives them, each where its class has none of the name; a member's
+    // A class of MSForms' members and events, under the names MSForms' port map gives them, each where its class has no member of that name; a member's
     // dispatch identifier where the class takes its default member from this one.
     private static void AddFromMSForms(ClassDescription declared, bool keepsDispIds, List<MemberDescription> members, List<EventDescription> events)
     {
@@ -262,7 +262,7 @@ public sealed class RDFormsLibraries : ILibrarySource
         };
     }
 
-    // What the model's class has that the class has none of the name of: its methods first, as a running program reaches one where a property
+    // What the model's class has whose name the class does not have yet: its methods first, as a running program reaches one where a property
     // has its name, then the properties a program reaches, then its events. A class that no legacy class ports to takes the model's default
     // member as its own, as a type library marks it.
     private static void AddFromModel(ComponentClass modelled, List<MemberDescription> members, List<EventDescription> events, LibraryDescription exported,
