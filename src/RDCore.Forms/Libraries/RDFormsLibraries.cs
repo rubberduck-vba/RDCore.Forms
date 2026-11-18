@@ -31,10 +31,10 @@ namespace RDCore.Forms.Libraries;
 /// </para>
 /// <para>
 /// <c>RDForms</c> has a class for each of the model's forms and controls, named as the model names it: <c>RDForms.Form</c>,
-/// <c>RDForms.TextBox</c>. A class VB6's port map ports a class of <c>VB</c> to has that class's members and events as <c>VB</c> describes
-/// them, its additions with them; another, such as a ToggleButton, has the model's methods, the properties a program reaches, and the
-/// model's events, typed as <c>VB</c> types its additions. A type of <c>VB</c> that <c>RDForms</c> declares none of the name of is qualified
-/// with its library (<c>VB.Control</c>), and <c>RDForms</c> depends on <c>VB</c> and on what <c>VB</c> depends on. No type library describes
+/// <c>RDForms.TextBox</c>. A class that VB6's port map ports a class of <c>VB</c> to has that class's members and events as <c>VB</c>
+/// describes them, its additions included; any other class, such as a ToggleButton, has the model's methods, the properties a program
+/// reaches, and the model's events, typed as <c>VB</c> types its additions. A type of <c>VB</c> whose name <c>RDForms</c> does not declare
+/// is qualified with its library (<c>VB.Control</c>), and <c>RDForms</c> depends on <c>VB</c> and on what <c>VB</c> depends on. No type library describes
 /// <c>RDForms</c>, so it has no GUID, and nothing in it is marked an addition.
 /// </para>
 /// </remarks>
@@ -140,8 +140,8 @@ public sealed class RDFormsLibraries : ILibrarySource
         };
     }
 
-    // A class of RDForms: the class of VB VB6's port map ports to the model's class, under the model's name, or the model's class as VB describes
-    // what it adds. Neither has VB's default interface, which RDForms does not declare.
+    // A class of RDForms: the class of VB that VB6's port map ports to the model's class, under the model's name, or else the model's class,
+    // described as VB describes its additions. Neither has VB's default interface, which RDForms does not declare.
     private static ClassDescription OwnClass(ComponentClass modelled, LibraryDescription vb, LibraryDescription exported)
     {
         var ported = FormsPortMap.VB6.Types.Where(port => port.Kind == TypePortKind.Class && string.Equals(port.RDFormsName, modelled.TypeName, StringComparison.OrdinalIgnoreCase))
