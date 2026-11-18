@@ -269,4 +269,82 @@ public sealed class MultiSelectListTests
 
         Expect.Lines(["double click 0: Click DblClick(Boolean False) [0] 0"], log);
     }
+
+    // The list's MultiSelect set from code.
+    private static (string Name, Action<Window, ListBox> Act) MultiSelect(ListBoxMultiSelect mode) =>
+        ($"MultiSelect {mode}", (_, l) => RDFormsControl.GetInstance(l)!.Set(P.MultiSelect, mode));
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void ASingleSelectListGivenExtended_KeepsItsItemSelected_AndSelectsAsAnExtendedList(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.None,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            MultiSelect(ListBoxMultiSelect.Extended),
+            ("Ctrl+press 3", (w, l) => Press(w, l, 3, KeyModifiers.Control)),
+            ("Shift+press 4", (w, l) => Press(w, l, 4, KeyModifiers.Shift)));
+
+        Expect.Lines(["press 1: Click [1] 1", "MultiSelect Extended:  [1] 1", "Ctrl+press 3: Click [1,3] 3", "Shift+press 4: Click [3,4] 4"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void ASingleSelectListGivenSimple_KeepsItsItemSelected_AndSelectsAsASimpleList(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.None,
+            ("press 2", (w, l) => Press(w, l, 2)),
+            MultiSelect(ListBoxMultiSelect.Simple),
+            ("press 4", (w, l) => Press(w, l, 4)),
+            ("Up", (w, _) => Stroke(w, Key.Up, PhysicalKey.ArrowUp, null)),
+            ("Space", (w, _) => Stroke(w, Key.Space, PhysicalKey.Space, " ")));
+
+        Expect.Lines(["press 2: Click [2] 2", "MultiSelect Simple:  [2] 2", "press 4: Click [2,4] 4", "Up: Click [2,4] 3", "Space: Click [2,3,4] 3"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void AnExtendedListGivenNone_KeepsOnlyItsListIndexItemSelected_AndSelectsAsASingleSelectList(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.Extended,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            ("Ctrl+press 3", (w, l) => Press(w, l, 3, KeyModifiers.Control)),
+            MultiSelect(ListBoxMultiSelect.None),
+            ("press 4", (w, l) => Press(w, l, 4)),
+            ("b", (w, _) => Stroke(w, Key.B, PhysicalKey.B, "b")));
+
+        Expect.Lines(["press 1: Click [1] 1", "Ctrl+press 3: Click [1,3] 3", "MultiSelect None:  [3] 3", "press 4: Click [4] 4", "b: Click [1] 1"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void AnExtendedListGivenNone_WhereItsListIndexItemIsNotSelected_SelectsNothing(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.Extended,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            ("Ctrl+press 3", (w, l) => Press(w, l, 3, KeyModifiers.Control)),
+            ("Ctrl+press 3", (w, l) => Press(w, l, 3, KeyModifiers.Control)),
+            MultiSelect(ListBoxMultiSelect.None));
+
+        Expect.Lines(["press 1: Click [1] 1", "Ctrl+press 3: Click [1,3] 3", "Ctrl+press 3: Click [1] 3", "MultiSelect None:  [] -1"], log);
+    }
+
+    [TestMethod]
+    [DataRow("ListBox")]
+    [DataRow("FileListBox")]
+    public void ASimpleListGivenExtended_KeepsItsSelectionAndFocus_AndSelectsAsAnExtendedList(string type)
+    {
+        var log = Steps(type, ListBoxMultiSelect.Simple,
+            ("press 1", (w, l) => Press(w, l, 1)),
+            ("press 3", (w, l) => Press(w, l, 3)),
+            MultiSelect(ListBoxMultiSelect.Extended),
+            ("press 0", (w, l) => Press(w, l, 0)),
+            ("Shift+press 2", (w, l) => Press(w, l, 2, KeyModifiers.Shift)));
+
+        Expect.Lines(["press 1: Click [1] 1", "press 3: Click [1,3] 3", "MultiSelect Extended:  [1,3] 3", "press 0: Click [0] 0",
+            "Shift+press 2: Click [0,1,2] 2"], log);
+    }
 }
