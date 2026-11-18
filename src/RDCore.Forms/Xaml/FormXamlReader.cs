@@ -7,8 +7,8 @@ using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Xaml;
 
-// Reads a loaded document into the model, reporting what it keeps as text. `named` hears the Name attribute of each component the model
-// holds, in the document's order.
+// Reads a loaded document into the model, reporting what it keeps as text. `named` is called with the Name attribute of each component
+// the model holds, in the document's order.
 internal sealed class FormXamlReader(FormXamlDiagnosticBag diagnostics, Action<XAttribute>? named = null)
 {
     private static readonly XNamespace Ns = FormXaml.Namespace;
