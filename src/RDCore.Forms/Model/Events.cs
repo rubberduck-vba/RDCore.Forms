@@ -351,8 +351,8 @@ public static class Events
     /// <c>ActualDy</c> how far it scrolled, in pixels, to the right and down.
     /// </summary>
     public static readonly EventDefinition ContainerScroll = new("Scroll",
-        new EventParameter("ActionX", "fmScrollAction"), new EventParameter("ActionY", "fmScrollAction"), new EventParameter("RequestDx", "Single"),
-        new EventParameter("RequestDy", "Single"), new EventParameter("ActualDx", "Single"), new EventParameter("ActualDy", "Single"));
+        new EventParameter("ActionX", "RDForms.fmScrollAction"), new EventParameter("ActionY", "RDForms.fmScrollAction"),
+        new EventParameter("RequestDx", "Single"), new EventParameter("RequestDy", "Single"), new EventParameter("ActualDx", "Single"), new EventParameter("ActualDy", "Single"));
 
     /// <summary>
     /// The focus is about to leave a control for another control of its form whose <c>CausesValidation</c> is True. A handler that sets

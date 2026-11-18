@@ -67,7 +67,7 @@ public sealed class ContainerScrollingTests
         Assert.IsNotNull(ported);
         Assert.AreEqual("Scroll", Events.ContainerScroll.Name);
         Assert.AreEqual(
-            string.Join(", ", ported.Parameters.Select(p => $"{p.Name} As {p.RDFormsType.Replace("RDForms.", "")}")),
+            string.Join(", ", ported.Parameters.Select(p => $"{p.Name} As {p.RDFormsType}")),
             string.Join(", ", Events.ContainerScroll.Parameters.Select(p => $"{p.Name} As {p.TypeName}")));
     }
 
