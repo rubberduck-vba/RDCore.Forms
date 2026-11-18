@@ -48,11 +48,12 @@ public sealed class ContainerScrollingTests
     }
 
     [TestMethod]
-    public void ATextBoxsScrollBars_StayItsOwn_ReadOnlyAtRunTime()
+    public void ATextBoxsScrollBars_StayItsOwn_ReadOnlyAtRunTimeOnAVisualBasic6Form()
     {
         Assert.IsTrue(ComponentClasses.TextBox.Has(P.ScrollBars));
         Assert.IsFalse(ComponentClasses.TextBox.Has(P.ContainerScrollBars));
-        Assert.IsTrue(ComponentClasses.TextBox.IsReadOnlyAtRunTime(P.ScrollBars));
+        Assert.IsTrue(ComponentClasses.TextBox.IsReadOnlyAtRunTimeOnAVisualBasic6Form(P.ScrollBars));
+        Assert.IsFalse(ComponentClasses.TextBox.IsReadOnlyAtRunTime(P.ScrollBars));
         Assert.IsFalse(ComponentClasses.Form.Has(P.ScrollBars));
     }
 

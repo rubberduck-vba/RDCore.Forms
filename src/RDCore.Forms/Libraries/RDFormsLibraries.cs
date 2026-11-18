@@ -197,10 +197,12 @@ public sealed class RDFormsLibraries : ILibrarySource
         var head = fromVB ?? fromMSForms.FirstOrDefault();
         var members = fromVB?.Members.ToList() ?? [];
         var events = fromVB?.Events.ToList() ?? [];
+        var vbNames = new VBNames(members.Select(member => member.Name).ToHashSet(StringComparer.OrdinalIgnoreCase),
+            events.Select(raised => raised.Name).ToHashSet(StringComparer.OrdinalIgnoreCase));
         // A control Controls.Add creates has its extender's members, which MSForms declares on Control.
         var legacy = fromMSForms.SelectMany(declared => extender is not null && IsCreated(declared.Name) ? new[] { declared, extender } : [declared]).Distinct();
         foreach (var declared in legacy)
-            AddFromMSForms(declared, keepsDispIds: ReferenceEquals(declared, head), members, events);
+            AddFromMSForms(declared, keepsDispIds: ReferenceEquals(declared, head), vbNames, members, events);
 
         if (modelled is not null)
             AddFromModel(modelled, members, events, exported, defaultMember: head is null);
@@ -211,24 +213,28 @@ public sealed class RDFormsLibraries : ILibrarySource
 
     private static bool IsCreated(string msformsClass) => FormsPortMap.MSForms.ProgIdOf($"Forms.{msformsClass}.1") is not null;
 
+    // The names of the members and events VB's class declares.
+    private sealed record VBNames(IReadOnlySet<string> Members, IReadOnlySet<string> Events);
+
     // A class of MSForms' members and events, under the names MSForms' port map gives them, each where its class has no member of that name; a member's
-    // dispatch identifier where the class takes its default member from this one.
-    private static void AddFromMSForms(ClassDescription declared, bool keepsDispIds, List<MemberDescription> members, List<EventDescription> events)
+    // dispatch identifier where the class takes its default member from this one. A member or an event VB's class has too is reconciled with VB's.
+    private static void AddFromMSForms(ClassDescription declared, bool keepsDispIds, VBNames vb, List<MemberDescription> members, List<EventDescription> events)
     {
         var known = members.Select(member => member.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var accessors in declared.Members.GroupBy(member => member.Name, StringComparer.OrdinalIgnoreCase))
         {
             var name = FormsPortMap.MSForms.MemberOf(declared.Name, accessors.Key)?.RDFormsName ?? accessors.Key;
-            if (!known.Add(name))
-                continue;
-
-            members.AddRange(accessors.Select(member => member with
+            var ported = accessors.Select(member => member with
             {
                 Name = name,
                 DispId = keepsDispIds ? member.DispId : null,
                 Type = member.Type is { } type ? MSFormsType(type) : null,
                 Parameters = [.. member.Parameters.Select(parameter => parameter with { Type = MSFormsType(parameter.Type) })],
-            }));
+            }).ToList();
+            if (known.Add(name))
+                members.AddRange(ported);
+            else if (vb.Members.Contains(name))
+                Reconcile(members, name, ported);
         }
 
         var raised = events.Select(known => known.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -244,8 +250,69 @@ public sealed class RDFormsLibraries : ILibrarySource
                 };
             if (raised.Add(portedEvent.Name))
                 events.Add(portedEvent);
+            else if (vb.Events.Contains(portedEvent.Name)
+                && events.FindIndex(known => string.Equals(known.Name, portedEvent.Name, StringComparison.OrdinalIgnoreCase)) is var at and >= 0
+                && Extends(portedEvent.Parameters, events[at].Parameters))
+                events[at] = events[at] with { Parameters = portedEvent.Parameters };
         }
     }
+
+    // A member both VB's class and MSForms' declare, as RDForms has it, where VB's was: the accessors of the one whose parameter list is wider, with VB's
+    // dispatch identifiers; typed Object where MSForms types it Object, as a control's Parent is a Frame or a Page as well as a form; and writable where
+    // either library's is, with the Property Let or Set only MSForms has, of the member's type. Where neither is wider, VB's types stand.
+    private static void Reconcile(List<MemberDescription> members, string name, List<MemberDescription> msforms)
+    {
+        bool Named(MemberDescription member) => string.Equals(member.Name, name, StringComparison.OrdinalIgnoreCase);
+        var at = members.FindIndex(Named);
+        var vb = members.Where(Named).ToList();
+        members.RemoveAll(Named);
+
+        var reconciled = IsWider(Primary(msforms), Primary(vb))
+            ? [.. msforms.Select(member => member with { DispId = vb.FirstOrDefault(known => known.Kind == member.Kind)?.DispId ?? Primary(vb)?.DispId })]
+            : vb;
+        if (TypeOf(Primary(msforms)) == "Object" && TypeOf(Primary(reconciled)) is { } type && type != "Object")
+            reconciled = [.. reconciled.Select(member => Typed(member, "Object"))];
+        if (Primary(reconciled) is { Kind: MemberKind.PropertyGet } get)
+        {
+            reconciled.AddRange([.. msforms.Where(member => member.Kind is MemberKind.PropertyLet or MemberKind.PropertySet
+                    && !reconciled.Any(known => known.Kind == member.Kind))
+                .Select(member => Typed(member, get.Type) with { DispId = get.DispId })]);
+        }
+        members.InsertRange(at, reconciled);
+    }
+
+    // A member's Property Get, or else its method.
+    private static MemberDescription? Primary(IReadOnlyList<MemberDescription> accessors) =>
+        accessors.FirstOrDefault(member => member.Kind == MemberKind.PropertyGet) ?? accessors.FirstOrDefault(member => member.Kind == MemberKind.Method);
+
+    // The type a member reads, or a property's assignment takes.
+    private static string? TypeOf(MemberDescription? member) =>
+        member?.Kind is MemberKind.PropertyLet or MemberKind.PropertySet ? member.Parameters.LastOrDefault()?.Type : member?.Type;
+
+    private static MemberDescription Typed(MemberDescription member, string? type) => member.Kind switch
+    {
+        MemberKind.PropertyLet or MemberKind.PropertySet when member.Parameters.Length > 0 =>
+            member with { Parameters = member.Parameters.SetItem(member.Parameters.Length - 1, member.Parameters[^1] with { Type = type ?? "Variant" }) },
+        MemberKind.PropertyGet => member with { Type = type },
+        _ => member,
+    };
+
+    // Whether a call of the other member is a call of this one, which takes more: of the same kind, it needs no more arguments, takes at least as many,
+    // and needs fewer or takes more. MSForms' Move takes five optional arguments where VB's needs one of four.
+    private static bool IsWider(MemberDescription? member, MemberDescription? other)
+    {
+        if (member is null || other is null || member.Kind != other.Kind)
+            return false;
+        static int Required(MemberDescription described) => described.Parameters.Count(parameter => !parameter.IsOptional && !parameter.IsParamArray);
+        var (required, otherRequired) = (Required(member), Required(other));
+        var (total, otherTotal) = (member.Parameters.Length, other.Parameters.Length);
+        return required <= otherRequired && total >= otherTotal && (required < otherRequired || total > otherTotal);
+    }
+
+    // Whether an event's parameters are the other's, then more: a handler of MSForms' DblClick takes Cancel, VB's takes none.
+    private static bool Extends(IReadOnlyList<ParameterDescription> parameters, IReadOnlyList<ParameterDescription> other) =>
+        parameters.Count > other.Count
+        && other.Select((parameter, index) => string.Equals(parameter.Name, parameters[index].Name, StringComparison.OrdinalIgnoreCase)).All(same => same);
 
     // A type of MSForms, as RDForms has it: the type MSForms' port map ports it to; an enumeration, RDForms' of its name; another, as MSForms names it.
     private static string MSFormsType(string type)
@@ -307,7 +374,7 @@ public sealed class RDFormsLibraries : ILibrarySource
             var settings = DesignerSettings.GetValueOrDefault(declared.Name) ?? [];
             foreach (var property in modelledClass.Properties.Where(property => !modelledClass.IsNotAvailableAtRunTime(property) && !Declared(property.Name)
                 && !settings.Contains(property.Name, StringComparer.OrdinalIgnoreCase)))
-                members.AddRange(Added(PropertyAccessors(property, modelledClass.IsReadOnlyAtRunTime(property), exported)));
+                members.AddRange(Added(PropertyAccessors(property, modelledClass.IsReadOnlyAtRunTimeOnAVisualBasic6Form(property), exported)));
             foreach (var raised in modelledClass.Events.Where(raised => !events.Any(known => string.Equals(known.Name, raised.Name, StringComparison.OrdinalIgnoreCase))))
                 events.Add(new EventDescription { Name = raised.Name, IsAddition = true, Parameters = [.. raised.Parameters.Select(parameter => Parameter(parameter.Name, parameter.TypeName))] });
         }

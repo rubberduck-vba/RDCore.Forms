@@ -369,11 +369,78 @@ public sealed class RDFormsLibrariesTests
     {
         var described = VB().Classes.Single(declared => declared.Name == name);
         var own = Own(name);
+        var members = described.Members.Select(member => member.Name).Distinct().ToArray();
 
-        CollectionAssert.AreEqual(described.Members.Select(member => (member.Name, member.Kind, member.Parameters.Length)).ToArray(),
-            own.Members.Take(described.Members.Length).Select(member => (member.Name, member.Kind, member.Parameters.Length)).ToArray());
+        CollectionAssert.AreEqual(members, own.Members.Select(member => member.Name).Distinct().Take(members.Length).ToArray());
         CollectionAssert.AreEqual(described.Events.Select(raised => raised.Name).ToArray(), own.Events.Take(described.Events.Length).Select(raised => raised.Name).ToArray());
         Assert.AreEqual((described.Description, described.IsCreatable), (own.Description, own.IsCreatable));
+    }
+
+    // Where VB's class and MSForms' have a member of one name, it is writable where either is: the Property Let only MSForms has, of VB's
+    // type, with the dispatch identifier of VB's Property Get. VB's class keeps it read-only.
+    [TestMethod]
+    [DataRow("TextBox", "Name", "String")]
+    [DataRow("Label", "Name", "String")]
+    [DataRow("TextBox", "MultiLine", "Boolean")]
+    [DataRow("TextBox", "HideSelection", "Boolean")]
+    [DataRow("TextBox", "ScrollBars", "Integer")]
+    [DataRow("Form", "ScrollBars", "Integer")]
+    [DataRow("Frame", "ScrollBars", "Integer")]
+    [DataRow("ListBox", "IntegralHeight", "Boolean")]
+    [DataRow("ListBox", "MultiSelect", "Integer")]
+    [DataRow("ComboBox", "Style", "Integer")]
+    public void AMemberWritableInEitherLibrary_IsWritable_OfVBsType(string className, string member, string type)
+    {
+        var accessors = Own(className).Members.Where(candidate => candidate.Name == member).ToList();
+
+        var let = accessors.Single(candidate => candidate.Kind == MemberKind.PropertyLet);
+        Assert.AreEqual(type, let.Parameters.Single().Type);
+        Assert.AreEqual(accessors.Single(candidate => candidate.Kind == MemberKind.PropertyGet).DispId, let.DispId);
+        Assert.IsFalse(VB().Classes.Single(declared => declared.Name == className).Members
+            .Any(candidate => candidate.Name == member && candidate.Kind == MemberKind.PropertyLet));
+    }
+
+    // The wider parameter list wins: MSForms' List takes a row and a column, both optional, and is a Variant; its AddItem needs no item; its
+    // Move takes five optional arguments. The dispatch identifiers are VB's.
+    [TestMethod]
+    [DataRow("ListBox", "List", MemberKind.PropertyGet, "0 2")]
+    [DataRow("ListBox", "List", MemberKind.PropertyLet, "1 3")]
+    [DataRow("ComboBox", "List", MemberKind.PropertyGet, "0 2")]
+    [DataRow("ListBox", "AddItem", MemberKind.Method, "0 2")]
+    [DataRow("ComboBox", "AddItem", MemberKind.Method, "0 2")]
+    [DataRow("TextBox", "Move", MemberKind.Method, "0 5")]
+    [DataRow("Image", "Move", MemberKind.Method, "0 5")]
+    public void TheWiderParameterList_Wins_WithVBsDispatchIdentifier(string className, string member, MemberKind kind, string requiredAndTotal)
+    {
+        var own = Own(className).Members.Single(candidate => candidate.Name == member && candidate.Kind == kind);
+        var vb = VB().Classes.Single(declared => declared.Name == className).Members.Single(candidate => candidate.Name == member && candidate.Kind == kind);
+
+        var required = own.Parameters.Count(parameter => !parameter.IsOptional && !parameter.IsParamArray);
+        Assert.AreEqual(requiredAndTotal, $"{required} {own.Parameters.Length}");
+        Assert.AreEqual(vb.DispId, own.DispId);
+        if (kind == MemberKind.PropertyGet)
+            Assert.AreEqual("Variant", own.Type);
+    }
+
+    // Where neither parameter list is wider, VB's stands: Selected and RemoveItem take an Integer index as VB's do.
+    [TestMethod]
+    [DataRow("ListBox", "Selected", "Integer")]
+    [DataRow("ListBox", "RemoveItem", "Integer")]
+    public void WhereNeitherParameterListIsWider_VBsStands(string className, string member, string type)
+        => Assert.IsTrue(Own(className).Members.Where(candidate => candidate.Name == member).All(candidate => candidate.Parameters[0].Type == type));
+
+    // A double click's handler takes Cancel, as MSForms' does; VB's class raises it with none, for a Visual Basic 6.0 form's handler.
+    [TestMethod]
+    [DataRow("Form")]
+    [DataRow("TextBox")]
+    [DataRow("ListBox")]
+    [DataRow("Image")]
+    public void DblClick_TakesCancel_AsMSFormsDoes(string className)
+    {
+        var cancel = Own(className).Events.Single(raised => raised.Name == "DblClick").Parameters.Single();
+
+        Assert.AreEqual(("Cancel", "Boolean", false), (cancel.Name, cancel.Type, cancel.IsByVal));
+        Assert.IsEmpty(VB().Classes.Single(declared => declared.Name == className).Events.Single(raised => raised.Name == "DblClick").Parameters);
     }
 
     // A class both legacy libraries port to: what a ported UserForm's code reaches on it under MSForms' port.
@@ -425,7 +492,14 @@ public sealed class RDFormsLibrariesTests
 
     [TestMethod]
     [DataRow("Form", "ActiveControl", "Control")]
-    [DataRow("TextBox", "Parent", "Form")]
+    [DataRow("TextBox", "Parent", "Object")]
+    [DataRow("Image", "Parent", "Object")]
+    [DataRow("Form", "Controls", "Object")]
+    [DataRow("TextBox", "Text", "String")]
+    [DataRow("TextBox", "BorderStyle", "Integer")]
+    [DataRow("ListBox", "ListIndex", "Integer")]
+    [DataRow("CommandButton", "FontSize", "Single")]
+    [DataRow("TextBox", "Font", "stdole.StdFont")]
     [DataRow("PictureBox", "Picture", "stdole.StdPicture")]
     [DataRow("Label", "Caption", "String")]
     [DataRow("ToggleButton", "Font", "Font")]
