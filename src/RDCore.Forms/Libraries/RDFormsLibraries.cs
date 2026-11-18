@@ -207,9 +207,19 @@ public sealed class RDFormsLibraries : ILibrarySource
         if (modelled is not null)
             AddFromModel(modelled, members, events, exported, defaultMember: head is null);
 
+        // MSForms' Name Let, which names only a control a program added again (FormDefinition.RenameControl).
+        for (var at = 0; at < members.Count; at++)
+            if (members[at] is { Kind: MemberKind.PropertyLet } let && string.Equals(let.Name, NameMember, StringComparison.OrdinalIgnoreCase))
+                members[at] = let with { Description = NameLetDescription };
+
         var described = head ?? new ClassDescription();
         return described with { Name = name, DefaultInterface = null, IsDefaultInterfaceHidden = false, Members = [.. members], Events = [.. events] };
     }
+
+    private const string NameMember = "Name";
+
+    private const string NameLetDescription =
+        "Names a control a program added with Controls.Add again. A control of the form's file keeps its name: assigning it is error 382.";
 
     private static bool IsCreated(string msformsClass) => FormsPortMap.MSForms.ProgIdOf($"Forms.{msformsClass}.1") is not null;
 

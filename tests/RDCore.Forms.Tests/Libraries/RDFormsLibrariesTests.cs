@@ -400,6 +400,20 @@ public sealed class RDFormsLibrariesTests
             .Any(candidate => candidate.Name == member && candidate.Kind == MemberKind.PropertyLet));
     }
 
+    // A control's Name Let names only a control a program added again; the description says so, as Microsoft Forms 2.0 refuses it (382) on a control of
+    // the form's file.
+    [TestMethod]
+    [DataRow("TextBox")]
+    [DataRow("Label")]
+    [DataRow("CommandButton")]
+    public void AControlsNameLet_SaysItNamesOnlyAControlAProgramAdded(string className)
+    {
+        var let = Own(className).Members.Single(candidate => candidate.Name == "Name" && candidate.Kind == MemberKind.PropertyLet);
+
+        StringAssert.Contains(let.Description, "Controls.Add");
+        StringAssert.Contains(let.Description, "382");
+    }
+
     // The wider parameter list wins: MSForms' List takes a row and a column, both optional, and is a Variant; its AddItem needs no item; its
     // Move takes five optional arguments. The dispatch identifiers are VB's.
     [TestMethod]
