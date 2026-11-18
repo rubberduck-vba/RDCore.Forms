@@ -8,8 +8,9 @@ using P = RDCore.Forms.Model.Properties;
 namespace RDCore.Forms.Libraries;
 
 /// <summary>
-/// The libraries RDForms describes: <c>VB</c>, the library of the VB6 forms and controls the RDForms model implements, and
-/// <c>MSComctlLib</c>, the library of the Windows Common Controls 6.0 (MSCOMCTL.OCX).
+/// The libraries RDForms describes: <c>VB</c>, the library of the VB6 forms and controls the RDForms model implements,
+/// <c>MSComctlLib</c>, the library of the Windows Common Controls 6.0 (MSCOMCTL.OCX), and <c>RDForms</c>, the library of RDForms' own forms
+/// and controls.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -28,6 +29,14 @@ namespace RDCore.Forms.Libraries;
 /// <c>MSComctlLib</c> is what <c>rdc export-library</c> reads from MSCOMCTL.OCX, as exported: it keeps the OCX's GUID and version, so
 /// a project's reference to MSCOMCTL.OCX finds it, and it has no additions.
 /// </para>
+/// <para>
+/// <c>RDForms</c> has a class for each of the model's forms and controls, named as the model names it: <c>RDForms.Form</c>,
+/// <c>RDForms.TextBox</c>. A class VB6's port map ports a class of <c>VB</c> to has that class's members and events as <c>VB</c> describes
+/// them, its additions with them; another, such as a ToggleButton, has the model's methods, the properties a program reaches, and the
+/// model's events, typed as <c>VB</c> types its additions. A type of <c>VB</c> that <c>RDForms</c> declares none of the name of is qualified
+/// with its library (<c>VB.Control</c>), and <c>RDForms</c> depends on <c>VB</c> and on what <c>VB</c> depends on. No type library describes
+/// <c>RDForms</c>, so it has no GUID, and nothing in it is marked an addition.
+/// </para>
 /// </remarks>
 public sealed class RDFormsLibraries : ILibrarySource
 {
@@ -42,24 +51,38 @@ public sealed class RDFormsLibraries : ILibrarySource
     public const string MSComctlLib = "MSComctlLib";
 
     /// <summary>
+    /// The name of the library of RDForms' own forms and controls.
+    /// </summary>
+    public const string RDForms = "RDForms";
+
+    /// <summary>
     /// The libraries RDForms describes. A description is built once, the first time it is asked for.
     /// </summary>
     public static RDFormsLibraries Instance { get; } = new();
 
-    private readonly Lazy<LibraryDescription> vb = new(DescribeVB);
+    private readonly Lazy<LibraryDescription> exportedVB = new(() => Exported(VB));
+
+    private readonly Lazy<LibraryDescription> vb;
 
     private readonly Lazy<LibraryDescription> commonControls = new(() => Exported(MSComctlLib));
 
-    private RDFormsLibraries() { }
+    private readonly Lazy<LibraryDescription> rdforms;
+
+    private RDFormsLibraries()
+    {
+        vb = new(() => DescribeVB(exportedVB.Value));
+        rdforms = new(() => DescribeRDForms(vb.Value, exportedVB.Value));
+    }
 
     /// <inheritdoc/>
-    public IEnumerable<string> Names => [VB, MSComctlLib];
+    public IEnumerable<string> Names => [VB, MSComctlLib, RDForms];
 
     /// <inheritdoc/>
     public bool TryGet(string name, [NotNullWhen(true)] out LibraryDescription? description)
     {
         description = string.Equals(name, VB, StringComparison.OrdinalIgnoreCase) ? vb.Value
             : string.Equals(name, MSComctlLib, StringComparison.OrdinalIgnoreCase) ? commonControls.Value
+            : string.Equals(name, RDForms, StringComparison.OrdinalIgnoreCase) ? rdforms.Value
             : null;
         return description is not null;
     }
@@ -83,13 +106,67 @@ public sealed class RDFormsLibraries : ILibrarySource
         return LibraryJson.Read(reader.ReadToEnd());
     }
 
-    private static LibraryDescription DescribeVB()
+    private static LibraryDescription DescribeVB(LibraryDescription exported) => exported with
     {
-        var exported = Exported(VB);
-        return exported with
+        FormatVersion = LibraryJson.CurrentFormatVersion,
+        Classes = [.. exported.Classes.Select(declared => WithAdditions(declared, exported))],
+    };
+
+    private static LibraryDescription DescribeRDForms(LibraryDescription vb, LibraryDescription exported)
+    {
+        var own = ComponentClasses.All.Select(modelled => modelled.ClassName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var vbTypes = vb.Classes.Select(declared => declared.Name).Concat(vb.Enums.Select(declared => declared.Name))
+            .Where(name => !own.Contains(name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        string Qualified(string type) => !type.Contains('.') && vbTypes.Contains(type) ? $"{VB}.{type}" : type;
+        ParameterDescription QualifiedParameter(ParameterDescription parameter) => parameter with { Type = Qualified(parameter.Type) };
+        ClassDescription Owned(ClassDescription declared) => declared with
         {
-            FormatVersion = LibraryJson.CurrentFormatVersion,
-            Classes = [.. exported.Classes.Select(declared => WithAdditions(declared, exported))],
+            IsAddition = false,
+            Members = [.. declared.Members.Select(member => member with
+            {
+                IsAddition = false,
+                Type = member.Type is { } type ? Qualified(type) : null,
+                Parameters = [.. member.Parameters.Select(QualifiedParameter)],
+            })],
+            Events = [.. declared.Events.Select(raised => raised with { IsAddition = false, Parameters = [.. raised.Parameters.Select(QualifiedParameter)] })],
+        };
+
+        return new LibraryDescription
+        {
+            Name = RDForms,
+            Description = "RDForms forms and controls",
+            DependsOn = [LibraryIdentity.Of(vb), .. vb.DependsOn],
+            Classes = [.. ComponentClasses.All.Select(modelled => Owned(OwnClass(modelled, vb, exported)))],
+        };
+    }
+
+    // A class of RDForms: the class of VB VB6's port map ports to the model's class, under the model's name, or the model's class as VB describes
+    // what it adds. Neither has VB's default interface, which RDForms does not declare.
+    private static ClassDescription OwnClass(ComponentClass modelled, LibraryDescription vb, LibraryDescription exported)
+    {
+        var ported = FormsPortMap.VB6.Types.Where(port => port.Kind == TypePortKind.Class && string.Equals(port.RDFormsName, modelled.TypeName, StringComparison.OrdinalIgnoreCase))
+            .Select(port => vb.Classes.FirstOrDefault(declared => string.Equals(declared.Name, port.LegacyName, StringComparison.OrdinalIgnoreCase)))
+            .FirstOrDefault(declared => declared is not null);
+        if (ported is not null)
+            return ported with { Name = modelled.ClassName, DefaultInterface = null, IsDefaultInterfaceHidden = false };
+
+        var members = new List<MemberDescription>();
+        bool Declared(string name) => members.Any(member => string.Equals(member.Name, name, StringComparison.OrdinalIgnoreCase));
+        foreach (var method in modelled.Methods.Where(method => !Declared(method.Name)))
+            members.AddRange(MethodMembers(method, exported));
+        foreach (var property in modelled.Properties.Where(property => !modelled.IsNotAvailableAtRunTime(property) && !Declared(property.Name)))
+            members.AddRange(PropertyAccessors(property, modelled.IsReadOnlyAtRunTime(property), exported));
+
+        // The model's default member is the class's, as a type library marks it.
+        return new ClassDescription
+        {
+            Name = modelled.ClassName,
+            Members = [.. members.Select(member => string.Equals(member.Name, modelled.DefaultMember, StringComparison.OrdinalIgnoreCase) ? member with { DispId = 0 } : member)],
+            Events = [.. modelled.Events.Select(raised => new EventDescription
+            {
+                Name = raised.Name,
+                Parameters = [.. raised.Parameters.Select(parameter => Parameter(parameter.Name, parameter.TypeName))],
+            })],
         };
     }
 

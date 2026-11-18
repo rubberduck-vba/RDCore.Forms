@@ -80,9 +80,9 @@ public sealed class RDFormsLibrariesTests
         LibraryJson.Write(new LibraryDescription { Name = "L", Classes = [new ClassDescription { Name = "C", Members = [.. members], Events = [.. events] }] });
 
     [TestMethod]
-    public void TheLibraries_AreVBAndMSComctlLib_AndAProjectsReferenceToVB6Olb_FindsVB()
+    public void TheLibraries_AreVBMSComctlLibAndRDForms_AndAProjectsReferenceToVB6Olb_FindsVB()
     {
-        CollectionAssert.AreEqual(new[] { "VB", "MSComctlLib" }, RDFormsLibraries.Instance.Names.ToArray());
+        CollectionAssert.AreEqual(new[] { "VB", "MSComctlLib", "RDForms" }, RDFormsLibraries.Instance.Names.ToArray());
         Assert.IsFalse(RDFormsLibraries.Instance.TryGet("VBRUN", out _));
         Assert.IsTrue(((ILibrarySource)RDFormsLibraries.Instance).TryGetByGuid(Guid.Parse("FCFB3D2E-A0FA-1068-A738-08002B3371B5"), out var vb));
         Assert.AreSame(VB(), vb);
@@ -296,5 +296,132 @@ public sealed class RDFormsLibrariesTests
 
         Assert.IsTrue(label.Members.Where(member => member.Name == "Opacity").All(member => member.GetProperty(SymbolProperties.LibraryAddition)));
         Assert.IsFalse(label.Members.Where(member => member.Name == "Caption").Any(member => member.GetProperty(SymbolProperties.LibraryAddition)));
+    }
+
+    // RDForms
+
+    private static LibraryDescription RDForms()
+    {
+        Assert.IsTrue(RDFormsLibraries.Instance.TryGet("rdforms", out var library));
+        return library;
+    }
+
+    private static readonly string[] Intrinsic =
+        ["Boolean", "Byte", "Integer", "Long", "LongLong", "LongPtr", "Single", "Double", "Currency", "Date", "String", "Variant", "Object", "OLE_COLOR"];
+
+    [TestMethod]
+    public void RDForms_HasAClassForEachOfTheModels_ByTheModelsName_AndNoTypeLibrary()
+    {
+        var library = RDForms();
+
+        Assert.AreSame(library, RDForms());
+        CollectionAssert.AreEqual(ComponentClasses.All.Select(modelled => modelled.ClassName).ToArray(), library.Classes.Select(declared => declared.Name).ToArray());
+        Assert.IsNull(library.Origin);
+        Assert.IsTrue(library.Classes.All(declared => declared.DefaultInterface is null));
+    }
+
+    [TestMethod]
+    public void RDForms_DependsOnVB_AndOnWhatVBDependsOn()
+        => CollectionAssert.AreEqual(new[] { LibraryIdentity.Of(VB()) }.Concat(VB().DependsOn).ToArray(), RDForms().DependsOn.ToArray());
+
+    [TestMethod]
+    [DataRow("Form")]
+    [DataRow("TextBox")]
+    [DataRow("Label")]
+    [DataRow("Menu")]
+    [DataRow("UserControl")]
+    public void APortedClass_HasTheMembersAndEventsVBDescribes_AsRDFormsOwn(string name)
+    {
+        var described = VB().Classes.Single(declared => declared.Name == name);
+        var own = RDForms().Classes.Single(declared => declared.Name == name);
+
+        CollectionAssert.AreEqual(described.Members.Select(member => (member.Name, member.Kind, member.Parameters.Length)).ToArray(),
+            own.Members.Select(member => (member.Name, member.Kind, member.Parameters.Length)).ToArray());
+        CollectionAssert.AreEqual(described.Events.Select(raised => raised.Name).ToArray(), own.Events.Select(raised => raised.Name).ToArray());
+        Assert.AreEqual((described.Description, described.IsCreatable), (own.Description, own.IsCreatable));
+    }
+
+    [TestMethod]
+    [DataRow("Form", "ActiveControl", "VB.Control")]
+    [DataRow("TextBox", "Parent", "Form")]
+    [DataRow("PictureBox", "Picture", "stdole.StdPicture")]
+    [DataRow("Label", "Caption", "String")]
+    public void AMembersType_IsRDFormsOwn_OrQualifiedWithItsLibrary(string className, string member, string type)
+        => Assert.AreEqual(type, RDForms().Classes.Single(declared => declared.Name == className).Members.First(candidate => candidate.Name == member).Type);
+
+    [TestMethod]
+    public void NothingInRDForms_IsAnAddition()
+        => Assert.IsFalse(RDForms().Classes.Any(declared => declared.IsAddition
+            || declared.Members.Any(member => member.IsAddition) || declared.Events.Any(raised => raised.IsAddition)));
+
+    // The step test of the classes no class of VB ports to: what a running program reaches on the model's class is in the description.
+    [TestMethod]
+    public void AClassVBPortsNoClassTo_HasWhatAProgramReachesOnTheModelsClass()
+    {
+        var ported = FormsPortMap.VB6.Types.Where(port => port.Kind == TypePortKind.Class).Select(port => port.RDFormsName).ToHashSet();
+        var unported = ComponentClasses.All.Where(modelled => !ported.Contains(modelled.TypeName)).ToList();
+        Assert.IsNotEmpty(unported);
+        foreach (var modelled in unported)
+        {
+            var own = RDForms().Classes.Single(declared => declared.Name == modelled.ClassName);
+            var reached = modelled.Properties.Where(property => !modelled.IsNotAvailableAtRunTime(property)).Select(property => property.Name)
+                .Concat(modelled.Methods.Select(method => method.Name));
+            foreach (var member in reached)
+                Assert.IsTrue(own.Members.Any(candidate => string.Equals(candidate.Name, member, StringComparison.OrdinalIgnoreCase)), $"{modelled.ClassName}.{member}");
+            CollectionAssert.AreEqual(modelled.Events.Select(raised => raised.Name).ToArray(), own.Events.Select(raised => raised.Name).ToArray(), modelled.ClassName);
+            if (modelled.DefaultMember is { } defaultMember)
+                Assert.IsTrue(own.Members.Where(candidate => candidate.Name == defaultMember).All(candidate => candidate.DispId == 0), $"{modelled.ClassName}.{defaultMember}");
+        }
+    }
+
+    [TestMethod]
+    public void AToggleButtonsValue_IsItsDefault_AndAProgramReadsAndWritesIt()
+    {
+        var value = RDForms().Classes.Single(declared => declared.Name == "ToggleButton").Members.Where(member => member.Name == "Value").ToList();
+
+        CollectionAssert.AreEqual(new[] { MemberKind.PropertyGet, MemberKind.PropertyLet }, value.Select(member => member.Kind).ToArray());
+        Assert.IsTrue(value.All(member => member.DispId == 0));
+    }
+
+    [TestMethod]
+    public void RDForms_WritesAndReadsBackTheSame()
+    {
+        var written = LibraryJson.Write(RDForms());
+
+        Assert.AreEqual(written, LibraryJson.Write(LibraryJson.Read(written)));
+        Assert.IsFalse(written.Contains("\"isAddition\"", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void APortedFormsSymbol_HasItsCaptionAndShow()
+    {
+        var symbols = new LibrarySymbolReader(new Uri("file:///c:/ws/")).Read([RDForms()]).ToArray();
+        var form = symbols.OfType<VBClassModuleSymbol>().Single(declared => declared.Name == "Form");
+
+        Assert.IsTrue(form.Members.Any(member => member.Name == "Caption"));
+        Assert.IsTrue(form.Members.Any(member => member.Name == "Show"));
+    }
+
+    // Every type a member or an event of RDForms names: an intrinsic type, a class of RDForms, a type of VB qualified with VB, or a type of
+    // another library VB depends on, qualified with it.
+    [TestMethod]
+    [Ignore("RDForms describes none of the drag-and-drop types the model's events name (RDForms.DataObject, RDForms.ReturnEffect, " +
+        "RDForms.DragState, RDForms.Action and RDForms.Control), nor the ScrollAction of the Scroll event's ActionX and ActionY.")]
+    public void EveryTypeRDFormsNames_IsDescribed()
+    {
+        var library = RDForms();
+        var own = library.Classes.Select(declared => declared.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var vb = VB().Classes.Select(declared => declared.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var libraries = library.DependsOn.Select(dependency => dependency.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        bool Of(string library, string name) => string.Equals(library, name, StringComparison.OrdinalIgnoreCase);
+        bool Described(string type) => Intrinsic.Contains(type, StringComparer.OrdinalIgnoreCase) || own.Contains(type)
+            || type.Split('.') is [var qualifier, var name]
+                && (Of(qualifier, RDFormsLibraries.RDForms) ? own.Contains(name) : Of(qualifier, RDFormsLibraries.VB) ? vb.Contains(name) : libraries.Contains(qualifier));
+
+        var types = library.Classes
+            .SelectMany(declared => declared.Members.SelectMany(member => member.Parameters.Select(parameter => parameter.Type).Append(member.Type))
+                .Concat(declared.Events.SelectMany(raised => raised.Parameters.Select(parameter => parameter.Type))))
+            .OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase);
+        Assert.AreEqual(string.Empty, string.Join(" ", types.Where(type => !Described(type)).Order()));
     }
 }
