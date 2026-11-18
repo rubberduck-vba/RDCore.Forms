@@ -71,9 +71,8 @@ public sealed class ComponentClass
     /// is not a control's. A Timer has none.
     /// </param>
     /// <param name="writableAtRunTimeOnAnRDFormsForm">
-    /// The properties whose definition is read-only at run time, as VB's class has them, that a program sets on an instance of this class
-    /// on an RDForms form, as Microsoft Forms 2.0's class has them, such as a TextBox's <c>MultiLine</c>; none where it is
-    /// <see langword="null"/>.
+    /// The properties that VB's class makes read-only at run time and Microsoft Forms 2.0's class lets a program set: a program sets them on
+    /// an instance of this class on an RDForms form, such as a TextBox's <c>MultiLine</c>. None where it is <see langword="null"/>.
     /// </param>
     /// <exception cref="ArgumentException">
     /// <paramref name="typeName"/> or <paramref name="defaultName"/> is empty or white space; two properties, two events or two methods share a

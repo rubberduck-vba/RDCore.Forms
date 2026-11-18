@@ -224,7 +224,9 @@ Some properties are set only by a designer and a form's file. A running VB6 prog
 |Read only|Form and MDIForm: `StartUpPosition`. Form: `ShowInTaskbar`, `MaxButton`, `MinButton`. CommandButton, CheckBox, OptionButton and ComboBox: `Style`. TextBox: `MultiLine`, `ScrollBars`. ListBox and FileListBox: `MultiSelect`. ListBox and ComboBox: `IntegralHeight`. Menu: `WindowList`.|
 |Neither read nor set|Menu: `Shortcut`. Timer: `Left`, `Top`. Data: `Negotiate`.|
 
-The model answers for each class with [`ComponentClass.IsReadOnlyAtRunTime`](../api/RDCore.Forms.Model.ComponentClass.yml) and `IsNotAvailableAtRunTime`. A Timer's `Left` and `Top` are the same definitions as other controls', and only the Timer makes them unavailable.
+On an RDForms form, a program sets the ones Microsoft Forms 2.0 lets it set: a TextBox's `MultiLine` and `ScrollBars`, a ListBox's `MultiSelect` and `IntegralHeight`, and a ComboBox's `Style`. A Visual Basic 6.0 form, which RDForms renders as its file describes it, keeps VB6's rule for all of them.
+
+The model answers for each class with [`ComponentClass.IsReadOnlyAtRunTime`](../api/RDCore.Forms.Model.ComponentClass.yml) on an RDForms form, `IsReadOnlyAtRunTimeOnAVisualBasic6Form` on a Visual Basic 6.0 form, and `IsNotAvailableAtRunTime`. A Timer's `Left` and `Top` are the same definitions as other controls', and only the Timer makes them unavailable.
 
 > [!NOTE]
 > **Not implemented.** The runtime does not refuse a program's read or assignment of these properties with 393 or 382.

@@ -242,7 +242,7 @@ public sealed class RDFormsComboBox : ComboBox, IRaisesKeyEvents, IRDFormsList
         listBorder is { } list && (ReferenceEquals(source, list) || list.IsVisualAncestorOf(source));
 
     // A Style's view, as the combo is made and from code: a Simple Combo's template, rows and presses on its list, a Dropdown Combo's
-    // completion panel, and an edit box but at Dropdown List. Each sets up its own and undoes the others', so that the combo is as one
+    // completion panel, and an edit box at every style except Dropdown List. Each sets up its own and undoes the others', so that the combo is as one
     // made with the style. The items and the selection stay. An edit box gained takes the selected item's text, and once the combo is
     // built the component's Text takes it too, quietly.
     private void ShowStyle(ComboBoxStyle value, bool built)
