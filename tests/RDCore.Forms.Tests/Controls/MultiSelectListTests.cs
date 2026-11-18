@@ -78,7 +78,7 @@ public sealed class MultiSelectListTests
             {
                 sink.Raised.Clear();
                 act(window, list.Control);
-                var events = sink.Raised.Where(e => e.EndsWith(".Click", StringComparison.Ordinal) || e.EndsWith(".DblClick", StringComparison.Ordinal))
+                var events = sink.Raised.Where(e => e.EndsWith(".Click", StringComparison.Ordinal) || e.EndsWith(".DblClick(Boolean False)", StringComparison.Ordinal))
                     .Select(e => e[(e.IndexOf('.') + 1)..]);
                 var selected = Enumerable.Range(0, list.Control.ItemCount).Where(list.Selected);
                 log.Add($"{name}: {string.Join(" ", events)} [{string.Join(",", selected)}] {list.ListIndex()}");
@@ -267,6 +267,6 @@ public sealed class MultiSelectListTests
                 Press(w, l, 0, clickCount: 2);
             }));
 
-        Expect.Lines(["double click 0: Click DblClick [0] 0"], log);
+        Expect.Lines(["double click 0: Click DblClick(Boolean False) [0] 0"], log);
     }
 }

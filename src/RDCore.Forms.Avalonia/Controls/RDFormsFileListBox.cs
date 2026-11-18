@@ -160,7 +160,7 @@ public sealed class RDFormsFileListBox : ListBox, IRaisesKeyEvents, IMultiSelect
             if (multi is null)
                 SelectedIndex = Items.IndexOf(file);
             if ((path, Pattern) != before)
-                RDFormsControl.Raise(this, Events.DblClick);
+                RDFormsControl.Raise(this, Events.DblClick, FormValue.FromBoolean(false));
         }
     }
 

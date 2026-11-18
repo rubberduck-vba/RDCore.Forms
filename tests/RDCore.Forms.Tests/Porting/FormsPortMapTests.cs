@@ -396,6 +396,22 @@ public sealed class FormsPortMapTests
         Assert.IsTrue(VB6.EventOf("UserControl", "HitTest")?.CoordinatesInLegacyUnit);
     }
 
+    // A VB DblClick handler takes no parameter; the port adds the Cancel the RDForms event has.
+    [TestMethod]
+    [DataRow("TextBox")]
+    [DataRow("Form")]
+    [DataRow("VB.ListBox")]
+    public void AVBDblClickHandler_GainsCancel(string legacyClass)
+    {
+        var port = VB6.EventOf(legacyClass, "DblClick");
+
+        Assert.IsNotNull(port);
+        Assert.AreEqual(new ParameterPort("Cancel", null, "Boolean", ByRef: true, UnwrapsValue: false), port.Parameters.Single());
+        Assert.IsTrue(port.Parameters.Single().IsAdded);
+        Assert.IsFalse(port.CoordinatesInLegacyUnit);
+        Assert.AreEqual("Cancel As Boolean", string.Join(", ", Events.DblClick.Parameters.Select(p => $"{p.Name} As {p.TypeName}")));
+    }
+
     [TestMethod]
     public void AnMSFormsKeyPressHandler_TakesItsKeyAsciiByRef_Unwrapped()
     {

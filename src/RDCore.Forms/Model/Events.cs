@@ -27,9 +27,10 @@ public static class Events
     public static readonly EventDefinition Click = new("Click");
 
     /// <summary>
-    /// The user double-clicked the component.
+    /// The user double-clicked the component. A handler that sets <c>Cancel</c> to <see langword="true"/> says it handled the double
+    /// click, as an MSForms handler's does; a Visual Basic 6.0 form's handler takes no <c>Cancel</c>.
     /// </summary>
-    public static readonly EventDefinition DblClick = new("DblClick");
+    public static readonly EventDefinition DblClick = new("DblClick", Cancel);
 
     /// <summary>
     /// The component received the focus: a control, or a form none of whose controls can take it.

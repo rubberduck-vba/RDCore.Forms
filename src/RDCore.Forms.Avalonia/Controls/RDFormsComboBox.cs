@@ -216,7 +216,7 @@ public sealed class RDFormsComboBox : ComboBox, IRaisesKeyEvents, IRDFormsList
         var item = source as ComboBoxItem ?? source.FindAncestorOfType<ComboBoxItem>();
         if (item is not null && e.ClickCount == 2)
         {
-            RDFormsControl.Raise(this, Events.DblClick);
+            RDFormsControl.Raise(this, Events.DblClick, FormValue.FromBoolean(false));
             return;
         }
         var index = item is null ? ItemCount - 1 : IndexFromContainer(item);

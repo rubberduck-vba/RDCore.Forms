@@ -146,7 +146,7 @@ public sealed class ComboStyleTests
             return result;
         });
 
-        Expect.Lines(["Combo1.Click", "Combo1.DblClick"], raised);
+        Expect.Lines(["Combo1.Click", "Combo1.DblClick(Boolean False)"], raised);
     }
 
     [TestMethod]
