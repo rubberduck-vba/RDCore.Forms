@@ -25,6 +25,6 @@ public sealed class RDFormsProgram
     /// </summary>
     public static RDFormsProgram Default { get; } = new();
 
-    // the window an Activate was last raised for: the program's active form.
+    // The window an Activate was last raised for: the program's active form.
     internal RDFormsFormWindow? Active { get; set; }
 }

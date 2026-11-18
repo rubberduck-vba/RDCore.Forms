@@ -123,7 +123,7 @@ public sealed class FormFocusTests
     }
 
     // As with another application's window: each program keeps its own active form, and nothing is raised on either program's forms as
-    // the activation moves between their windows (the forms of one program are AnotherFormShown_ThenTheFirstActivatedAgain_...).
+    // the activation moves between their windows (for the forms of one program, see AnotherFormShown_ThenTheFirstActivatedAgain_...).
     [TestMethod]
     public void AnotherProgramsFormShown_ThenTheFirstActivatedAgain_RaisesNothingOnTheFirst_AndOnlyTheShowOnTheOther()
     {
