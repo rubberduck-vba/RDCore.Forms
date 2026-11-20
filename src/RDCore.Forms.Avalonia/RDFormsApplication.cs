@@ -23,7 +23,7 @@ namespace RDCore.Forms.Avalonia;
 public class RDFormsApplication : Application
 {
     /// <summary>
-    /// The name of an application its host does not name.
+    /// The name of an application that neither its host nor a derived class names.
     /// </summary>
     public const string DefaultName = "RDForms";
 
