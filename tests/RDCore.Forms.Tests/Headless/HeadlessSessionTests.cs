@@ -28,6 +28,19 @@ public sealed class HeadlessSessionTests
         Assert.IsTrue(templated);
     }
 
+    // the name the platform shows where it names the application, as macOS names its application menu: the session's application was built with no name.
+    [TestMethod]
+    public void TheSessionsApplication_IsNamedRDForms_ItsHostNamingItNone()
+        => Assert.AreEqual(RDFormsApplication.DefaultName, Headless.Run(() => Application.Current!.Name));
+
+    [TestMethod]
+    [DataRow("Ducky", "Ducky", DisplayName = "the name given")]
+    [DataRow(null, "RDForms", DisplayName = "no name")]
+    [DataRow("", "RDForms", DisplayName = "an empty name")]
+    [DataRow("  ", "RDForms", DisplayName = "white space")]
+    public void AnApplication_IsNamedAsItsHostNamesIt_OrRDForms(string? name, string expected)
+        => Assert.AreEqual(expected, Headless.Run(() => RDFormsApplication.Create<RDFormsApplication>(name).Name));
+
     [TestMethod]
     public void AWindowShown_InTheHeadlessSession_TakesTypedText()
     {
