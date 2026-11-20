@@ -42,6 +42,18 @@ public sealed class HeadlessSessionTests
         => Assert.AreEqual(expected, Headless.Run(() => RDFormsApplication.Create<RDFormsApplication>(name).Name));
 
     [TestMethod]
+    [DataRow("Ducky", "Ducky", DisplayName = "the name given")]
+    [DataRow(null, "Named in its constructor", DisplayName = "no name")]
+    [DataRow("  ", "Named in its constructor", DisplayName = "white space")]
+    public void ADerivedApplication_NamedInItsConstructor_KeepsItsName_ItsHostNamingItNone(string? name, string expected)
+        => Assert.AreEqual(expected, Headless.Run(() => RDFormsApplication.Create<SelfNamedApplication>(name).Name));
+
+    private sealed class SelfNamedApplication : RDFormsApplication
+    {
+        public SelfNamedApplication() => Name = "Named in its constructor";
+    }
+
+    [TestMethod]
     public void AWindowShown_InTheHeadlessSession_TakesTypedText()
     {
         var text = Headless.Run(() =>

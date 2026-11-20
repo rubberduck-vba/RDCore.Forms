@@ -17,7 +17,7 @@ namespace RDCore.Forms.Avalonia;
 /// </para>
 /// <para>
 /// The platform shows the application's <see cref="Application.Name"/> where it names the application, such as the application menu of macOS. It is
-/// <see cref="DefaultName"/> unless the host names the application (<see cref="Configure(string?)"/>).
+/// <see cref="DefaultName"/> unless the host names the application (<see cref="Configure(string?)"/>) or a derived class names it in its constructor.
 /// </para>
 /// </remarks>
 public class RDFormsApplication : Application
@@ -56,8 +56,8 @@ public class RDFormsApplication : Application
     public static AppBuilder Configure(string? name) => Configure<RDFormsApplication>(name);
 
     /// <summary>
-    /// The builder of an application derived from <see cref="RDFormsApplication"/>, named <see cref="DefaultName"/>, which draws with Skia and whose default
-    /// font is Inter.
+    /// The builder of an application derived from <see cref="RDFormsApplication"/>, named as its constructor names it (<see cref="DefaultName"/> unless the
+    /// derived class names it), which draws with Skia and whose default font is Inter.
     /// </summary>
     /// <typeparam name="TApplication">The application.</typeparam>
     /// <returns>The application's builder.</returns>
@@ -70,7 +70,9 @@ public class RDFormsApplication : Application
     /// font is Inter.
     /// </summary>
     /// <typeparam name="TApplication">The application.</typeparam>
-    /// <param name="name">The name of the application; <see cref="DefaultName"/> when it is <see langword="null"/>, empty or white space.</param>
+    /// <param name="name">
+    /// The name of the application; the name its constructor gives it when it is <see langword="null"/>, empty or white space.
+    /// </param>
     /// <returns>The application's builder.</returns>
     public static AppBuilder Configure<TApplication>(string? name)
         where TApplication : RDFormsApplication, new()
@@ -81,9 +83,19 @@ public class RDFormsApplication : Application
     /// <see cref="Configure{TApplication}(string?)"/> makes.
     /// </summary>
     /// <typeparam name="TApplication">The application.</typeparam>
-    /// <param name="name">The name of the application; <see cref="DefaultName"/> when it is <see langword="null"/>, empty or white space.</param>
+    /// <param name="name">
+    /// The name of the application; the name its constructor gives it when it is <see langword="null"/>, empty or white space.
+    /// </param>
     /// <returns>The application.</returns>
     public static TApplication Create<TApplication>(string? name)
         where TApplication : RDFormsApplication, new()
-        => new() { Name = string.IsNullOrWhiteSpace(name) ? DefaultName : name };
+    {
+        var application = new TApplication();
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            application.Name = name;
+        }
+
+        return application;
+    }
 }
