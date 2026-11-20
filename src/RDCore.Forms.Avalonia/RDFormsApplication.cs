@@ -38,8 +38,8 @@ public class RDFormsApplication : Application
     public override void Initialize() => Styles.Add(new SimpleTheme());
 
     /// <summary>
-    /// The builder of an <see cref="RDFormsApplication"/> named <see cref="DefaultName"/>, which draws with Skia and whose default font is Inter. The host adds
-    /// its platform and starts it.
+    /// The builder of an <see cref="RDFormsApplication"/> named <see cref="DefaultName"/>, which draws with Skia and whose default font is Inter. The host
+    /// adds its platform and starts it.
     /// </summary>
     /// <returns>The application's builder.</returns>
     public static AppBuilder Configure() => Configure<RDFormsApplication>(null);
@@ -77,8 +77,8 @@ public class RDFormsApplication : Application
         => AppBuilder.Configure(() => Create<TApplication>(name)).UseSkia().WithInterFont();
 
     /// <summary>
-    /// An application derived from <see cref="RDFormsApplication"/>, named as the builders of <see cref="Configure{TApplication}(string?)"/> name the one they
-    /// make.
+    /// A new application derived from <see cref="RDFormsApplication"/>, named <paramref name="name"/>: the application the builder of
+    /// <see cref="Configure{TApplication}(string?)"/> makes.
     /// </summary>
     /// <typeparam name="TApplication">The application.</typeparam>
     /// <param name="name">The name of the application; <see cref="DefaultName"/> when it is <see langword="null"/>, empty or white space.</param>
