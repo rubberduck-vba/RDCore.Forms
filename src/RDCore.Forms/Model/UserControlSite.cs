@@ -25,7 +25,7 @@ public sealed class UserControlSite
     // Each placed control's site, for as long as the placed control lives.
     private static readonly ConditionalWeakTable<ComponentInstance, UserControlSite> sites = [];
 
-    // HIMETRIC units, hundredths of a millimetre, to the pixel, at 96 pixels to the inch.
+    // HIMETRIC units, hundredths of a millimeter, to the pixel, at 96 pixels to the inch.
     private const double HimetricPerPixel = 2540.0 / 96;
 
     private UserControlSite(ComponentInstance placed, FormDefinition definition)
@@ -90,7 +90,7 @@ public sealed class UserControlSite
     /// <description>A new <see cref="StdFontObject"/> of the bag's font, each time it is read.</description>
     /// </item>
     /// <item>
-    /// <term><c>_ExtentX</c> and <c>_ExtentY</c> of a visible control</term>
+    /// <term><c>_ExtentX</c> and <c>_ExtentY</c> of a control whose UserControl's <c>InvisibleAtRuntime</c> is False</term>
     /// <description>
     /// A Long: the placed control's width or height in whole pixels, as HIMETRIC units (133 pixels read 3519), whatever the file writes.
     /// </description>
@@ -132,7 +132,7 @@ public sealed class UserControlSite
             if (placed.Class.Property(property.Name) is null && !property.Name.Equals("Index", StringComparison.OrdinalIgnoreCase)
                 && DesignerValue.TryType(property.Text, out var value))
             {
-                // a StdFont is the UserControl's own object: each read gives a new one.
+                // A StdFont is the UserControl's own object: each read gives a new one.
                 var text = property.Text;
                 values[property.Name] = value.Kind == FormValueKind.Object ? () => Typed(text) : () => value;
             }

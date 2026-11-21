@@ -111,7 +111,7 @@ The bag holds the placed control's settings that are not the extender's, by name
 |Another number a Currency holds, such as `1.5`|A Currency.|
 |Any other number|A Double.|
 |A `StdFont` bag (`BeginProperty Font {0BE35203-…}`)|A new `StdFont` of the bag's font, at each read.|
-|`_ExtentX`, `_ExtentY` of a visible control|A Long: the placed control's width or height in whole pixels, in HIMETRIC units, whatever the file writes (133 pixels read 3519).|
+|`_ExtentX`, `_ExtentY`, where the UserControl's `InvisibleAtRuntime` is False|A Long: the placed control's width or height in whole pixels, in HIMETRIC units, whatever the file writes (133 pixels read 3519).|
 
 `ReadProperty` of a name the bag does not hold, an extender property such as `Left` included, fails with 327 without a default; an empty name fails with 5. `WriteProperty` fails with 425 while the program runs.
 
