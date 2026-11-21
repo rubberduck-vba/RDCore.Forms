@@ -54,7 +54,7 @@ A placed control has no `Enabled`, `hWnd` or data-binding member (438 in VB6). I
 
 ## Showing a placed UserControl
 
-[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes a `RDFormsUserControl` for a placed UserControl, and a form's window shows it at the control's place and size. Each placed control has its own copy of its UserControl, its [site's](#the-usercontrol-a-program-sees), so that its controls are its own: a change to one control's copy leaves the UserControl's definition and the other placed controls as they are. A [`RDFormsFormView`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormView.yml) inside it shows the copy, whose root takes the placed control's `Width` and `Height`.
+[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes a `RDFormsUserControl` for a placed UserControl, and a form's window shows it at the control's place and size. Each placed control has its own copy of its UserControl, the `UserControl` of its [site](#the-usercontrol-a-program-sees), so that its controls are its own: a change to one control's copy leaves the UserControl's definition and the other placed controls as they are. A [`RDFormsFormView`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormView.yml) inside it shows the copy, whose root takes the placed control's `Width` and `Height`.
 
 |Setting|Behaviour|
 |---|---|

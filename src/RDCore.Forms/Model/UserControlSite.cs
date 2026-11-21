@@ -11,9 +11,8 @@ namespace RDCore.Forms.Model;
 /// as long as the placed control lives. A placed control's view shows its site's <see cref="UserControl"/>.
 /// </para>
 /// <para>
-/// The UserControl's own events are raised with a component of <see cref="UserControl"/> as their source: its root for the
-/// UserControl's events, such as Resize, and its controls for theirs. The events of the control the form places, such as the form's
-/// <c>Gauge1_GotFocus</c>, have <see cref="Extender"/> as their source.
+/// No event is raised through the site: a placed UserControl raises none of its own events (Initialize, Resize, Show, Paint, Terminate)
+/// and none of its focus events. The site has no <c>Ambient</c> and no <c>PropertyBag</c>.
 /// </para>
 /// </remarks>
 public sealed class UserControlSite
