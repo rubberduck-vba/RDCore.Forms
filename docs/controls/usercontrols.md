@@ -54,7 +54,7 @@ A placed control has no `Enabled`, `hWnd` or data-binding member (438 in VB6). I
 
 ## Showing a placed UserControl
 
-[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes a `RDFormsUserControl` for a placed UserControl, and a form's window shows it at the control's place and size. Each placed control has its own copy of its UserControl ([`FormDefinition.Copy`](../api/RDCore.Forms.Model.FormDefinition.yml)), so that its controls are its own: a change to one control's copy leaves the UserControl's definition and the other placed controls as they are. A [`RDFormsFormView`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormView.yml) inside it shows the copy, whose root takes the placed control's `Width` and `Height`.
+[`RDFormsControls.Create`](../api/RDCore.Forms.Avalonia.Controls.RDFormsControls.yml) makes a `RDFormsUserControl` for a placed UserControl, and a form's window shows it at the control's place and size. Each placed control has its own copy of its UserControl, the `UserControl` of its [site](#the-usercontrol-a-program-sees), so that its controls are its own: a change to one control's copy leaves the UserControl's definition and the other placed controls as they are. A [`RDFormsFormView`](../api/RDCore.Forms.Avalonia.Rendering.RDFormsFormView.yml) inside it shows the copy, whose root takes the placed control's `Width` and `Height`.
 
 |Setting|Behaviour|
 |---|---|
@@ -73,6 +73,18 @@ A placed UserControl takes no focus, and Tab passes over it; a press on one of i
 
 > [!NOTE]
 > **Not implemented.** A placed UserControl raises none of its own events (Initialize, ReadProperties, Resize, Show, Paint, Hide, Terminate) and none of its focus events, and its access keys do nothing. A program cannot move a control into one (425 in VB6 for one that is not a container).
+
+## The UserControl a program sees
+
+[`UserControlSite.Of`](../api/RDCore.Forms.Model.UserControlSite.yml) gives a placed UserControl's site: what the UserControl's code works with, one per placed control, an `InvisibleAtRuntime` one included.
+
+|Member|What it is|
+|---|---|
+|`Extender`|The placed control.|
+|`UserControl`|The placed control's own copy of its UserControl.|
+
+> [!NOTE]
+> **Not implemented.** A site has no `Ambient` and no `PropertyBag`.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
