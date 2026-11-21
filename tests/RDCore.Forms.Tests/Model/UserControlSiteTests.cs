@@ -1,5 +1,9 @@
+using System.Globalization;
 using RDCore.Forms.Import.VB6;
 using RDCore.Forms.Model;
+using RDCore.SDK.Runtime.Stdole;
+using RDCore.SDK.Runtime.Vbrun;
+using P = RDCore.Forms.Model.Properties;
 
 namespace RDCore.Forms.Tests.Model;
 
@@ -19,18 +23,31 @@ public sealed class UserControlSiteTests
             "Attribute VB_Name = \"Gauge\"",
             ""]);
 
-    // Gauge1 as the VB6 grid places it (2000 by 600 twips), with the values its ReadProperties read; Gauge2 plain.
+    // Gauge1 as the VB6 grid places it (2000 by 600 twips), with the values its ReadProperties read and an extender property the
+    // reader keeps as text; Gauge2 plain. The form's colors and font are not its defaults, so that Ambient reads them from the form.
     private const string PlacingForm = """
         VERSION 5.00
         Begin VB.Form Form1
+           BackColor       =   &H00FF0000&
+           ForeColor       =   &H8000000F&
            ClientHeight    =   4500
            ClientWidth     =   6000
+           BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851}
+              Name            =   "Tahoma"
+              Size            =   10
+              Charset         =   0
+              Weight          =   400
+              Underline       =   0   'False
+              Italic          =   -1  'True
+              Strikethrough   =   0   'False
+           EndProperty
            Begin Project1.Gauge Gauge1
               Height          =   600
               Left            =   100
               TabIndex        =   0
               Top             =   600
               Width           =   2000
+              WhatsThisHelpID =   3000000000
               _ExtentX        =   3528
               _ExtentY        =   1058
               Caption         =   "hello"
@@ -74,6 +91,8 @@ public sealed class UserControlSiteTests
         return (gauge, VB6FormReader.Read(PlacingForm, options: new VB6ImportOptions { Classes = [type] }).Form!);
     }
 
+    private static UserControlSite Gauge1Site(params string[] settings) => UserControlSite.Of(Read(settings).Form.Find("Gauge1")!);
+
     [TestMethod]
     public void APlacedControl_HasOneSite_WithItsOwnCopyOfItsUserControl()
     {
@@ -108,38 +127,108 @@ public sealed class UserControlSiteTests
         Assert.ThrowsExactly<ArgumentException>(() => UserControlSite.Of(form));
     }
 
-    // The PropertyBag a UserControl's ReadProperties reads, as VB6 types the form file's text: the host's values wait for the SDK's VBRUN
-    // PropertyBag object, which holds them.
+    // The PropertyBag a UserControl's ReadProperties reads, as VB6 types the form file's text.
     [TestMethod]
-    [Ignore("needs the SDK Vbrun objects")]
-    [DataRow("Caption", "String", "hello", DisplayName = "\"hello\": String")]
-    [DataRow("caption", "String", "hello", DisplayName = "a name in another case")]
-    [DataRow("Str", "String", "007", DisplayName = "\"007\": String")]
-    [DataRow("Num", "Integer", "42", DisplayName = "42: Integer")]
-    [DataRow("Neg", "Integer", "-5", DisplayName = "-5: Integer")]
-    [DataRow("Flag", "Integer", "-1", DisplayName = "-1 'True: Integer")]
-    [DataRow("Big", "Long", "100000", DisplayName = "100000: Long")]
-    [DataRow("Hex", "Long", "-2147483633", DisplayName = "-2147483633: Long")]
-    [DataRow("Hex2", "Long", "-2147483633", DisplayName = "&H8000000F&: Long")]
-    [DataRow("Dbl", "Currency", "1.5", DisplayName = "1.5: Currency")]
-    [DataRow("Font", "Font", "Arial 12 bold", DisplayName = "a Font bag: its Font")]
-    [DataRow("_ExtentX", "Long", "3519", DisplayName = "_ExtentX from 133 pixels, not the file's 3528")]
-    [DataRow("_ExtentY", "Long", "1058", DisplayName = "_ExtentY from 40 pixels")]
-    [DataRow("Left", "327", "", DisplayName = "an extender property: not the UserControl's (327)")]
-    [DataRow("Missing", "327", "", DisplayName = "a name the file lacks, with no default: 327")]
-    [DataRow("", "5", "", DisplayName = "an empty name: 5")]
-    public void ReadProperty_TypesTheFilesText_AsVB6Does(string name, string type, string value) =>
-        Assert.Fail($"{name}: {type} {value}");
+    [DataRow("Caption", FormValueKind.String, "hello", DisplayName = "\"hello\": String")]
+    [DataRow("caption", FormValueKind.String, "hello", DisplayName = "a name in another case")]
+    [DataRow("Str", FormValueKind.String, "007", DisplayName = "\"007\": String")]
+    [DataRow("Num", FormValueKind.Integer, "42", DisplayName = "42: Integer")]
+    [DataRow("Neg", FormValueKind.Integer, "-5", DisplayName = "-5: Integer")]
+    [DataRow("Flag", FormValueKind.Integer, "-1", DisplayName = "-1 'True: Integer")]
+    [DataRow("Big", FormValueKind.Long, "100000", DisplayName = "100000: Long")]
+    [DataRow("Hex", FormValueKind.Long, "-2147483633", DisplayName = "-2147483633: Long")]
+    [DataRow("Hex2", FormValueKind.Long, "-2147483633", DisplayName = "&H8000000F&: Long")]
+    [DataRow("Dbl", FormValueKind.Currency, "1.5", DisplayName = "1.5: Currency")]
+    [DataRow("_ExtentX", FormValueKind.Long, "3519", DisplayName = "_ExtentX from 133 pixels, not the file's 3528")]
+    [DataRow("_ExtentY", FormValueKind.Long, "1058", DisplayName = "_ExtentY from 40 pixels")]
+    public void ReadProperty_TypesTheFilesText_AsVB6Does(string name, FormValueKind kind, string value)
+    {
+        var bag = Gauge1Site().PropertyBag;
 
-    // Ambient on a form, as VB6 reads it: the host's values wait for the SDK's VBRUN AmbientProperties object.
+        Assert.AreEqual(PropertyBagFailure.None, bag.TryReadProperty(name, out var read));
+        Assert.AreEqual(kind, read.Kind);
+        Assert.AreEqual(value, Convert.ToString(read.ClrValue, CultureInfo.InvariantCulture));
+    }
+
     [TestMethod]
-    [Ignore("needs the SDK Vbrun objects")]
-    [DataRow("BackColor", "the form's, unsigned (2147483663 for &H8000000F)")]
-    [DataRow("ForeColor", "the form's, unsigned")]
-    [DataRow("Font", "a copy of the form's Font, never the same object")]
-    [DataRow("DisplayName", "Gauge1")]
-    [DataRow("ScaleUnits", "Twip, Pixel after ScaleMode 3")]
-    [DataRow("DisplayAsDefault", "False")]
-    public void Ambient_ReadsTheForm(string member, string value) =>
-        Assert.Fail($"{member}: {value}");
+    [DataRow("Left", PropertyBagFailure.DataValueNotFound, DisplayName = "an extender property: not the UserControl's (327)")]
+    [DataRow("WhatsThisHelpID", PropertyBagFailure.DataValueNotFound, DisplayName = "an extender property the file sets past its range (327)")]
+    [DataRow("Missing", PropertyBagFailure.DataValueNotFound, DisplayName = "a name the file lacks, with no default: 327")]
+    [DataRow("", PropertyBagFailure.InvalidProcedureCall, DisplayName = "an empty name: 5")]
+    public void ReadProperty_OfAValueTheBagLacks_Fails(string name, PropertyBagFailure failure) =>
+        Assert.AreEqual(failure, Gauge1Site().PropertyBag.TryReadProperty(name, out _));
+
+    [TestMethod]
+    public void ReadProperty_OfAFontBag_GivesANewStdFontOfItsFont_EachTime()
+    {
+        var bag = Gauge1Site().PropertyBag;
+
+        Assert.AreEqual(PropertyBagFailure.None, bag.TryReadProperty("Font", out var first));
+        Assert.AreEqual(PropertyBagFailure.None, bag.TryReadProperty("font", out var second));
+
+        var font = (StdFontObject)first.AsObject()!;
+        Assert.AreEqual("Arial", font.Name);
+        Assert.AreEqual(12m, font.Size);
+        Assert.IsTrue(font.Bold);
+        Assert.AreNotSame(font, second.AsObject());
+    }
+
+    [TestMethod]
+    public void ReadProperty_OfTheExtent_IsThePlacedControlsSizeWhenItIsRead()
+    {
+        var site = Gauge1Site();
+
+        site.Extender.Set(P.Width, 100);
+
+        Assert.AreEqual(PropertyBagFailure.None, site.PropertyBag.TryReadProperty("_ExtentX", out var extent));
+        Assert.AreEqual(2646, extent.AsLong());
+    }
+
+    [TestMethod]
+    public void Ambient_ReadsTheFormsColors_Unsigned()
+    {
+        var ambient = Gauge1Site().Ambient;
+
+        Assert.AreEqual(0xFF0000u, ambient.BackColor);
+        Assert.AreEqual(2147483663u, ambient.ForeColor);
+    }
+
+    [TestMethod]
+    public void Ambient_ReadsACopyOfTheFormsFont_EachTime()
+    {
+        var ambient = Gauge1Site().Ambient;
+
+        var font = ambient.Font;
+
+        Assert.AreEqual("Tahoma", font.Name);
+        Assert.IsTrue(font.Italic);
+        Assert.AreNotSame(font, ambient.Font);
+    }
+
+    [TestMethod]
+    public void Ambient_ScaleUnits_IsTheFormsScaleModeWhenItIsRead()
+    {
+        var site = Gauge1Site();
+        Assert.AreEqual("Twip", site.Ambient.ScaleUnits);
+
+        site.Extender.Container!.Set(P.ScaleMode, ScaleMode.Pixel);
+
+        Assert.AreEqual("Pixel", site.Ambient.ScaleUnits);
+    }
+
+    [TestMethod]
+    public void Ambient_DisplayName_IsThePlacedControlsName() =>
+        Assert.AreEqual("Gauge1", Gauge1Site().Ambient.DisplayName);
+
+    [TestMethod]
+    public void Ambient_DisplayAsDefault_IsThePlacedControlsDefault()
+    {
+        var plain = Gauge1Site();
+        var site = Gauge1Site("DefaultCancel   =   -1  'True");
+
+        site.Extender.Set(P.Default, true);
+
+        Assert.IsFalse(plain.Ambient.DisplayAsDefault);
+        Assert.IsTrue(site.Ambient.DisplayAsDefault);
+    }
 }

@@ -82,9 +82,41 @@ A placed UserControl takes no focus, and Tab passes over it; a press on one of i
 |---|---|
 |`Extender`|The placed control.|
 |`UserControl`|The placed control's own copy of its UserControl.|
+|`Ambient`|The form's ambient properties, read from the form each time (a VBRUN `AmbientProperties`).|
+|`PropertyBag`|The values the form's file keeps for the placed control, which `ReadProperties` reads (a VBRUN `PropertyBag`).|
+
+### Ambient
+
+|Member|Value|
+|---|---|
+|`BackColor`, `ForeColor`|The form's, unsigned: `&H8000000F` reads 2147483663.|
+|`Font`|A copy of the form's `Font`, a new one at each read.|
+|`RightToLeft`|False.|
+|`ScaleUnits`|The name of the form's `ScaleMode`, such as `Twip` or `Pixel`.|
+|`DisplayName`|The placed control's name.|
+|`DisplayAsDefault`|The placed control's `Default`, where the UserControl's `DefaultCancel` is True; otherwise False.|
+|`LocaleID`|The locale the program runs in.|
+
+The other members have the values VB6 gives on a running form, such as `UserMode` True.
+
+### PropertyBag
+
+The bag holds the placed control's settings that are not the extender's, by name in any case. VB6 types each from the file's text:
+
+|The file's text|The value read|
+|---|---|
+|A quoted string, such as `"007"`|A String.|
+|A whole number of -32768 to 32767 without `&`, such as `42` or `-1 'True`|An Integer.|
+|Another whole number a Long holds, or one written with `&`, such as `&H8000000F&`|A Long.|
+|Another number a Currency holds, such as `1.5`|A Currency.|
+|Any other number|A Double.|
+|A `StdFont` bag (`BeginProperty Font {0BE35203-…}`)|A new `StdFont` of the bag's font, at each read.|
+|`_ExtentX`, `_ExtentY`, where the UserControl's `InvisibleAtRuntime` is False|A Long: the placed control's width or height in whole pixels, in HIMETRIC units, whatever the file writes (133 pixels read 3519).|
+
+`ReadProperty` of a name the bag does not hold, an extender property such as `Left` included, fails with 327 without a default; an empty name fails with 5. `WriteProperty` fails with 425 while the program runs.
 
 > [!NOTE]
-> **Not implemented.** A site has no `Ambient` and no `PropertyBag`.
+> **Not implemented.** A record of the companion file, such as `"Form1.frx":0000`, and a bag of another class are not in the bag. A form has no `RightToLeft`, so `Ambient.RightToLeft` reads False.
 
 ---
 [ACCUEIL](../index.fr.md) • [HOME](../index.md) | [BIENVENUE](../introduction.fr.md) • [WELCOME](../introduction.md) | [DÉMARRER](../getting-started.fr.md) • [GET STARTED](../getting-started.md) | [IMPORTER](../import/vb6.fr.md) • [IMPORT](../import/vb6.md) | [CONTROLS](index.md) | [FORMAT](../format/index.md) | 🌐 [rubberduckvba.ca](https://rubberduckvba.ca)
