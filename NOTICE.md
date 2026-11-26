@@ -20,6 +20,10 @@ Des parties de RDCore.Forms sont dérivées de [HexIDE](https://github.com/hexid
 
 Les paquets NuGet dont dépend RDCore.Forms, dont Avalonia, demeurent sous leurs propres licences.
 
+## RDCore.SDK et RDCore.SDK.Protocols
+
+RDCore.Forms est bâti sur deux paquets NuGet publiés sous la licence **MIT** : **RDCore.SDK** (`RDCore.SDK.dll`), à partir de [rubberduck-vba/RDCore.SDK](https://github.com/rubberduck-vba/RDCore.SDK), et **RDCore.SDK.Protocols** (`RDCore.SDK.Protocols.dll`), à partir de [rubberduck-vba/RDCore.SDK.Protocols](https://github.com/rubberduck-vba/RDCore.SDK.Protocols). Un paquet de RDCore.Forms dépend de RDCore.SDK, qui dépend de RDCore.SDK.Protocols, et ne contient aucune de leurs _assemblies_.
+
 ## Palette sombre de WinUI 3
 
 La palette sombre de `FormPalette` (`src/RDCore.Forms.Avalonia/Controls/FormPalette.cs`) reprend les couleurs du thème sombre de WinUI 3, dans le fichier `controls/dev/CommonStyles/Common_themeresources_any.xaml` de [microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml), au _commit_ `8463f451`.
@@ -69,6 +73,10 @@ Parts of RDCore.Forms are derived from [HexIDE](https://github.com/hexide-io/Hex
 - HexIDE's licence is reproduced below, as it requires.
 
 The NuGet packages RDCore.Forms depends on, Avalonia among them, remain under their own licences.
+
+## RDCore.SDK and RDCore.SDK.Protocols
+
+RDCore.Forms builds on two NuGet packages published under the **MIT** licence: **RDCore.SDK** (`RDCore.SDK.dll`), from [rubberduck-vba/RDCore.SDK](https://github.com/rubberduck-vba/RDCore.SDK), and **RDCore.SDK.Protocols** (`RDCore.SDK.Protocols.dll`), from [rubberduck-vba/RDCore.SDK.Protocols](https://github.com/rubberduck-vba/RDCore.SDK.Protocols). A package of RDCore.Forms depends on RDCore.SDK, which depends on RDCore.SDK.Protocols, and carries neither assembly.
 
 ## WinUI 3 dark palette
 
