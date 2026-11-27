@@ -72,8 +72,19 @@ A push button that stays down once clicked. Its `Value` is True while it is down
 
 Its behaviour is RDForms' own, not measured with MSForms.
 
+### Picture
+
+A ToggleButton with a `Picture` draws it with its caption as an MSForms ToggleButton does, measured in Excel:
+
+- The picture and the caption make one block, centred inside the button, 4 pixels from its edge. `PicturePosition` places the picture as it places a Label's (see [A Label's picture](text.md#picture)), one pixel from the caption, and is AboveCenter by default.
+- The caption takes 4 pixels more across and down than its text: the text is at the left of that room, 2 pixels from its top. An empty caption still takes its room, so a picture beside it is off the centre.
+- A picture larger than the inside of the button is shrunk to it, across and down separately.
+- The colour of a bitmap's lower-left pixel is transparent.
+- While the button is down, the picture and the caption are drawn one pixel right and down. RDForms' own, not measured: the same while a press holds it.
+- A ToggleButton with no `Picture` shows its caption alone, centred.
+
 > [!NOTE]
-> **Not implemented.** The button does not draw its `Picture`, and ignores `PicturePosition`, `AutoSize`, `WordWrap`, `BackStyle` and `MouseIcon`. The form's file keeps their values.
+> **Not implemented.** The button ignores `AutoSize`, `WordWrap`, `BackStyle` and `MouseIcon`. The form's file keeps their values.
 
 ## Style Graphical
 
