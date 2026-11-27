@@ -149,7 +149,7 @@ A program's `Set Control.Container = Frame1` is `FormDefinition.SetContainer(con
 |`Font`|The control's font, held at the size VB6 draws it at: see [Fonts](fonts.md).|
 |`ToolTipText`|Shown as the control's tooltip; an empty text shows none.|
 |`MousePointer`|The pointer over the control. Custom (99) shows the pointer made from the control's `MouseIcon`, and the arrow where it has none.|
-|`MouseIcon`|An icon or a cursor; a bitmap is error 380. The pointer made from it is 32 pixels square: the picture's 32-pixel image, or its only image scaled to 32. An icon points with its centre, and a cursor with its own hot spot, scaled with its image.|
+|`MouseIcon`|An icon or a cursor; any other picture, such as a bitmap, is error 380. The pointer made from it is 32 pixels square: the picture's 32-pixel image, or else its first image scaled to 32. An icon points with its centre, and a cursor with its own hot spot, scaled with its image.|
 |`ControlSource`, `RowSource`|RD-VBA addition, from MSForms. A TextBox, CheckBox, OptionButton, ListBox, ComboBox or scroll bar has a `ControlSource`, and a ListBox or a ComboBox a `RowSource`: a String, "" by default, that an [MSForms import](../import/msforms.md) sets. It is kept as text and binds and fills nothing.|
 
 ### Opacity
