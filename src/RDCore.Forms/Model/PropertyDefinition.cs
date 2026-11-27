@@ -120,7 +120,7 @@ public abstract class PropertyDefinition
     private protected abstract bool IsValid(object value);
 
     // Whether a component can be set to a value the property accepts, where the component's other properties bound it: a MultiPage's
-    // Value is one of its pages. A form's file is read past it, as it sets the Value before the pages.
+    // Value is one of its pages. Reading a form's file does not check it, as the file sets the Value before it adds the pages.
     internal abstract bool AcceptsOn(ComponentInstance component, object? value);
 
     // The value a component holds when the property is set to a value.
