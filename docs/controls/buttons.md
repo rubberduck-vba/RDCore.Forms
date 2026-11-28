@@ -84,7 +84,7 @@ A ToggleButton with a `Picture` draws it with its caption as an MSForms ToggleBu
 - A ToggleButton with no `Picture` shows its caption alone, centred.
 
 > [!NOTE]
-> **Not implemented.** The button ignores `AutoSize`, `WordWrap`, `BackStyle` and `MouseIcon`. The form's file keeps their values.
+> **Not implemented.** The button ignores `AutoSize`, `WordWrap` and `BackStyle`. The form's file keeps their values.
 
 ## Style Graphical
 
