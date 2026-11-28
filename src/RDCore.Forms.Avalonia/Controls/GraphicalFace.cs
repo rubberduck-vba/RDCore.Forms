@@ -68,6 +68,16 @@ internal sealed class GraphicalFace : Control
     // Where the picture is drawn, in MSForms' layout, or null where it draws none or lays out as VB6 does.
     public Rect? PictureBounds => position is not null && Shown.Picture is not null ? pictureAt : null;
 
+    // PictureBounds, from the top left corner of the button the face is in.
+    public Rect? PictureBoundsIn(Visual button) =>
+        PictureBounds is { } at && this.TranslatePoint(at.Position, button) is { } from ? new Rect(from, at.Size) : null;
+
+    // Where the caption's text is drawn, from the top left corner of the button, in MSForms' layout with a picture, or null.
+    public Rect? CaptionBoundsIn(Visual button) =>
+        position is not null && HasPicture && caption is not null && caption.TranslatePoint(default, button) is { } from
+            ? new Rect(from + new Vector(caption.Padding.Left, caption.Padding.Top), caption.Bounds.Size.Deflate(caption.Padding))
+            : null;
+
     public bool IsDown
     {
         get => isDown;

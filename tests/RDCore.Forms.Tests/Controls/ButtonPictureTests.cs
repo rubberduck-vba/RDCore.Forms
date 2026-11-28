@@ -1,8 +1,10 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
 using RDCore.Forms.Avalonia.Controls;
 using RDCore.Forms.Model;
+using RDCore.Forms.Xaml;
 using P = RDCore.Forms.Model.Properties;
 using UI = RDCore.Forms.Tests.Headless.Headless;
 
@@ -61,10 +63,19 @@ public sealed class ButtonPictureTests
         return position is { } at ? button.Set(P.PicturePosition, at) : button;
     }
 
+    // A Graphical CommandButton of the same size, picture and caption as a ToggleButton, with no PicturePosition unless one is given.
+    private static ComponentInstance Command(ComponentInstance toggle, PicturePosition? position = null)
+    {
+        var button = new ComponentInstance(ComponentClasses.CommandButton, "Command1").Set(P.ButtonStyle, ButtonStyle.Graphical)
+            .Set(P.Width, toggle.Get(P.Width)).Set(P.Height, toggle.Get(P.Height)).Set(P.Caption, toggle.Get(P.Caption))
+            .Set(P.Picture, toggle.Get(P.Picture));
+        return position is { } at ? button.Set(P.PicturePosition, at) : button;
+    }
+
     // Where the button draws its picture and its caption's text, from its top left corner, shown at its size, after an action on it.
     private static (Rect? Picture, Rect? Text) Laid(ComponentInstance button, Action<ComponentInstance>? then = null)
     {
-        var control = new RDFormsToggleButton(button);
+        Control control = button.Class == ComponentClasses.CommandButton ? new RDFormsCommandButton(button) : new RDFormsToggleButton(button);
         var (window, _) = ControlHost.Show((control, new Rect(0, 0, button.Get(P.Width), button.Get(P.Height))));
         Dispatcher.UIThread.RunJobs();
         if (then is not null)
@@ -72,7 +83,8 @@ public sealed class ButtonPictureTests
             then(button);
             Dispatcher.UIThread.RunJobs();
         }
-        var result = (control.PictureBounds, control.CaptionBounds);
+        var result = control is RDFormsCommandButton command ? (command.PictureBounds, command.CaptionBounds)
+            : (((RDFormsToggleButton)control).PictureBounds, ((RDFormsToggleButton)control).CaptionBounds);
         window.Close();
         return result;
     }
@@ -185,5 +197,52 @@ public sealed class ButtonPictureTests
         Assert.AreEqual(new Size(16, 12), set.Picture!.Value.Size);
         Assert.IsNotNull(set.Text);
         Assert.AreEqual((null, null), (taken.Picture, taken.Text));
+    }
+
+    // MSForms' CommandButton lays its picture out as its ToggleButton does (measured in Excel), and a Graphical CommandButton whose
+    // PicturePosition is set lays it out the same way, set by its file or by a program, to the default value too.
+    [TestMethod]
+    [DataRow(PicturePosition.LeftCenter)]
+    [DataRow(PicturePosition.AboveCenter)]
+    [DataRow(PicturePosition.BelowRight)]
+    [DataRow(PicturePosition.Center)]
+    public void AGraphicalCommandButtonWithItsPicturePositionSet_LaysOutAsTheToggleButtonDoes(PicturePosition position)
+    {
+        var toggle = Toggle(200, 93, Bitmap(16, 12), "Ab", position);
+        var (expected, set, byAProgram) = UI.Run(() => (Laid(toggle), Laid(Command(toggle, position)),
+            Laid(Command(toggle), b => b.Set(P.PicturePosition, position))));
+
+        Assert.IsNotNull(expected.Picture);
+        Assert.AreEqual(expected, set);
+        Assert.AreEqual(expected, byAProgram);
+    }
+
+    // A Graphical CommandButton with no PicturePosition keeps VB6's layout (GraphicalButtonTests), which lays out no MSForms block.
+    [TestMethod]
+    public void AGraphicalCommandButtonWithNoPicturePosition_LaysOutNoMSFormsBlock()
+    {
+        var (unset, reset) = UI.Run(() => (Laid(Command(Toggle(200, 93, Bitmap(16, 12), "Ab"))),
+            Laid(Command(Toggle(200, 93, Bitmap(16, 12), "Ab"), PicturePosition.LeftCenter), b => b.Reset(P.PicturePosition))));
+
+        Assert.AreEqual((null, null), unset);
+        Assert.AreEqual((null, null), reset);
+    }
+
+    // A form's file keeps a CommandButton's PicturePosition set to its default value, so that the button keeps MSForms' layout.
+    [TestMethod]
+    public void ACommandButtonsPicturePositionSetToItsDefault_IsWrittenAndReadBackSet()
+    {
+        var root = new ComponentInstance(ComponentClasses.Form, "Form1");
+        var button = new ComponentInstance(ComponentClasses.CommandButton, "Command1").Set(P.PicturePosition, PicturePosition.AboveCenter);
+        var unset = new ComponentInstance(ComponentClasses.CommandButton, "Command2");
+        button.SetContainer(root);
+        unset.SetContainer(root);
+
+        var read = FormXaml.Read(FormXaml.Write(new FormDefinition(root)));
+
+        Assert.IsEmpty(read.Diagnostics, string.Join(Environment.NewLine, read.Diagnostics));
+        Assert.IsTrue(read.Form!.Find("Command1")!.IsSet(P.PicturePosition));
+        Assert.AreEqual(PicturePosition.AboveCenter, read.Form.Find("Command1")!.Get(P.PicturePosition));
+        Assert.IsFalse(read.Form.Find("Command2")!.IsSet(P.PicturePosition));
     }
 }

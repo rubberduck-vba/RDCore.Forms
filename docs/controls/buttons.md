@@ -105,6 +105,12 @@ A Graphical button is down while it is pressed, and a Graphical CheckBox or Opti
 
 A picture is drawn at its size in pixels. A greyed `Picture` or caption is drawn at half its opacity, and a disabled button keeps its `BackColor`: this look is RDForms' own, not measured with VB6.
 
+### PicturePosition
+
+A CommandButton's `PicturePosition` is an RD-VBA addition: VB6's CommandButton has none. A Graphical CommandButton whose `PicturePosition` is set, by a program or by the form's file, lays out its picture and its caption as an MSForms CommandButton does, which is the layout of a ToggleButton's [Picture](#picture). Set to its default, 7 (`AboveCenter`), it still takes that layout.
+
+A Graphical CommandButton whose `PicturePosition` is not set keeps VB6's layout, so a VB6 form draws as VB6 does. Its `DownPicture`, its `DisabledPicture` and its [MaskColor](#maskcolor) apply in either layout. A CheckBox and an OptionButton have no `PicturePosition`.
+
 ### MaskColor
 
 Where `UseMaskColor` is True, a picture's pixels of the `MaskColor` show the button's face, in its `BackColor`. By default `MaskColor` is silver (`&H00C0C0C0&`) and `UseMaskColor` is False.
@@ -132,6 +138,7 @@ The names an MSForms button takes in RDForms (see [Converting from MSForms](inde
 |`Accelerator` of a CommandButton, a CheckBox, an OptionButton or a ToggleButton|A `&` before the access key's letter in `Caption`. An assignment of `Accelerator` from code is RDC40001.|
 |`Alignment` of a CheckBox, an OptionButton or a ToggleButton|`Alignment`, with VB's values: `fmAlignmentLeft` (0) is 1, and `fmAlignmentRight` (1) is 0. MSForms names the caption's side, VB the box's.|
 |`Value`, `TripleState`, `Locked`, `Picture`, `PicturePosition` and the other members of the same name|The same.|
+|A CommandButton's `PicturePosition`|Always set: the file's value, or 7 (`AboveCenter`) where the file stores none, so the button keeps MSForms' layout (see [PicturePosition](#pictureposition)).|
 
 > [!NOTE]
 > **Not implemented.** A button's BeforeDragOver, BeforeDropOrPaste and Error are declared and never raised.

@@ -65,15 +65,12 @@ public sealed class RDFormsToggleButton : ToggleButton, ICustomHitTest, IRaisesK
     /// <summary>
     /// Where the button draws its picture, from its top left corner, or <see langword="null"/> where it draws none.
     /// </summary>
-    public Rect? PictureBounds => face.PictureBounds is { } at && face.TranslatePoint(at.Position, this) is { } from ? new Rect(from, at.Size) : null;
+    public Rect? PictureBounds => face.PictureBoundsIn(this);
 
     /// <summary>
     /// Where the button draws its caption's text, from its top left corner, or <see langword="null"/> where its picture is not shown with it.
     /// </summary>
-    public Rect? CaptionBounds =>
-        face.HasPicture && face.Caption is { } caption && caption.TranslatePoint(default, this) is { } from
-            ? new Rect(from + new Vector(caption.Padding.Left, caption.Padding.Top), caption.Bounds.Size.Deflate(caption.Padding))
-            : null;
+    public Rect? CaptionBounds => face.CaptionBoundsIn(this);
 
     /// <inheritdoc/>
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
