@@ -34,7 +34,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 /// <para>
 /// A Graphical button whose <c>PicturePosition</c> is set, by a program or by its form's file, lays its picture and its caption out
 /// as an MSForms CommandButton does, as <see cref="RDFormsToggleButton"/> lays out its own, and one whose <c>PicturePosition</c> is not
-/// set keeps VB6's layout. Its <c>MaskColor</c> and <c>UseMaskColor</c> still mask its picture.
+/// set keeps VB6's layout. Its <c>MaskColor</c> and <c>UseMaskColor</c> mask its picture in either layout.
 /// </para>
 /// </remarks>
 public sealed class RDFormsCommandButton : Button, IRaisesKeyEvents

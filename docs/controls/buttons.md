@@ -77,7 +77,7 @@ Its behaviour is RDForms' own, not measured with MSForms.
 A ToggleButton with a `Picture` draws it with its caption as an MSForms ToggleButton does, measured in Excel:
 
 - The picture and the caption make one block, centred inside the button, 4 pixels from its edge. `PicturePosition` places the picture as it places a Label's (see [A Label's picture](text.md#picture)), one pixel from the caption, and is AboveCenter by default.
-- The caption takes 4 pixels more across and down than its text: the text is at the left of that room, 2 pixels from its top. An empty caption still takes its room, so a picture beside it is off the centre.
+- The caption takes 4 pixels more across and down than its text: the text is at the left of that room, 2 pixels from its top. An empty caption takes its room too, so a picture beside it is off the centre.
 - A picture larger than the inside of the button is shrunk to it, across and down separately.
 - The colour of a bitmap's lower-left pixel is transparent.
 - While the button is down, the picture and the caption are drawn one pixel right and down. RDForms' own, not measured: the same while a press holds it.
@@ -107,7 +107,7 @@ A picture is drawn at its size in pixels. A greyed `Picture` or caption is drawn
 
 ### PicturePosition
 
-A CommandButton's `PicturePosition` is an RD-VBA addition: VB6's CommandButton has none. A Graphical CommandButton whose `PicturePosition` is set, by a program or by the form's file, lays out its picture and its caption as an MSForms CommandButton does, which is the layout of a ToggleButton's [Picture](#picture). Set to its default, 7 (`AboveCenter`), it still takes that layout.
+A CommandButton's `PicturePosition` is an RD-VBA addition: VB6's CommandButton has none. A Graphical CommandButton whose `PicturePosition` is set, by a program or by the form's file, lays out its picture and its caption as an MSForms CommandButton does, which is the layout of a ToggleButton's [Picture](#picture). Set to its default, 7 (`AboveCenter`), it takes that layout too.
 
 A Graphical CommandButton whose `PicturePosition` is not set keeps VB6's layout, so a VB6 form draws as VB6 does. Its `DownPicture`, its `DisabledPicture` and its [MaskColor](#maskcolor) apply in either layout. A CheckBox and an OptionButton have no `PicturePosition`.
 

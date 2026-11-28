@@ -16,7 +16,7 @@ namespace RDCore.Forms.Avalonia.Controls;
 // UseMaskColor is set, the pixels of a picture of exactly the MaskColor show the face, whichever picture is shown.
 // With a Position, it lays the picture and the caption out as MSForms' buttons do (measured in Excel): the Label's layout
 // (LabelFace.Layout) inside the button inset 4 pixels, the caption's box 4 pixels wider and taller than its text, with the
-// text at its left and 2 pixels from its top. An empty caption still takes its box. Where there is no picture, the caption is centred.
+// text at its left and 2 pixels from its top. An empty caption takes its box too. Where there is no picture, the caption is centred.
 internal sealed class GraphicalFace : Control
 {
     // How much of its colour a disabled button's caption keeps, and its Picture where it has no DisabledPicture.
